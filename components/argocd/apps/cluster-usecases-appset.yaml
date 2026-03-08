@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cluster-usecases
+  namespace: openshift-gitops
+spec:
+  goTemplate: true
+  generators:
+    - git:
+        repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
+        revision: main
+        directories:
+          - path: usecases/*/profiles/tier1-minimal
+  template:
+    metadata:
+      name: 'usecase-{{ index .path.segments 1 }}'
+      namespace: openshift-gitops
+    spec:
+      project: usecases
+      source:
+        repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
+        targetRevision: main
+        path: '{{ .path.path }}'
+      destination:
+        server: https://kubernetes.default.svc
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true
+        syncOptions:
+          - ServerSideApply=true
+          - SkipDryRunOnMissingResource=true
+          - CreateNamespace=true
+        retry:
+          limit: 10
+          backoff:
+            duration: 60s
+            maxDuration: 10m0s
+            factor: 2

@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: orchestrator-rhoai
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: orchestrator-rhoai
+      tier: "3"
+
+resources:
+  - ../../manifests/base
+  - ../../manifests/serving/orchestrator
+  - ../../manifests/serving/qwen-math-7b
+  - ../../manifests/serving/qwen3-32b
+  - ../../manifests/services/ui

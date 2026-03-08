@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cluster-operators
+  namespace: openshift-gitops
+spec:
+  goTemplate: true
+  generators:
+    - git:
+        repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
+        revision: main
+        directories:
+          - path: components/operators/*
+  template:
+    metadata:
+      name: 'operator-{{ .path.basename }}'
+      namespace: openshift-gitops
+    spec:
+      project: platform
+      source:
+        repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
+        targetRevision: main
+        path: '{{ .path.path }}'
+      destination:
+        server: https://kubernetes.default.svc
+      ignoreDifferences:
+        - group: operators.coreos.com
+          kind: Subscription
+          jsonPointers:
+            - /spec/startingCSV
+            - /status
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: false
+        syncOptions:
+          - ServerSideApply=true
+          - SkipDryRunOnMissingResource=true
+          - RespectIgnoreDifferences=true
+        retry:
+          limit: 5
+          backoff:
+            duration: 30s
+            maxDuration: 5m0s
+            factor: 2
