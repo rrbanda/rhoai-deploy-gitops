@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: usecases
+  namespace: openshift-gitops
+spec:
+  description: AI use case applications deployed on RHOAI
+  sourceRepos:
+    - https://github.com/rrbanda/rhoai-deploy-gitops.git
+  destinations:
+    - namespace: '*'
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'

@@ -1,0 +1,7 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - orchestrator-config-configmap.yaml
+  - model-mapping-configmap.yaml
+  - tool-definitions-configmap.yaml

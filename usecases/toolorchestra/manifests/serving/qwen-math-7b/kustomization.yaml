@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: orchestrator-rhoai
+
+commonLabels:
+  app.kubernetes.io/part-of: orchestrator-rhoai
+
+resources:
+  - pvc.yaml
+  - serving-runtime.yaml
+  - inference-service.yaml
+  - download-job.yaml

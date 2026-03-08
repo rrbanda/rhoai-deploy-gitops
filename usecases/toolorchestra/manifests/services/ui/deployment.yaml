@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orchestrator-ui
+  namespace: orchestrator-rhoai
+  labels:
+    app.kubernetes.io/name: orchestrator-ui
+    app.kubernetes.io/component: ui
+    app.kubernetes.io/part-of: orchestrator-rhoai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: orchestrator-ui
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: orchestrator-ui
+        app.kubernetes.io/component: ui
+        app.kubernetes.io/part-of: orchestrator-rhoai
+    spec:
+      serviceAccountName: orchestrator-sa
+      volumes:
+        - name: ui-code
+          configMap:
+            name: orchestrator-ui-code
+        - name: orchestrator-config
+          configMap:
+            name: orchestrator-config
+      containers:
+        - name: ui
+          image: registry.access.redhat.com/ubi9/python-311:latest
+          command:
+            - bash
+            - -c
+            - |
+              cd /app
+              pip install --no-cache-dir -r requirements.txt 2>&1 | tail -5
+              echo "Starting ToolOrchestra UI..."
+              python server.py
+          ports:
+            - containerPort: 7860
+              protocol: TCP
+              name: http
+          volumeMounts:
+            - name: ui-code
+              mountPath: /app
+              readOnly: true
+            - name: orchestrator-config
+              mountPath: /config
+              readOnly: true
+          env:
+            - name: CONFIG_PATH
+              value: /config/config.yaml
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 7860
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 7860
+            initialDelaySeconds: 30
+            periodSeconds: 15
