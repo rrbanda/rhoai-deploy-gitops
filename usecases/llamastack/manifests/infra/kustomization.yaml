@@ -4,8 +4,7 @@ kind: Kustomization
 namespace: llamastack
 
 resources:
-  # Secrets are NOT managed by ArgoCD -- create manually before first sync.
-  # See secrets-placeholder.yaml for the templates and instructions.
+  - secrets-placeholder.yaml
   - postgres-pvc.yaml
   - postgres-deployment.yaml
   - postgres-service.yaml
