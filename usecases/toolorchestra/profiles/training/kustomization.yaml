@@ -13,4 +13,5 @@ resources:
   - ../../manifests/serving/orchestrator
   - ../../manifests/serving/qwen-math-7b
   - ../../manifests/services/ui
-  - ../../manifests/training
+  - ../../manifests/training/infra
+  - ../../manifests/training/workloads
