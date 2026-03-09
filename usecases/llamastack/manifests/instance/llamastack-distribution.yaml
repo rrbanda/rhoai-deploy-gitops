@@ -1,0 +1,82 @@
+apiVersion: llamastack.io/v1alpha1
+kind: LlamaStackDistribution
+metadata:
+  name: llamastack
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  replicas: 1
+  server:
+    distribution:
+      # Patched 0.5.2 with Bug 1+2 fix (Gemini type leak + OpenAI strict:null).
+      # Dockerfile: usecases/llamastack/build/Dockerfile
+      # To upgrade: rebuild with new FROM tag, push, update image ref here.
+      # When upstream 0.5.3+ ships both fixes, switch to:
+      #   image: docker.io/llamastack/distribution-starter:0.5.3
+      # To revert to RHOAI-managed version, replace 'image' with:
+      #   name: rh-dev
+      image: quay.io/rbrhssa/llamastack-custom:0.5.2-patched
+    containerSpec:
+      name: llama-stack
+      port: 8321
+      resources:
+        requests:
+          cpu: 250m
+          memory: 500Mi
+        limits:
+          cpu: "4"
+          memory: 12Gi
+      env:
+        - name: POSTGRES_HOST
+          value: postgres.llamastack.svc.cluster.local
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_DB
+          value: llamastack
+        - name: POSTGRES_USER
+          value: llamastack
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: password
+        - name: INFERENCE_MODEL
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-secret
+              key: INFERENCE_MODEL
+        - name: VLLM_URL
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-secret
+              key: VLLM_URL
+        - name: VLLM_TLS_VERIFY
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-secret
+              key: VLLM_TLS_VERIFY
+        - name: VLLM_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-secret
+              key: VLLM_API_TOKEN
+        - name: GEMINI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: gemini-secret
+              key: api_key
+        - name: ENABLE_FAISS
+          value: faiss
+        - name: ENABLE_SENTENCE_TRANSFORMERS
+          value: "true"
+        - name: EMBEDDING_PROVIDER
+          value: sentence-transformers
+        - name: FMS_ORCHESTRATOR_URL
+          value: http://localhost
+    storage:
+      size: 5Gi
+    userConfig:
+      configMapName: llamastack-custom-config
+      configMapNamespace: llamastack
+  network:
+    exposeRoute: true

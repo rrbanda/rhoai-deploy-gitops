@@ -1,0 +1,205 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: llamastack-custom-config
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+data:
+  run.yaml: |
+    version: 2
+    image_name: rh
+    apis:
+    - agents
+    - batches
+    - datasetio
+    - eval
+    - inference
+    - safety
+    - scoring
+    - tool_runtime
+    - vector_io
+    - files
+    providers:
+      inference:
+      - provider_id: ${env.VLLM_URL:+vllm-inference}
+        provider_type: remote::vllm
+        config:
+          url: ${env.VLLM_URL:=}
+          max_tokens: ${env.VLLM_MAX_TOKENS:=4096}
+          api_token: ${env.VLLM_API_TOKEN:=fake}
+          tls_verify: ${env.VLLM_TLS_VERIFY:=true}
+      - provider_id: ${env.VLLM_EMBEDDING_URL:+vllm-embedding}
+        provider_type: remote::vllm
+        config:
+          url: ${env.VLLM_EMBEDDING_URL:=}
+          max_tokens: ${env.VLLM_EMBEDDING_MAX_TOKENS:=4096}
+          api_token: ${env.VLLM_EMBEDDING_API_TOKEN:=fake}
+          tls_verify: ${env.VLLM_EMBEDDING_TLS_VERIFY:=true}
+      - provider_id: vllm-orchestrator
+        provider_type: remote::vllm
+        config:
+          url: http://orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local:8080/v1
+          max_tokens: 4096
+          api_token: fake
+          tls_verify: false
+      - provider_id: gemini
+        provider_type: remote::gemini
+        config:
+          api_key: ${env.GEMINI_API_KEY}
+      - provider_id: ${env.ENABLE_SENTENCE_TRANSFORMERS:+sentence-transformers}
+        provider_type: inline::sentence-transformers
+        config: {}
+      - provider_id: ${env.OPENAI_API_KEY:+openai}
+        provider_type: remote::openai
+        config:
+          api_key: ${env.OPENAI_API_KEY:=}
+          base_url: ${env.OPENAI_BASE_URL:=https://api.openai.com/v1}
+      vector_io:
+      - provider_id: faiss
+        provider_type: inline::faiss
+        config:
+          persistence:
+            backend: kv_default
+            namespace: vector_io::faiss
+      safety:
+        - provider_id: trustyai_fms
+          provider_type: remote::trustyai_fms
+          module: llama_stack_provider_trustyai_fms==0.3.2
+          config:
+            orchestrator_url: ${env.FMS_ORCHESTRATOR_URL:=}
+            ssl_cert_path: ${env.FMS_SSL_CERT_PATH:=}
+            shields: {}
+      agents:
+      - provider_id: meta-reference
+        provider_type: inline::meta-reference
+        config:
+          persistence:
+            agent_state:
+              backend: kv_default
+              namespace: agents::meta_reference
+            responses:
+              backend: sql_default
+              table_name: agents_responses
+              max_write_queue_size: 10000
+              num_writers: 4
+      eval:
+      - provider_id: trustyai_lmeval
+        provider_type: remote::trustyai_lmeval
+        module: llama_stack_provider_lmeval==0.2.4
+        config:
+          use_k8s: ${env.TRUSTYAI_LMEVAL_USE_K8S:=true}
+          base_url: ${env.VLLM_URL:=http://localhost:8000/v1}
+      datasetio:
+      - provider_id: huggingface
+        provider_type: remote::huggingface
+        config:
+          kvstore:
+            backend: kv_default
+            namespace: datasetio::huggingface
+      - provider_id: localfs
+        provider_type: inline::localfs
+        config:
+          kvstore:
+            backend: kv_default
+            namespace: datasetio::localfs
+      scoring:
+      - provider_id: basic
+        provider_type: inline::basic
+        config: {}
+      - provider_id: llm-as-judge
+        provider_type: inline::llm-as-judge
+        config: {}
+      tool_runtime:
+      - provider_id: brave-search
+        provider_type: remote::brave-search
+        config:
+          api_key: ${env.BRAVE_SEARCH_API_KEY:=}
+          max_results: 3
+      - provider_id: tavily-search
+        provider_type: remote::tavily-search
+        config:
+          api_key: ${env.TAVILY_SEARCH_API_KEY:=}
+          max_results: 3
+      - provider_id: rag-runtime
+        provider_type: inline::rag-runtime
+        config: {}
+      - provider_id: model-context-protocol
+        provider_type: remote::model-context-protocol
+        config: {}
+      files:
+      - provider_id: meta-reference-files
+        provider_type: inline::localfs
+        config:
+          storage_dir: /opt/app-root/src/.llama/distributions/rh/files
+          metadata_store:
+            backend: sql_default
+            table_name: files_metadata
+      batches:
+      - provider_id: reference
+        provider_type: inline::reference
+        config:
+          kvstore:
+            namespace: batches
+            backend: kv_default
+    storage:
+      backends:
+        kv_default:
+          type: kv_postgres
+          host: ${env.POSTGRES_HOST:=localhost}
+          port: ${env.POSTGRES_PORT:=5432}
+          db: ${env.POSTGRES_DB:=llamastack}
+          user: ${env.POSTGRES_USER:=llamastack}
+          password: ${env.POSTGRES_PASSWORD:=llamastack}
+          table_name: ${env.POSTGRES_TABLE_NAME:=llamastack_kvstore}
+        sql_default:
+          type: sql_postgres
+          host: ${env.POSTGRES_HOST:=localhost}
+          port: ${env.POSTGRES_PORT:=5432}
+          db: ${env.POSTGRES_DB:=llamastack}
+          user: ${env.POSTGRES_USER:=llamastack}
+          password: ${env.POSTGRES_PASSWORD:=llamastack}
+      stores:
+        metadata:
+          backend: kv_default
+          namespace: registry
+        inference:
+          table_name: inference_store
+          backend: sql_default
+          max_write_queue_size: 10000
+          num_writers: 4
+        conversations:
+          table_name: openai_conversations
+          backend: sql_default
+        prompts:
+          namespace: prompts
+          backend: kv_default
+    registered_resources:
+      models:
+      - metadata: {}
+        model_id: ${env.INFERENCE_MODEL}
+        provider_id: vllm-inference
+        model_type: llm
+      - metadata: {}
+        model_id: orchestrator-8b
+        provider_id: vllm-orchestrator
+        model_type: llm
+      - metadata:
+          embedding_dimension: ${env.EMBEDDING_DIMENSION:=768}
+        model_id: ${env.EMBEDDING_MODEL:=granite-embedding-125m-english}
+        provider_id: ${env.EMBEDDING_PROVIDER:=vllm-embedding}
+        provider_model_id: ${env.EMBEDDING_PROVIDER_MODEL_ID:=ibm-granite/granite-embedding-125m-english}
+        model_type: embedding
+      shields: []
+      vector_dbs: []
+      datasets: []
+      scoring_fns: []
+      benchmarks: []
+      tool_groups:
+      - toolgroup_id: builtin::websearch
+        provider_id: tavily-search
+      - toolgroup_id: builtin::rag
+        provider_id: rag-runtime
+    telemetry:
+      enabled: true
+    server:
+      port: 8321
