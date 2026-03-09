@@ -10,6 +10,7 @@ metadata:
     opendatahub.io/dashboard: "true"
     opendatahub.io/genai-asset: "true"
   annotations:
+    argocd.argoproj.io/sync-wave: "1"
     opendatahub.io/model-type: generative
     openshift.io/display-name: Nemotron-Orchestrator-8B
     openshift.io/description: "NVIDIA ToolOrchestra 8B orchestrator model for multi-tool coordination"

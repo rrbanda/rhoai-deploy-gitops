@@ -7,9 +7,10 @@ metadata:
     app.kubernetes.io/name: download-qwen-math-7b
     app.kubernetes.io/component: model-download
     app.kubernetes.io/part-of: orchestrator-rhoai
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   backoffLimit: 2
-  ttlSecondsAfterFinished: 7200
   template:
     metadata:
       labels:
