@@ -1,0 +1,116 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grpo-training-config
+  namespace: orchestrator-rhoai
+  labels:
+    app.kubernetes.io/name: grpo-training-config
+    app.kubernetes.io/component: training
+    app.kubernetes.io/part-of: orchestrator-rhoai
+data:
+  train-config.yaml: |
+    # GRPO training config adapted for RHOAI L4/L40S cluster.
+    # Original paper: 2 nodes × 8 H100 GPUs.
+    # This config: 1 node × 3 L4 GPUs (24GB VRAM each).
+
+    # Base model
+    model_path: Qwen/Qwen3-8B
+
+    # GRPO algorithm
+    algorithm: grpo
+    rollout_samples: 4
+    train_batch_size: 4
+    ppo_mini_batch_size: 4
+    ppo_epochs: 1
+
+    # Sequence lengths (reduced for L4 24GB VRAM)
+    max_prompt_length: 8192
+    max_response_length: 4096
+
+    # Optimizer
+    learning_rate: 1e-6
+    temperature: 1.0
+    entropy_coeff: 0
+
+    # Reward config
+    reward_manager: match
+    use_llm_reward: true
+    efficiency_reward: true
+    use_qa_reward: true
+
+    # GPU memory optimization for L4
+    gradient_checkpointing: true
+    optimizer_offload: true
+    param_offload: false
+    gpu_memory_utilization: 0.85
+
+    # Parallelism (single GPU per node)
+    tensor_model_parallel_size: 1
+    n_gpus_per_node: 1
+    nnodes: 3
+
+    # Training schedule
+    total_epochs: 3
+    save_freq: 1
+
+    # Length penalty (from paper)
+    margin: -1
+    min_value_correct: 0.5
+    max_value_wrong: 0.0
+    repetition_penalty: -0.001
+    length_penalty_type: cosine
+
+  tools.json: |
+    [
+      {
+        "type": "function",
+        "function": {
+          "name": "enhance_reasoning",
+          "description": "tool to enhance answer model reasoning",
+          "parameters": {
+            "properties": {
+              "model": {
+                "description": "The model used to reason. Choices: ['reasoner-1', 'reasoner-2', 'reasoner-3'].",
+                "type": "string"
+              }
+            },
+            "required": ["model"],
+            "type": "object"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "answer",
+          "description": "give the final answer",
+          "parameters": {
+            "properties": {
+              "model": {
+                "description": "The model used to answer. Choices: ['answer-1', 'answer-2', 'answer-3', 'answer-4', 'answer-math-1', 'answer-math-2'].",
+                "type": "string"
+              }
+            },
+            "required": ["model"],
+            "type": "object"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "search",
+          "description": "Search for missing information",
+          "parameters": {
+            "properties": {
+              "model": {
+                "description": "The model used to search. Choices: ['search-1', 'search-2', 'search-3'].",
+                "type": "string"
+              }
+            },
+            "required": ["model"],
+            "type": "object"
+          }
+        }
+      }
+    ]

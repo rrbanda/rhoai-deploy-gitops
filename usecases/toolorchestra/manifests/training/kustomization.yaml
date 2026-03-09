@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: orchestrator-rhoai
+
+resources:
+  - local-queue.yaml
+  - checkpoint-pvc.yaml
+  - training-config.yaml
+  - download-base-model-job.yaml
+  - download-data-job.yaml
+  - grpo-rayjob.yaml
