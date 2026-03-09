@@ -23,12 +23,6 @@ spec:
         path: '{{ .path.path }}'
       destination:
         server: https://kubernetes.default.svc
-      ignoreDifferences:
-        - group: ""
-          kind: Secret
-          jsonPointers:
-            - /data
-            - /stringData
       syncPolicy:
         automated:
           selfHeal: true
@@ -37,7 +31,6 @@ spec:
           - ServerSideApply=true
           - SkipDryRunOnMissingResource=true
           - CreateNamespace=true
-          - RespectIgnoreDifferences=true
         retry:
           limit: 10
           backoff:

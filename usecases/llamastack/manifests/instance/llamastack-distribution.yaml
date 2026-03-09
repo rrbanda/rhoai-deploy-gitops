@@ -60,6 +60,11 @@ spec:
             secretKeyRef:
               name: llama-stack-secret
               key: VLLM_API_TOKEN
+        - name: VLLM_MAX_TOKENS
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-secret
+              key: VLLM_MAX_TOKENS
         - name: GEMINI_API_KEY
           valueFrom:
             secretKeyRef:
