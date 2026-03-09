@@ -7,7 +7,7 @@ metadata:
 data:
   config.yaml: |
     version: 2
-    image_name: rh
+    distro_name: starter
     apis:
     - agents
     - batches
@@ -21,20 +21,13 @@ data:
     - files
     providers:
       inference:
-      - provider_id: ${env.VLLM_URL:+vllm-inference}
+      - provider_id: vllm-inference
         provider_type: remote::vllm
         config:
-          url: ${env.VLLM_URL:=}
+          url: ${env.VLLM_URL}
           max_tokens: ${env.VLLM_MAX_TOKENS:=4096}
           api_token: ${env.VLLM_API_TOKEN:=fake}
           tls_verify: ${env.VLLM_TLS_VERIFY:=true}
-      - provider_id: ${env.VLLM_EMBEDDING_URL:+vllm-embedding}
-        provider_type: remote::vllm
-        config:
-          url: ${env.VLLM_EMBEDDING_URL:=}
-          max_tokens: ${env.VLLM_EMBEDDING_MAX_TOKENS:=4096}
-          api_token: ${env.VLLM_EMBEDDING_API_TOKEN:=fake}
-          tls_verify: ${env.VLLM_EMBEDDING_TLS_VERIFY:=true}
       - provider_id: vllm-orchestrator
         provider_type: remote::vllm
         config:
@@ -42,6 +35,13 @@ data:
           max_tokens: 4096
           api_token: fake
           tls_verify: false
+      - provider_id: ${env.VLLM_EMBEDDING_URL:+vllm-embedding}
+        provider_type: remote::vllm
+        config:
+          url: ${env.VLLM_EMBEDDING_URL:=}
+          max_tokens: ${env.VLLM_EMBEDDING_MAX_TOKENS:=4096}
+          api_token: ${env.VLLM_EMBEDDING_API_TOKEN:=fake}
+          tls_verify: ${env.VLLM_EMBEDDING_TLS_VERIFY:=true}
       - provider_id: ${env.GEMINI_API_KEY:+gemini}
         provider_type: remote::gemini
         config:
@@ -62,9 +62,9 @@ data:
             backend: kv_default
             namespace: vector_io::faiss
       safety:
-        - provider_id: llama-guard
-          provider_type: inline::llama-guard
-          config: {}
+      - provider_id: llama-guard
+        provider_type: inline::llama-guard
+        config: {}
       agents:
       - provider_id: meta-reference
         provider_type: inline::meta-reference
@@ -123,7 +123,7 @@ data:
       - provider_id: meta-reference-files
         provider_type: inline::localfs
         config:
-          storage_dir: ${env.LLAMA_STACK_FILES_DIR:=/opt/app-root/src/.llama/distributions/rh/files}
+          storage_dir: ${env.FILES_STORAGE_DIR:=~/.llama/distributions/starter/files}
           metadata_store:
             backend: sql_default
             table_name: files_metadata
@@ -134,6 +134,13 @@ data:
           kvstore:
             namespace: batches
             backend: kv_default
+      telemetry:
+      - provider_id: meta-reference
+        provider_type: inline::meta-reference
+        config:
+          service_name: "${env.OTEL_SERVICE_NAME:=}"
+          sinks: ${env.TELEMETRY_SINKS:=console}
+          otel_exporter_otlp_endpoint: ${env.OTEL_EXPORTER_OTLP_ENDPOINT:=}
     storage:
       backends:
         kv_default:
@@ -166,33 +173,26 @@ data:
         prompts:
           namespace: prompts
           backend: kv_default
-    registered_resources:
-      models:
-      - metadata: {}
-        model_id: ${env.INFERENCE_MODEL}
-        provider_id: vllm-inference
-        model_type: llm
-      - metadata: {}
-        model_id: orchestrator-8b
-        provider_id: vllm-orchestrator
-        model_type: llm
-      - metadata:
-          embedding_dimension: ${env.EMBEDDING_DIMENSION:=768}
-        model_id: ${env.EMBEDDING_MODEL:=granite-embedding-125m-english}
-        provider_id: ${env.EMBEDDING_PROVIDER:=vllm-embedding}
-        provider_model_id: ${env.EMBEDDING_PROVIDER_MODEL_ID:=ibm-granite/granite-embedding-125m-english}
-        model_type: embedding
-      shields: []
-      vector_dbs: []
-      datasets: []
-      scoring_fns: []
-      benchmarks: []
-      tool_groups:
-      - toolgroup_id: builtin::websearch
-        provider_id: tavily-search
-      - toolgroup_id: builtin::rag
-        provider_id: rag-runtime
-    telemetry:
-      enabled: true
+    models:
+    - metadata: {}
+      model_id: ${env.INFERENCE_MODEL}
+      provider_id: vllm-inference
+      model_type: llm
+    - metadata: {}
+      model_id: orchestrator-8b
+      provider_id: vllm-orchestrator
+      model_type: llm
+    - metadata:
+        embedding_dimension: ${env.EMBEDDING_DIMENSION:=768}
+      model_id: ${env.EMBEDDING_MODEL:=granite-embedding-125m-english}
+      provider_id: ${env.EMBEDDING_PROVIDER:=vllm-embedding}
+      provider_model_id: ${env.EMBEDDING_PROVIDER_MODEL_ID:=ibm-granite/granite-embedding-125m-english}
+      model_type: embedding
+    shields: []
+    tool_groups:
+    - toolgroup_id: builtin::websearch
+      provider_id: tavily-search
+    - toolgroup_id: builtin::rag
+      provider_id: rag-runtime
     server:
       port: 8321

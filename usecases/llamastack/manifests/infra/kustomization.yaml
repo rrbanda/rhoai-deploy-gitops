@@ -4,7 +4,6 @@ kind: Kustomization
 namespace: llamastack
 
 resources:
-  - secrets-placeholder.yaml
   - postgres-pvc.yaml
   - postgres-deployment.yaml
   - postgres-service.yaml
