@@ -182,6 +182,18 @@ data:
         model_id: orchestrator-8b
         provider_id: vllm-orchestrator
         model_type: llm
+      - metadata: {}
+        model_id: gemini-2.0-flash
+        provider_id: gemini
+        model_type: llm
+      - metadata: {}
+        model_id: gemini-1.5-pro
+        provider_id: gemini
+        model_type: llm
+      - metadata: {}
+        model_id: gemini-1.5-flash
+        provider_id: gemini
+        model_type: llm
       - metadata:
           embedding_dimension: 768
         model_id: ${env.EMBEDDING_MODEL:=nomic-ai/nomic-embed-text-v1.5}
