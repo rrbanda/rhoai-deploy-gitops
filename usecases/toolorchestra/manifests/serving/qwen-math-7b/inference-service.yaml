@@ -10,6 +10,7 @@ metadata:
     opendatahub.io/dashboard: "true"
     opendatahub.io/genai-asset: "true"
   annotations:
+    argocd.argoproj.io/sync-wave: "1"
     opendatahub.io/model-type: generative
     openshift.io/display-name: Qwen2.5-Math-7B-Instruct
     openshift.io/description: "Qwen2.5-Math-7B math specialist for ToolOrchestra"
