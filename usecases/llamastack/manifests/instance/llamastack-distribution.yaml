@@ -80,8 +80,5 @@ spec:
           value: http://localhost
     storage:
       size: 5Gi
-    userConfig:
-      configMapName: llamastack-custom-config
-      configMapNamespace: llamastack
   network:
     exposeRoute: true
