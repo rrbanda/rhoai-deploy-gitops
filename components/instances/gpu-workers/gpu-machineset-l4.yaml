@@ -1,0 +1,82 @@
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  name: ocp-2qkbk-gpu-us-east-2a
+  namespace: openshift-machine-api
+  labels:
+    machine.openshift.io/cluster-api-cluster: ocp-2qkbk
+  annotations:
+    machine.openshift.io/GPU: "1"
+    machine.openshift.io/memoryMb: "32768"
+    machine.openshift.io/vCPU: "8"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      machine.openshift.io/cluster-api-cluster: ocp-2qkbk
+      machine.openshift.io/cluster-api-machineset: ocp-2qkbk-gpu-us-east-2a
+  template:
+    metadata:
+      labels:
+        machine.openshift.io/cluster-api-cluster: ocp-2qkbk
+        machine.openshift.io/cluster-api-machine-role: worker
+        machine.openshift.io/cluster-api-machine-type: worker
+        machine.openshift.io/cluster-api-machineset: ocp-2qkbk-gpu-us-east-2a
+    spec:
+      lifecycleHooks: {}
+      metadata:
+        labels:
+          gpu-node: "true"
+          node-role.kubernetes.io/worker: ""
+      providerSpec:
+        value:
+          apiVersion: machine.openshift.io/v1beta1
+          kind: AWSMachineProviderConfig
+          ami:
+            id: ami-0fd7c367ed8a90d52
+          instanceType: g6.2xlarge
+          blockDevices:
+            - ebs:
+                encrypted: true
+                iops: 0
+                kmsKey:
+                  arn: ""
+                volumeSize: 200
+                volumeType: gp3
+          credentialsSecret:
+            name: aws-cloud-credentials
+          deviceIndex: 0
+          iamInstanceProfile:
+            id: ocp-2qkbk-worker-profile
+          placement:
+            availabilityZone: us-east-2a
+            region: us-east-2
+          securityGroups:
+            - filters:
+                - name: tag:Name
+                  values:
+                    - ocp-2qkbk-node
+            - filters:
+                - name: tag:Name
+                  values:
+                    - ocp-2qkbk-lb
+          subnet:
+            filters:
+              - name: tag:Name
+                values:
+                  - ocp-2qkbk-subnet-private-us-east-2a
+          tags:
+            - name: kubernetes.io/cluster/ocp-2qkbk
+              value: owned
+            - name: Stack
+              value: project openshift-cluster-v7hjl
+            - name: config
+              value: openshift-cluster
+            - name: guid
+              value: v7hjl
+            - name: owner
+              value: unknown
+            - name: uuid
+              value: e818b11f-2b67-57f2-ad10-13f3e8422dec
+          userDataSecret:
+            name: worker-user-data
