@@ -7,6 +7,7 @@ commonLabels:
   app.kubernetes.io/part-of: orchestrator-rhoai
 
 resources:
+  - orchestrator-ui-code-configmap.yaml
   - deployment.yaml
   - service.yaml
   - route.yaml

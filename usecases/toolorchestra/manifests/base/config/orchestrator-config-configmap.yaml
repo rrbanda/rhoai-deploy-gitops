@@ -23,49 +23,52 @@ data:
       system_prompt: "You are good at using tools."
       max_turns: 30
 
+    # Tier1-minimal: all specialists use the two deployed models.
+    # orchestrator-8b serves as general-purpose reasoner/searcher/answerer.
+    # qwen-math-7b handles math-specific answering.
     specialists:
       reasoner-1:
-        endpoint: https://llamastack-llamastack.apps.ocp.v7hjl.sandbox2288.opentlc.com/v1
-        model: gemini/models/gemini-2.5-flash
-        display: Gemini 2.5 Flash
-        temperature: 1.0
-        max_tokens: 40000
+        endpoint: http://orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.7
+        max_tokens: 8000
       reasoner-2:
-        endpoint: http://llama-32-3b-instruct-predictor.my-first-model.svc.cluster.local:8080/v1
-        model: llama-32-3b-instruct
-        display: Llama-3.2-3B
-        temperature: 0.2
+        endpoint: http://orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.5
         max_tokens: 8000
       reasoner-3:
-        endpoint: http://llama-32-3b-instruct-predictor.my-first-model.svc.cluster.local:8080/v1
-        model: llama-32-3b-instruct
-        display: Llama-3.2-3B
-        temperature: 0.2
+        endpoint: http://orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.5
         max_tokens: 8000
       answer-1:
-        endpoint: https://llamastack-llamastack.apps.ocp.v7hjl.sandbox2288.opentlc.com/v1
-        model: gemini/models/gemini-2.5-flash
-        display: Gemini 2.5 Flash
-        temperature: 1.0
-        max_tokens: 40000
+        endpoint: http://orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.7
+        max_tokens: 8000
       answer-2:
-        endpoint: http://llama-32-3b-instruct-predictor.my-first-model.svc.cluster.local:8080/v1
-        model: llama-32-3b-instruct
-        display: Llama-3.2-3B
-        temperature: 0.2
+        endpoint: http://orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.5
         max_tokens: 8000
       answer-3:
-        endpoint: http://llama-32-3b-instruct-predictor.my-first-model.svc.cluster.local:8080/v1
-        model: llama-32-3b-instruct
-        display: Llama-3.2-3B
-        temperature: 0.2
+        endpoint: http://orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.5
         max_tokens: 8000
       answer-4:
-        endpoint: http://llama-32-3b-instruct-predictor.my-first-model.svc.cluster.local:8080/v1
-        model: llama-32-3b-instruct
-        display: Llama-3.2-3B
-        temperature: 0.2
-        max_tokens: 8000
+        endpoint: http://orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.3
+        max_tokens: 4000
       answer-math-1:
         endpoint: http://qwen-math-7b-predictor.orchestrator-rhoai.svc.cluster.local:8080/v1
         model: qwen-math-7b
@@ -79,23 +82,23 @@ data:
         temperature: 0.2
         max_tokens: 2000
       search-1:
-        endpoint: https://llamastack-llamastack.apps.ocp.v7hjl.sandbox2288.opentlc.com/v1
-        model: gemini/models/gemini-2.0-flash
-        display: Gemini 2.0 Flash
-        temperature: 1.0
-        max_tokens: 40000
+        endpoint: http://orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.7
+        max_tokens: 8000
       search-2:
-        endpoint: http://llama-32-3b-instruct-predictor.my-first-model.svc.cluster.local:8080/v1
-        model: llama-32-3b-instruct
-        display: Llama-3.2-3B
-        temperature: 0.2
+        endpoint: http://orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.5
         max_tokens: 8000
       search-3:
-        endpoint: http://llama-32-3b-instruct-predictor.my-first-model.svc.cluster.local:8080/v1
-        model: llama-32-3b-instruct
-        display: Llama-3.2-3B
-        temperature: 0.2
-        max_tokens: 8000
+        endpoint: http://orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.3
+        max_tokens: 4000
 
     pricing:
       reasoner-1:    { input: 1.25, output: 10.0 }
