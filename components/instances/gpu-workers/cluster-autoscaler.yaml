@@ -4,6 +4,8 @@ metadata:
   name: default
   labels:
     app.kubernetes.io/managed-by: argocd
+  annotations:
+    argocd.argoproj.io/sync-options: ServerSideApply=false
 spec:
   podPriorityThreshold: -10
   resourceLimits:
