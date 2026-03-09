@@ -8,25 +8,51 @@ This repository contains everything needed to install, configure, and manage an 
 
 ```
 rhoai-deploy-gitops/
-├── bootstrap/              # OpenShift GitOps (ArgoCD) operator install
-├── clusters/               # Per-cluster overlays (dev, prod, etc.)
+├── bootstrap/                        # OpenShift GitOps (ArgoCD) operator install
+├── clusters/                         # Per-cluster overlays (dev, prod, etc.)
+│   ├── base/                         # Common: AppSets + ArgoCD projects
+│   └── overlays/dev/
+│       ├── bootstrap-app.yaml        # Self-managing app-of-apps (auto-syncs this overlay)
+│       ├── rhoai-instance-app.yaml   # DSC with ignoreDifferences
+│       └── training-workloads-app.yaml  # Manual-sync training workloads
 ├── components/
-│   ├── argocd/             # ArgoCD projects and ApplicationSets
-│   ├── operators/          # OLM operator subscriptions
+│   ├── argocd/                       # ArgoCD projects and ApplicationSets
+│   │   ├── apps/
+│   │   │   ├── cluster-operators-appset.yaml    # Auto-discovers components/operators/*
+│   │   │   ├── cluster-instances-appset.yaml    # Auto-discovers components/instances/*
+│   │   │   └── cluster-usecases-appset.yaml     # Auto-discovers usecases/*/profiles/tier1-minimal
+│   │   └── projects/
+│   ├── operators/                    # OLM operator subscriptions
 │   │   ├── cert-manager/
 │   │   ├── nfd/
 │   │   ├── gpu-operator/
 │   │   ├── kueue-operator/
 │   │   ├── jobset-operator/
 │   │   └── rhoai-operator/
-│   └── instances/          # Operator instance CRs
+│   └── instances/                    # Operator instance CRs
 │       ├── nfd-instance/
 │       ├── gpu-instance/
 │       ├── kueue-instance/
+│       ├── kueue-config/             # ResourceFlavors (gpu-l4, gpu-l40s) + ClusterQueue
 │       ├── jobset-instance/
-│       └── rhoai-instance/ # DataScienceCluster (v1)
-└── usecases/               # AI application deployments
-    └── toolorchestra/      # NVIDIA ToolOrchestra multi-model orchestrator
+│       └── rhoai-instance/           # DataScienceCluster (v1) with dev overlay
+└── usecases/
+    └── toolorchestra/                # NVIDIA ToolOrchestra multi-model orchestrator
+        ├── manifests/
+        │   ├── base/                 # Namespace, RBAC, ConfigMaps, NetworkPolicy
+        │   ├── serving/
+        │   │   ├── orchestrator/     # Nemotron-Orchestrator-8B (ServingRuntime, InferenceService, download Job)
+        │   │   ├── qwen-math-7b/     # Qwen2.5-Math-7B-Instruct
+        │   │   └── qwen3-32b/        # Qwen3-32B (for larger clusters)
+        │   ├── services/ui/          # Orchestrator web UI
+        │   └── training/
+        │       ├── infra/            # LocalQueue, PVC, training ConfigMap (always deployed)
+        │       └── workloads/        # Download jobs + RayJob (on-demand via manual sync)
+        └── profiles/
+            ├── tier1-minimal/        # 2 models + UI + training infra (auto-synced)
+            ├── tier2-standard/       # Extended config
+            ├── tier3-full/           # All models
+            └── training/             # Serving + training (standalone kustomize target)
 ```
 
 ## Prerequisites
@@ -48,15 +74,16 @@ oc apply -k bootstrap/
 oc wait --for=condition=Available deployment/openshift-gitops-server \
   -n openshift-gitops --timeout=300s
 
-# 3. Apply cluster configuration (triggers ArgoCD to sync everything)
+# 3. Bootstrap the cluster (one-time manual apply, self-manages after this)
 oc apply -k clusters/overlays/dev/
 
 # 4. Monitor convergence (~15-30 min for full stack)
 watch oc get application.argoproj.io -n openshift-gitops
 ```
 
-ArgoCD will automatically install all operators, create instances, and deploy use cases.
-Retry policies handle ordering dependencies (operators must install before instances).
+After step 3, the `cluster-bootstrap` app-of-apps takes over. Any future changes
+pushed to Git (new Applications, updated manifests) are auto-synced -- no further
+`oc apply` needed.
 
 ### Option B: Manual (no ArgoCD)
 
@@ -79,6 +106,7 @@ oc apply -k components/instances/nfd-instance/    # NFD first (GPU depends on it
 oc apply -k components/instances/gpu-instance/
 # Wait: oc wait --for=jsonpath='{.status.state}'=ready clusterpolicy/gpu-cluster-policy --timeout=600s
 oc apply -k components/instances/kueue-instance/
+oc apply -k components/instances/kueue-config/    # GPU ResourceFlavors + ClusterQueue
 oc apply -k components/instances/jobset-instance/
 oc apply -k components/instances/rhoai-instance/overlays/dev/
 # Wait: oc wait --for=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'=True \
@@ -93,6 +121,98 @@ oc wait --for=condition=Ready inferenceservice/orchestrator-8b \
 oc wait --for=condition=Ready inferenceservice/qwen-math-7b \
   -n orchestrator-rhoai --timeout=1800s
 ```
+
+## ArgoCD Applications
+
+After bootstrap, ArgoCD manages **15 Applications** across three layers:
+
+| Application | Source | Sync Policy | Purpose |
+|-------------|--------|-------------|---------|
+| `cluster-bootstrap` | `clusters/overlays/dev/` | Auto (selfHeal) | Self-manages the dev overlay: AppSets, explicit Apps |
+| `operator-cert-manager` | `components/operators/cert-manager/` | Auto (selfHeal) | cert-manager operator subscription |
+| `operator-nfd` | `components/operators/nfd/` | Auto (selfHeal) | Node Feature Discovery operator |
+| `operator-gpu-operator` | `components/operators/gpu-operator/` | Auto (selfHeal) | NVIDIA GPU Operator |
+| `operator-kueue-operator` | `components/operators/kueue-operator/` | Auto (selfHeal) | Red Hat Build of Kueue |
+| `operator-jobset-operator` | `components/operators/jobset-operator/` | Auto (selfHeal) | JobSet Operator |
+| `operator-rhoai-operator` | `components/operators/rhoai-operator/` | Auto (selfHeal) | Red Hat OpenShift AI operator |
+| `instance-nfd-instance` | `components/instances/nfd-instance/` | Auto (selfHeal) | NFD NodeFeatureDiscovery CR |
+| `instance-gpu-instance` | `components/instances/gpu-instance/` | Auto (selfHeal) | GPU ClusterPolicy CR |
+| `instance-kueue-instance` | `components/instances/kueue-instance/` | Auto (selfHeal) | Kueue operator instance |
+| `instance-kueue-config` | `components/instances/kueue-config/` | Auto (selfHeal) | GPU ResourceFlavors + ClusterQueue |
+| `instance-jobset-instance` | `components/instances/jobset-instance/` | Auto (selfHeal) | JobSet operator instance |
+| `instance-rhoai` | `components/instances/rhoai-instance/overlays/dev/` | Auto (selfHeal, no prune) | DataScienceCluster with ignoreDifferences |
+| `usecase-toolorchestra` | `usecases/toolorchestra/profiles/tier1-minimal/` | Auto (selfHeal, prune) | Serving (2 models), UI, training infra |
+| `usecase-toolorchestra-training` | `usecases/toolorchestra/manifests/training/workloads/` | **Manual only** | Download jobs + RayJob (on-demand) |
+
+### Sync Wave Ordering
+
+Within the `usecase-toolorchestra` app, sync waves ensure correct resource ordering:
+
+| Wave | Resources | Purpose |
+|------|-----------|---------|
+| -1 (default) | Namespace, RBAC, ConfigMaps, PVCs, ServingRuntimes, Service, Route, NetworkPolicy, LocalQueue | Infrastructure created first |
+| 0 | `download-orchestrator-8b`, `download-qwen-math-7b` Jobs | Model download jobs run and complete before predictors start |
+| 1 | `orchestrator-8b`, `qwen-math-7b` InferenceServices | Predictors created only after models are downloaded to PVCs |
+
+Download jobs are idempotent (check for `.download_complete` marker) and have no TTL,
+so completed jobs persist as Synced/Healthy in ArgoCD without being recreated.
+
+## Training Pipeline
+
+The repository includes a GRPO training pipeline for the ToolOrchestra model, using
+**KubeRay** for distributed training and **Kueue** for GPU quota management.
+
+### Training Infrastructure (always deployed)
+
+Deployed automatically by `usecase-toolorchestra` via `tier1-minimal`:
+
+- **LocalQueue** (`training-queue`) -- namespaced queue pointing to `training-cluster-queue`
+- **PVC** (`training-checkpoints`, 100Gi) -- stores base model, dataset, and checkpoints
+- **ConfigMap** (`grpo-training-config`) -- GRPO hyperparameters adapted for L4 GPUs
+
+### Training Workloads (on-demand)
+
+Managed by `usecase-toolorchestra-training` with **manual sync**:
+
+- **Download Jobs** (sync-wave 0):
+  - `download-qwen3-8b` -- downloads Qwen/Qwen3-8B base model
+  - `download-training-data` -- downloads nvidia/ToolScale dataset
+- **RayJob** (sync-wave 1):
+  - `grpo-training` -- 1 head node (no GPU) + 3 GPU worker nodes (1xL4 each)
+  - Uses verl framework with GRPO algorithm
+
+### Running Training
+
+```bash
+# Option A: Via ArgoCD (recommended, fully GitOps)
+argocd app sync usecase-toolorchestra-training
+
+# ArgoCD processes sync waves:
+#   Wave 0: download jobs run (base model + dataset)
+#   Wave 1: RayJob starts GRPO training (after downloads complete)
+
+# Option B: Via ArgoCD UI
+# Navigate to usecase-toolorchestra-training → click Sync
+
+# Option C: Manual (without ArgoCD)
+oc apply -k usecases/toolorchestra/manifests/training/workloads/
+
+# Monitor training
+oc get rayjob grpo-training -n orchestrator-rhoai -w
+oc logs -f -l app.kubernetes.io/name=grpo-head -n orchestrator-rhoai
+```
+
+### Kueue GPU Quota
+
+The `kueue-config` instance defines GPU resource management:
+
+| Resource | L40S Quota | L4 Quota |
+|----------|-----------|----------|
+| CPU | 16 | 32 |
+| Memory | 64Gi | 128Gi |
+| nvidia.com/gpu | 1 | 4 |
+
+Preemption is enabled: `LowerPriority` within the queue, `Any` within the cohort.
 
 ## RHOAI 3.3 Specifics
 
@@ -116,8 +236,42 @@ The ArgoCD ApplicationSets use production-grade sync options validated through t
 | `CreateNamespace=true` | ArgoCD manages namespace lifecycle for use cases |
 | `RespectIgnoreDifferences=true` | Honors configured `ignoreDifferences` rules |
 | `ignoreDifferences` for OLM Subscriptions | Prevents perpetual drift on `.status` and `.spec.startingCSV` |
+| `ignoreDifferences` for DataScienceCluster | Prevents drift on `/status` and operator-managed component fields |
 
 Retry policies: operators retry 5x (30s-5m), instances retry 10x (60s-10m), use cases retry 10x (60s-10m).
+
+### App-of-Apps Bootstrap
+
+The `cluster-bootstrap` Application watches `clusters/overlays/dev/` and auto-syncs
+any changes. This means:
+
+- Adding a new `Application` YAML to `clusters/overlays/dev/` and pushing to Git
+  automatically creates the new ArgoCD Application
+- Adding a new operator directory to `components/operators/` automatically creates
+  a new operator Application via the `cluster-operators` ApplicationSet
+- Same for `components/instances/*` and `usecases/*/profiles/tier1-minimal`
+
+The only manual `oc apply` ever needed is the initial bootstrap (step 3 in Quick Start).
+
+## ToolOrchestra Use Case
+
+NVIDIA ToolOrchestra is a multi-model orchestrator that coordinates specialized AI models
+for complex reasoning tasks. The deployment includes:
+
+| Component | Description |
+|-----------|-------------|
+| `orchestrator-8b` | Nemotron-Orchestrator-8B -- orchestrates tool calls across specialist models |
+| `qwen-math-7b` | Qwen2.5-Math-7B-Instruct -- math reasoning specialist |
+| `orchestrator-ui` | Web UI for interactive orchestration with SSE streaming |
+
+### Profiles
+
+| Profile | Models | Training | Use Case |
+|---------|--------|----------|----------|
+| `tier1-minimal` | orchestrator-8b, qwen-math-7b | Infra only | Development, demos |
+| `tier2-standard` | + additional models | Infra only | Staging |
+| `tier3-full` | All models including qwen3-32b | Infra only | Production |
+| `training` | tier1-minimal models | Full (infra + workloads) | Training runs |
 
 ## Teardown Procedure
 
@@ -195,25 +349,35 @@ oc delete namespace openshift-gitops-operator openshift-gitops
    must schedule on GPU nodes (via `nodeSelector: nvidia.com/gpu.present: "true"`) to
    ensure PVCs are provisioned in the same zone as GPU nodes.
 
-2. **DSC API version**: RHOAI 3.3 installs the `v1` DSC CRD. Fields like
+2. **RWO PVC and download jobs**: Model download jobs share RWO PVCs with predictor pods.
+   Sync waves (download at wave 0, InferenceService at wave 1) ensure downloads complete
+   before predictors start. Download jobs have no TTL so they persist as completed,
+   preventing ArgoCD from recreating them into a Multi-Attach conflict.
+
+3. **DSC API version**: RHOAI 3.3 installs the `v1` DSC CRD. Fields like
    `modelsasservice`, `trainer`, `mlflowoperator` are not yet available in v1.
    Use `datasciencepipelines` (not `aipipelines`), `modelmeshserving`, `codeflare`.
 
-3. **GPU ClusterPolicy v25.x**: Requires `spec.daemonsets` and `spec.dcgm` fields
+4. **GPU ClusterPolicy v25.x**: Requires `spec.daemonsets` and `spec.dcgm` fields
    that were optional in earlier versions.
 
-4. **Kueue v1.2**: Requires `spec.config.integrations.frameworks` with supported
+5. **Kueue v1.2**: Requires `spec.config.integrations.frameworks` with supported
    framework list (BatchJob, RayJob, RayCluster, JobSet, PyTorchJob, TrainJob).
 
-5. **Stale Tekton webhooks**: After teardown, Tekton validating/mutating webhooks
+6. **Stale Tekton webhooks**: After teardown, Tekton validating/mutating webhooks
    may persist and block namespace creation. Delete them explicitly.
 
-6. **servicemeshoperator3**: May reappear after teardown if RHDH operator is installed,
+7. **servicemeshoperator3**: May reappear after teardown if RHDH operator is installed,
    as it declares servicemesh as an OLM dependency.
 
-7. **RHOAI admission webhooks**: InferenceService annotations referencing non-existent
+8. **RHOAI admission webhooks**: InferenceService annotations referencing non-existent
    `connections` secrets or `hardware-profile` names will be rejected. Remove these
    annotations if the backing resources don't exist.
+
+9. **Job spec immutability**: If a download job's spec changes in Git while a completed
+   job exists on the cluster, ArgoCD cannot update it (Kubernetes Jobs are immutable).
+   Delete the existing job manually (`oc delete job <name> -n <ns>`), then let ArgoCD
+   recreate it with the new spec.
 
 ## Adding a New Use Case
 
@@ -230,19 +394,38 @@ oc delete namespace openshift-gitops-operator openshift-gitops
        services/
          my-service/
      profiles/
-       default/
+       tier1-minimal/
          kustomization.yaml
    ```
 
-2. Each profile directory is a Kustomize target. ArgoCD auto-discovers it via the
-   `cluster-usecases-appset` ApplicationSet, or deploy manually with
-   `oc apply -k usecases/my-app/profiles/default/`.
+2. The `cluster-usecases` ApplicationSet auto-discovers `usecases/*/profiles/tier1-minimal`
+   directories. Once pushed to Git, `cluster-bootstrap` syncs the AppSet, which generates
+   a new `usecase-<name>` Application automatically.
 
-3. For model download jobs, always add `nodeSelector: nvidia.com/gpu.present: "true"`
-   to ensure PVCs are provisioned in the GPU availability zone.
+3. For manual deployment without ArgoCD:
+   ```bash
+   oc apply -k usecases/my-app/profiles/tier1-minimal/
+   ```
+
+4. For model download jobs, always:
+   - Add `nodeSelector: nvidia.com/gpu.present: "true"` to ensure PVCs are provisioned
+     in the GPU availability zone
+   - Add `argocd.argoproj.io/sync-wave: "0"` annotation so downloads run before
+     InferenceService (wave 1)
+   - Omit `ttlSecondsAfterFinished` so completed jobs persist and ArgoCD doesn't
+     recreate them into RWO PVC conflicts
+
+## Adding a New Operator
+
+1. Create `components/operators/my-operator/kustomization.yaml` with a Subscription resource
+2. Create `components/instances/my-instance/kustomization.yaml` with the instance CR
+3. Push to Git -- `cluster-bootstrap` auto-syncs the AppSets, which auto-discover the
+   new directories and create ArgoCD Applications
 
 ## References
 
 - [RHOAI 3.3 Install Docs](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.3/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install)
 - [RHOAI 3.3 Distributed Workloads](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.3/html/installing_and_uninstalling_openshift_ai_self-managed/installing-the-distributed-workloads-components_install)
 - [redhat-cop/gitops-catalog](https://github.com/redhat-cop/gitops-catalog) -- Kustomize bases for operators
+- [ToolOrchestra Paper](https://arxiv.org/abs/2503.02495) -- NVIDIA's multi-model orchestration approach
+- [verl Framework](https://github.com/volcengine/verl) -- Reinforcement learning training framework
