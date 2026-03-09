@@ -31,4 +31,4 @@ spec:
     feastoperator:
       managementState: Removed
     llamastackoperator:
-      managementState: Removed
+      managementState: Managed
