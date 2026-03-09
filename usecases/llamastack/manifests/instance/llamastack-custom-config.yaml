@@ -10,7 +10,6 @@ data:
     distro_name: starter
     apis:
     - agents
-    - batches
     - datasetio
     - eval
     - inference
@@ -134,13 +133,6 @@ data:
           kvstore:
             namespace: batches
             backend: kv_default
-      telemetry:
-      - provider_id: meta-reference
-        provider_type: inline::meta-reference
-        config:
-          service_name: "${env.OTEL_SERVICE_NAME:=}"
-          sinks: ${env.TELEMETRY_SINKS:=console}
-          otel_exporter_otlp_endpoint: ${env.OTEL_EXPORTER_OTLP_ENDPOINT:=}
     storage:
       backends:
         kv_default:
