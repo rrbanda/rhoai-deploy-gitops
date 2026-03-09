@@ -4,6 +4,5 @@ kind: Kustomization
 resources:
   - gpu-machineset-l4.yaml
   - gpu-machineset-l40s.yaml
-  - cluster-autoscaler.yaml
   - machine-autoscaler-l4.yaml
   - machine-autoscaler-l40s.yaml
