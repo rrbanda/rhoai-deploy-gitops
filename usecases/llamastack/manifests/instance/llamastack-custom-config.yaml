@@ -62,13 +62,9 @@ data:
             backend: kv_default
             namespace: vector_io::faiss
       safety:
-        - provider_id: trustyai_fms
-          provider_type: remote::trustyai_fms
-          module: llama_stack_provider_trustyai_fms==0.3.2
-          config:
-            orchestrator_url: ${env.FMS_ORCHESTRATOR_URL:=}
-            ssl_cert_path: ${env.FMS_SSL_CERT_PATH:=}
-            shields: {}
+        - provider_id: llama-guard
+          provider_type: inline::llama-guard
+          config: {}
       agents:
       - provider_id: meta-reference
         provider_type: inline::meta-reference
@@ -83,12 +79,9 @@ data:
               max_write_queue_size: 10000
               num_writers: 4
       eval:
-      - provider_id: trustyai_lmeval
-        provider_type: remote::trustyai_lmeval
-        module: llama_stack_provider_lmeval==0.2.4
-        config:
-          use_k8s: ${env.TRUSTYAI_LMEVAL_USE_K8S:=true}
-          base_url: ${env.VLLM_URL:=http://localhost:8000/v1}
+      - provider_id: meta-reference
+        provider_type: inline::meta-reference
+        config: {}
       datasetio:
       - provider_id: huggingface
         provider_type: remote::huggingface
@@ -130,7 +123,7 @@ data:
       - provider_id: meta-reference-files
         provider_type: inline::localfs
         config:
-          storage_dir: /opt/app-root/src/.llama/distributions/rh/files
+          storage_dir: ${env.LLAMA_STACK_FILES_DIR:=/opt/app-root/src/.llama/distributions/rh/files}
           metadata_store:
             backend: sql_default
             table_name: files_metadata
