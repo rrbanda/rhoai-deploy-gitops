@@ -8,6 +8,8 @@ metadata:
     app.kubernetes.io/component: training
     app.kubernetes.io/part-of: orchestrator-rhoai
     kueue.x-k8s.io/queue-name: training-queue
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   shutdownAfterJobFinishes: true
   ttlSecondsAfterFinished: 86400

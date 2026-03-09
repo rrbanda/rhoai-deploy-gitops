@@ -13,3 +13,5 @@ resources:
   - ../../manifests/serving/orchestrator
   - ../../manifests/serving/qwen-math-7b
   - ../../manifests/services/ui
+  # Training infrastructure (always deployed, no GPU consumption)
+  - ../../manifests/training/infra

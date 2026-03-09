@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: usecase-toolorchestra-training
+  namespace: openshift-gitops
+spec:
+  project: usecases
+  source:
+    repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
+    targetRevision: main
+    path: usecases/toolorchestra/manifests/training/workloads
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: orchestrator-rhoai
+  syncPolicy:
+    # Manual sync only -- training runs when you explicitly sync in ArgoCD.
+    # No automated/selfHeal: workloads are on-demand, not continuously reconciled.
+    syncOptions:
+      - ServerSideApply=true
+      - SkipDryRunOnMissingResource=true
+      - CreateNamespace=true
+    retry:
+      limit: 3
+      backoff:
+        duration: 30s
+        maxDuration: 5m0s
+        factor: 2

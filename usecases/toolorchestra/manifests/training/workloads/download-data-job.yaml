@@ -7,6 +7,8 @@ metadata:
     app.kubernetes.io/name: download-training-data
     app.kubernetes.io/component: training
     app.kubernetes.io/part-of: orchestrator-rhoai
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   backoffLimit: 2
   ttlSecondsAfterFinished: 7200
