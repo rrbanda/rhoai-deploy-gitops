@@ -18,6 +18,5 @@ spec:
     unneededTime: 10m
   balanceSimilarNodeGroups: true
   skipNodesWithLocalStorage: true
-  skipNodesWithSystemPods: true
   maxPodGracePeriod: 600
   maxNodeProvisionTime: 15m
