@@ -3,4 +3,3 @@ kind: Kustomization
 
 resources:
   - model-weights-pvc.yaml
-  - shared-data-pvc.yaml
