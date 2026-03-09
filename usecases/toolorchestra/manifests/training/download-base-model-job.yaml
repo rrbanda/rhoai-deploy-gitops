@@ -1,0 +1,62 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: download-qwen3-8b
+  namespace: orchestrator-rhoai
+  labels:
+    app.kubernetes.io/name: download-qwen3-8b
+    app.kubernetes.io/component: training
+    app.kubernetes.io/part-of: orchestrator-rhoai
+spec:
+  backoffLimit: 2
+  ttlSecondsAfterFinished: 7200
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: download-qwen3-8b
+        app.kubernetes.io/component: training
+    spec:
+      restartPolicy: OnFailure
+      nodeSelector:
+        nvidia.com/gpu.present: "true"
+      containers:
+        - name: download
+          image: registry.access.redhat.com/ubi9/python-311:latest
+          command:
+            - bash
+            - -ec
+            - |
+              pip install -q huggingface_hub
+              python3 << 'PYEOF'
+              from huggingface_hub import snapshot_download
+              import os
+              target = '/checkpoints/Qwen3-8B'
+              marker = os.path.join(target, '.download_complete')
+              if os.path.exists(marker):
+                  print('Model already downloaded. Skipping.')
+                  exit(0)
+              print('Downloading Qwen/Qwen3-8B...')
+              snapshot_download(
+                  repo_id='Qwen/Qwen3-8B',
+                  local_dir=target,
+                  ignore_patterns=['*.gguf', '*.bin', 'original/*'],
+              )
+              open(marker, 'w').write('ok')
+              print('Download complete.')
+              PYEOF
+              ls -lh /checkpoints/Qwen3-8B/
+              df -h /checkpoints
+          resources:
+            requests:
+              cpu: "1"
+              memory: "4Gi"
+            limits:
+              cpu: "2"
+              memory: "8Gi"
+          volumeMounts:
+            - name: checkpoints
+              mountPath: /checkpoints
+      volumes:
+        - name: checkpoints
+          persistentVolumeClaim:
+            claimName: training-checkpoints

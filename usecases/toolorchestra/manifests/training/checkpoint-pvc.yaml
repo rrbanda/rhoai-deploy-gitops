@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: training-checkpoints
+  namespace: orchestrator-rhoai
+  labels:
+    app.kubernetes.io/name: training-checkpoints
+    app.kubernetes.io/component: training
+    app.kubernetes.io/part-of: orchestrator-rhoai
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: gp3-csi

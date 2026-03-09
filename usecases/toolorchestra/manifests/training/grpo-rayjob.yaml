@@ -1,0 +1,230 @@
+apiVersion: ray.io/v1
+kind: RayJob
+metadata:
+  name: grpo-training
+  namespace: orchestrator-rhoai
+  labels:
+    app.kubernetes.io/name: grpo-training
+    app.kubernetes.io/component: training
+    app.kubernetes.io/part-of: orchestrator-rhoai
+    kueue.x-k8s.io/queue-name: training-queue
+spec:
+  shutdownAfterJobFinishes: true
+  ttlSecondsAfterFinished: 86400
+  activeDeadlineSeconds: 86400
+
+  entrypoint: >-
+    python3 -u -m recipe.algo.main_grpo_quick3
+    algorithm.adv_estimator=grpo
+    data.train_files='["/data/data.jsonl"]'
+    data.val_files='["/data/data.jsonl"]'
+    data.train_tool_config_path=/config/tools.json
+    data.test_tool_config_path=/config/tools.json
+    data.prompt_template=qwen-base
+    data.train_batch_size=4
+    data.gen_batch_size=16
+    data.val_batch_size=4
+    data.max_prompt_length=8192
+    data.max_response_length=4096
+    data.truncation=left
+    +data.shuffle_train_dataloader=True
+    +data.use_llm_reward=true
+    +data.efficiency_reward=true
+    +data.use_qa_reward=true
+    +data.my_output_dir=/checkpoints/outputs
+    +data.model_type=Qwen/Qwen3-8B
+    +data.topk_doc=10
+    +data.exp_tag=rhoai-grpo
+    algorithm.filter_groups.enable=True
+    algorithm.filter_groups.metric=seq_reward
+    algorithm.kl_ctrl.kl_coef=0.0001
+    algorithm.use_kl_in_reward=False
+    actor_rollout_ref.model.path=/checkpoints/Qwen3-8B
+    actor_rollout_ref.actor.optim.lr=1e-6
+    +actor_rollout_ref.rollout.n_agent=4
+    actor_rollout_ref.model.use_remove_padding=True
+    actor_rollout_ref.model.enable_gradient_checkpointing=True
+    actor_rollout_ref.actor.ppo_mini_batch_size=4
+    actor_rollout_ref.actor.ppo_epochs=1
+    actor_rollout_ref.actor.use_dynamic_bsz=True
+    actor_rollout_ref.actor.ppo_max_token_len_per_gpu=8192
+    actor_rollout_ref.actor.entropy_coeff=0
+    actor_rollout_ref.actor.use_kl_loss=True
+    actor_rollout_ref.actor.kl_loss_coef=0.0001
+    actor_rollout_ref.actor.kl_loss_type=mse
+    actor_rollout_ref.actor.fsdp_config.param_offload=False
+    actor_rollout_ref.actor.fsdp_config.optimizer_offload=True
+    actor_rollout_ref.rollout.tensor_model_parallel_size=1
+    actor_rollout_ref.rollout.name=vllm
+    actor_rollout_ref.rollout.temperature=1.0
+    actor_rollout_ref.rollout.gpu_memory_utilization=0.85
+    actor_rollout_ref.rollout.n=1
+    actor_rollout_ref.rollout.enforce_eager=True
+    actor_rollout_ref.rollout.free_cache_engine=False
+    actor_rollout_ref.rollout.enable_chunked_prefill=False
+    actor_rollout_ref.rollout.log_prob_max_token_len_per_gpu=8192
+    actor_rollout_ref.ref.fsdp_config.param_offload=True
+    actor_rollout_ref.ref.log_prob_max_token_len_per_gpu=8192
+    trainer.logger='[console]'
+    trainer.project_name=toolorchestra
+    trainer.experiment_name=rhoai-grpo
+    trainer.val_before_train=False
+    trainer.n_gpus_per_node=1
+    trainer.nnodes=3
+    trainer.save_freq=1
+    trainer.test_freq=1000000
+    trainer.default_local_dir=/checkpoints/ckpt
+    trainer.total_epochs=3
+    reward_manager.type=match
+    reward_manager.max_concurrency=16
+    +max_turns=15
+
+  runtimeEnvYAML: |
+    working_dir: /training
+    excludes:
+      - "**/data.jsonl"
+      - "**/node_modules"
+    env_vars:
+      TOKENIZERS_PARALLELISM: "true"
+      NCCL_DEBUG: "WARN"
+      VLLM_LOGGING_LEVEL: "WARN"
+      RAY_USAGE_STATS_ENABLED: "0"
+      RAY_DISABLE_DOCKER_CPU_WARNING: "1"
+      VLLM_WORKER_MULTIPROC_METHOD: "spawn"
+
+  rayClusterSpec:
+    headGroupSpec:
+      rayStartParams:
+        dashboard-host: "0.0.0.0"
+        num-cpus: "4"
+        num-gpus: "0"
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: grpo-head
+            app.kubernetes.io/component: training
+        spec:
+          serviceAccountName: orchestrator-sa
+          nodeSelector:
+            nvidia.com/gpu.present: "true"
+          containers:
+            - name: ray-head
+              image: nvcr.io/nvidia/pytorch:24.08-py3
+              command:
+                - /bin/bash
+                - -lc
+                - |
+                  pip install --no-cache-dir -q \
+                    "vllm==0.8.3" "verl[vllm]" \
+                    "transformers>=4.51.0" accelerate datasets peft \
+                    hydra-core pylatexenc wandb liger-kernel \
+                    duckduckgo-search httpx pyyaml
+                  exec "$@"
+                - --
+              resources:
+                requests:
+                  cpu: "4"
+                  memory: "16Gi"
+                limits:
+                  cpu: "8"
+                  memory: "32Gi"
+              ports:
+                - containerPort: 6379
+                  name: gcs-server
+                - containerPort: 8265
+                  name: dashboard
+                - containerPort: 10001
+                  name: client
+              volumeMounts:
+                - name: checkpoints
+                  mountPath: /checkpoints
+                - name: training-code
+                  mountPath: /training
+                - name: training-data
+                  mountPath: /data
+                - name: config
+                  mountPath: /config
+                - name: shm
+                  mountPath: /dev/shm
+          volumes:
+            - name: checkpoints
+              persistentVolumeClaim:
+                claimName: training-checkpoints
+            - name: training-code
+              emptyDir: {}
+            - name: training-data
+              emptyDir: {}
+            - name: config
+              configMap:
+                name: grpo-training-config
+            - name: shm
+              emptyDir:
+                medium: Memory
+                sizeLimit: 8Gi
+
+    workerGroupSpecs:
+      - replicas: 3
+        minReplicas: 3
+        maxReplicas: 3
+        groupName: gpu-workers
+        rayStartParams:
+          num-gpus: "1"
+          num-cpus: "4"
+        template:
+          metadata:
+            labels:
+              app.kubernetes.io/name: grpo-worker
+              app.kubernetes.io/component: training
+          spec:
+            serviceAccountName: orchestrator-sa
+            nodeSelector:
+              nvidia.com/gpu.present: "true"
+            containers:
+              - name: ray-worker
+                image: nvcr.io/nvidia/pytorch:24.08-py3
+                command:
+                  - /bin/bash
+                  - -lc
+                  - |
+                    pip install --no-cache-dir -q \
+                      "vllm==0.8.3" "verl[vllm]" \
+                      "transformers>=4.51.0" accelerate datasets peft \
+                      hydra-core pylatexenc liger-kernel \
+                      duckduckgo-search httpx pyyaml
+                    exec "$@"
+                  - --
+                resources:
+                  requests:
+                    cpu: "4"
+                    memory: "16Gi"
+                    nvidia.com/gpu: "1"
+                  limits:
+                    cpu: "8"
+                    memory: "24Gi"
+                    nvidia.com/gpu: "1"
+                volumeMounts:
+                  - name: checkpoints
+                    mountPath: /checkpoints
+                  - name: training-code
+                    mountPath: /training
+                  - name: training-data
+                    mountPath: /data
+                  - name: config
+                    mountPath: /config
+                  - name: shm
+                    mountPath: /dev/shm
+            volumes:
+              - name: checkpoints
+                persistentVolumeClaim:
+                  claimName: training-checkpoints
+              - name: training-code
+                emptyDir: {}
+              - name: training-data
+                emptyDir: {}
+              - name: config
+                configMap:
+                  name: grpo-training-config
+              - name: shm
+                emptyDir:
+                  medium: Memory
+                  sizeLimit: 8Gi
