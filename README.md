@@ -32,6 +32,8 @@ rhoai-deploy-gitops/
 │   └── instances/                    # Operator instance CRs
 │       ├── nfd-instance/
 │       ├── gpu-instance/
+│       ├── gpu-workers/              # GPU MachineSets (L4, L40S) + MachineAutoscalers
+│       ├── cluster-autoscaler/       # ClusterAutoscaler for GPU node auto-scaling
 │       ├── kueue-instance/
 │       ├── kueue-config/             # ResourceFlavors (gpu-l4, gpu-l40s) + ClusterQueue
 │       ├── jobset-instance/
@@ -124,7 +126,7 @@ oc wait --for=condition=Ready inferenceservice/qwen-math-7b \
 
 ## ArgoCD Applications
 
-After bootstrap, ArgoCD manages **15 Applications** across three layers:
+After bootstrap, ArgoCD manages **17 Applications** across three layers:
 
 | Application | Source | Sync Policy | Purpose |
 |-------------|--------|-------------|---------|
@@ -138,6 +140,8 @@ After bootstrap, ArgoCD manages **15 Applications** across three layers:
 | `instance-nfd-instance` | `components/instances/nfd-instance/` | Auto (selfHeal) | NFD NodeFeatureDiscovery CR |
 | `instance-gpu-instance` | `components/instances/gpu-instance/` | Auto (selfHeal) | GPU ClusterPolicy CR |
 | `instance-kueue-instance` | `components/instances/kueue-instance/` | Auto (selfHeal) | Kueue operator instance |
+| `instance-gpu-workers` | `components/instances/gpu-workers/` | Auto (selfHeal) | GPU MachineSets (L4, L40S) + MachineAutoscalers |
+| `instance-cluster-autoscaler` | `components/instances/cluster-autoscaler/` | Auto (selfHeal) | ClusterAutoscaler for GPU node auto-scaling |
 | `instance-kueue-config` | `components/instances/kueue-config/` | Auto (selfHeal) | GPU ResourceFlavors + ClusterQueue |
 | `instance-jobset-instance` | `components/instances/jobset-instance/` | Auto (selfHeal) | JobSet operator instance |
 | `instance-rhoai` | `components/instances/rhoai-instance/overlays/dev/` | Auto (selfHeal, no prune) | DataScienceCluster with ignoreDifferences |
@@ -156,6 +160,46 @@ Within the `usecase-toolorchestra` app, sync waves ensure correct resource order
 
 Download jobs are idempotent (check for `.download_complete` marker) and have no TTL,
 so completed jobs persist as Synced/Healthy in ArgoCD without being recreated.
+
+## GPU Worker Node Scaling
+
+GPU worker nodes are fully GitOps-managed. Scaling is handled two ways:
+
+### Manual Scaling via Git
+
+Change the `replicas` field in the MachineSet YAML and push:
+
+```bash
+# Example: scale L4 GPU nodes from 3 to 5
+# Edit components/instances/gpu-workers/gpu-machineset-l4.yaml
+#   spec.replicas: 5
+git commit -am "Scale L4 GPU workers to 5" && git push
+# ArgoCD auto-syncs → MachineSet updated → new nodes provisioned
+```
+
+### Auto-scaling
+
+The ClusterAutoscaler and MachineAutoscalers are deployed via GitOps:
+
+| Resource | Config | Effect |
+|----------|--------|--------|
+| ClusterAutoscaler | max 20 nodes, max 8 GPUs | Cluster-wide scaling limits |
+| MachineAutoscaler (L4) | min: 1, max: 6 | Auto-scales `g6.2xlarge` nodes |
+| MachineAutoscaler (L40S) | min: 0, max: 4 | Auto-scales `g6e.2xlarge` nodes |
+
+When a pod requests `nvidia.com/gpu` and no capacity is available, the ClusterAutoscaler
+automatically adds GPU nodes. Idle nodes are removed after 10 minutes.
+
+### Customizing for Your Cluster
+
+The GPU MachineSet manifests contain cluster-specific values (AMI ID, infra ID, subnet
+names, security groups, IAM profile). When deploying to a new cluster, update these
+fields in `components/instances/gpu-workers/gpu-machineset-*.yaml`:
+
+- `metadata.name` and all `ocp-2qkbk` references → your cluster's infra ID
+- `spec.template.spec.providerSpec.value.ami.id` → your cluster's RHCOS AMI
+- `spec.template.spec.providerSpec.value.iamInstanceProfile.id` → your IAM profile
+- `subnet`, `securityGroups`, `tags` → your cluster's networking config
 
 ## Training Pipeline
 
