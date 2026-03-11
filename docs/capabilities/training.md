@@ -61,14 +61,17 @@ multi-pod job orchestration.
 
     ```bash
     # 1. Install all required operators
+    oc apply -k components/operators/cert-manager/
     oc apply -k components/operators/rhoai-operator/
     oc apply -k components/operators/kueue-operator/
     oc apply -k components/operators/jobset-operator/
     oc apply -k components/operators/nfd/
     oc apply -k components/operators/gpu-operator/
 
-    # Wait for CSVs
-    oc get csv -A | grep -E "rhods|kueue|jobset|nfd|gpu"
+    # Wait for all CSVs to reach Succeeded before proceeding (re-run until all show Succeeded)
+    watch "oc get csv -A | grep -E 'cert-manager|rhods|kueue|jobset|nfd|gpu'"
+
+    # IMPORTANT: Do NOT proceed until every CSV shows "Succeeded".
 
     # 2. Install GPU infrastructure
     oc apply -k components/instances/nfd-instance/

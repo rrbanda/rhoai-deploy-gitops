@@ -58,6 +58,16 @@ oc get pods -n redhat-ods-applications -l app=model-registry-operator
 oc get pods -n rhoai-model-registries
 ```
 
+## Configure External Storage
+
+After enabling Model Registry in the DSC, configure the external MySQL database and S3 storage:
+
+1. **MySQL database** -- create a MySQL 5.x+ (8.x recommended) instance accessible from the cluster. Note the hostname, port, database name, username, and password.
+2. **S3 storage** -- configure an S3-compatible bucket for model artifacts. Note the endpoint, bucket name, region, and credentials.
+3. **Create a Model Registry instance** via the RHOAI Dashboard or CLI, providing the MySQL and S3 connection details.
+
+For detailed configuration steps, see the [official RHOAI documentation on creating a model registry](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.3/html/managing_models/managing-model-registry).
+
 ## Usage
 
 1. Open the RHOAI Dashboard

@@ -22,6 +22,20 @@ NVIDIA ToolOrchestra is a multi-model orchestrator that coordinates specialized 
 !!! note "tier2 vs tier3"
     `tier2-standard` and `tier3-full` currently deploy the same models. They differ only by a `tier` label ("2" vs "3") for environment separation. Extend `tier3-full` with additional models as your cluster scales.
 
+## Prerequisites
+
+ToolOrchestra deploys InferenceServices that require a fully configured RHOAI platform. Ensure the following are installed and ready before deploying:
+
+| Requirement | Why | Guide |
+|-------------|-----|-------|
+| RHOAI Operator + DSC with `kserve: Managed` | InferenceServices require the KServe serving platform | [Quick Start](../quickstart.md) or [Model Serving](../capabilities/model-serving.md) |
+| cert-manager Operator | KServe requires TLS certificates via Knative | [Capabilities](../capabilities/index.md) |
+| GPU infrastructure (NFD + GPU Operator + GPU workers) | Models require NVIDIA L4 or L40S GPUs | [GPU Infrastructure](../capabilities/gpu-infrastructure.md) |
+| Kueue + JobSet (for training only) | Training workloads need GPU quota management | [Training](../capabilities/training.md) |
+
+!!! warning "GPU MachineSet customization"
+    The `gpu-workers` manifests contain cluster-specific values (AMI ID, subnet, instance type). Edit them to match your cluster before deploying. See [GPU Infrastructure](../capabilities/gpu-infrastructure.md).
+
 ## Deploy
 
 === "GitOps"
