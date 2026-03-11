@@ -37,7 +37,14 @@ rhoai-deploy-gitops/
 │       ├── kueue-instance/
 │       ├── kueue-config/             # ResourceFlavors (gpu-l4, gpu-l40s) + ClusterQueue
 │       ├── jobset-instance/
-│       └── rhoai-instance/           # DataScienceCluster (v1) with dev overlay
+│       └── rhoai-instance/           # DataScienceCluster (v1) with composable overlays
+│           ├── base/                # Minimal DSC (Dashboard only)
+│           └── overlays/
+│               ├── dev/             # All components (default for ArgoCD)
+│               ├── minimal/         # Dashboard only
+│               ├── serving/         # KServe + ModelMesh
+│               ├── training/        # Ray + Training Operator
+│               └── full/            # All components
 └── usecases/
     └── toolorchestra/                # NVIDIA ToolOrchestra multi-model orchestrator
         ├── manifests/
@@ -123,6 +130,41 @@ oc wait --for=condition=Ready inferenceservice/orchestrator-8b \
 oc wait --for=condition=Ready inferenceservice/qwen-math-7b \
   -n orchestrator-rhoai --timeout=1800s
 ```
+
+## Capabilities
+
+RHOAI is modular -- you don't have to deploy everything. Each capability has its
+own guide with dependencies, deployment steps, and examples.
+
+| Capability | DSC Component | Guide |
+|------------|---------------|-------|
+| KServe Model Serving | `kserve` | [model-serving.md](docs/capabilities/model-serving.md) |
+| ModelMesh Serving | `modelmeshserving` | [modelmesh.md](docs/capabilities/modelmesh.md) |
+| Distributed Training | `ray`, `trainingoperator` | [training.md](docs/capabilities/training.md) |
+| Data Science Pipelines | `datasciencepipelines` | [pipelines.md](docs/capabilities/pipelines.md) |
+| Workbenches | `workbenches` | [workbenches.md](docs/capabilities/workbenches.md) |
+| Model Registry | `modelregistry` | [model-registry.md](docs/capabilities/model-registry.md) |
+| GPU Infrastructure | N/A (operators) | [gpu-infrastructure.md](docs/capabilities/gpu-infrastructure.md) |
+| Kueue (GPU Quotas) | `kueue` (Unmanaged) | [kueue.md](docs/capabilities/kueue.md) |
+
+See the [Capabilities Guide](docs/capabilities/README.md) for the full
+dependency map, composable DSC overlays, and instructions for building a
+custom profile.
+
+### DSC Overlays
+
+The base DSC starts minimal (Dashboard only). Pick an overlay for your needs:
+
+| Overlay | Components | Command |
+|---------|-----------|---------|
+| `minimal` | Dashboard | `oc apply -k components/instances/rhoai-instance/overlays/minimal/` |
+| `serving` | Dashboard, KServe, ModelMesh | `oc apply -k components/instances/rhoai-instance/overlays/serving/` |
+| `training` | Dashboard, Ray, Training Operator | `oc apply -k components/instances/rhoai-instance/overlays/training/` |
+| `full` | All components | `oc apply -k components/instances/rhoai-instance/overlays/full/` |
+| `dev` | All components (default) | `oc apply -k components/instances/rhoai-instance/overlays/dev/` |
+
+You can also compose overlays by stacking JSON patches from the capability
+overlays. See [Composing a Custom Profile](docs/capabilities/README.md#composing-a-custom-profile).
 
 ## ArgoCD Applications
 

@@ -1,0 +1,6 @@
+- op: replace
+  path: /spec/components/kserve/managementState
+  value: Managed
+- op: replace
+  path: /spec/components/modelmeshserving/managementState
+  value: Managed
