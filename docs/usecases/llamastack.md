@@ -1,13 +1,33 @@
-# LlamaStack Distribution
+# LlamaStack
 
-LlamaStack is Meta's open framework for building AI applications. This use case deploys a [LlamaStack Distribution](https://github.com/meta-llama/llama-stack) on OpenShift AI, backed by PostgreSQL for persistence and connected to vLLM-served models for inference.
+LlamaStack is Meta's open framework for building AI applications with agents, RAG, tool use, and safety. RHOAI 3.3 includes a **Llama Stack Operator** as a DSC component (`llamastackoperator`) that installs the operator and its `LlamaStackDistribution` CRD. This use case deploys a **specific LlamaStack instance** on top of that operator.
 
-## Components
+## How It Works -- Two Layers
 
-| Component | Description |
-|-----------|-------------|
-| `llamastack` | LlamaStackDistribution CR -- runs the LlamaStack server with agents, inference, safety, eval, and vector I/O APIs |
-| `postgres` | PostgreSQL 16 -- persistent storage for agent state, conversations, vector DBs, and metadata |
+```mermaid
+graph TD
+  DSC["DataScienceCluster"] -->|"llamastackoperator: Managed"| LSO["Llama Stack Operator (installed by RHOAI)"]
+  LSO -->|"provides CRD"| CRD["LlamaStackDistribution CRD"]
+  CRD -->|"instance created by"| UC["usecases/llamastack/ manifests"]
+  UC --> LSD["LlamaStackDistribution CR"]
+  UC --> PG["PostgreSQL 16"]
+  UC --> CM["ConfigMap (custom config)"]
+```
+
+| Layer | What | Who manages it | Path in this repo |
+|-------|------|----------------|-------------------|
+| **Operator** (DSC component) | Installs the Llama Stack Operator and `LlamaStackDistribution` CRD | RHOAI Operator via the DSC | `components/instances/rhoai-instance/` -- set `llamastackoperator: Managed` |
+| **Instance** (use case) | Creates a `LlamaStackDistribution` CR, PostgreSQL database, and custom config | This repo's use case manifests | `usecases/llamastack/` |
+
+The operator must be installed first (via the DSC) before the use case manifests can create an instance.
+
+## What This Use Case Deploys
+
+| Component | Resource | Description |
+|-----------|----------|-------------|
+| `llamastack` | `LlamaStackDistribution` CR | Runs the LlamaStack server (agents, inference, safety, eval, vector I/O) using a custom patched image |
+| `postgres` | Deployment + PVC + Service | PostgreSQL 16 for agent state, conversations, and metadata |
+| `llamastack-custom-config` | ConfigMap | LlamaStack v2 config with vLLM inference, FAISS, sentence-transformers, and tool runtimes |
 
 ## Architecture
 
@@ -24,15 +44,27 @@ LlamaStack connects to the ToolOrchestra `orchestrator-8b` model via the in-clus
 
 ## Prerequisites
 
-!!! warning "Official dependencies (per RHOAI 3.3 Installation Guide)"
-    The official Red Hat documentation lists these requirements for the `llamastackoperator` DSC component:
+### 1. RHOAI Platform with LlamaStack Operator Enabled
 
-    - **Red Hat OpenShift Service Mesh Operator 3.x** -- required for LlamaStack networking
-    - **cert-manager Operator** -- required for TLS certificate management
-    - **GPU-enabled nodes** -- NFD Operator + NVIDIA GPU Operator must be installed and GPU worker nodes available
-    - **S3-compatible object storage** -- required for model artifacts and data persistence
+The `llamastackoperator` DSC component must be set to `Managed`. This is included in the `full` and `dev` DSC overlays. If using a custom overlay, add:
 
-    Ensure all of these are installed and configured before enabling `llamastackoperator` in the DSC.
+```yaml
+- op: replace
+  path: /spec/components/llamastackoperator/managementState
+  value: Managed
+```
+
+### 2. Official Dependencies (per RHOAI 3.3 Installation Guide)
+
+!!! warning "Required before enabling `llamastackoperator` in the DSC"
+    The [official RHOAI 3.3 documentation](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.3/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install) (Section 3.1.2) lists these requirements:
+
+    - **Red Hat OpenShift Service Mesh Operator 3.x**
+    - **cert-manager Operator**
+    - **GPU-enabled nodes** -- NFD Operator + NVIDIA GPU Operator installed, GPU worker nodes available
+    - **S3-compatible object storage** -- for model artifacts and data persistence
+
+### 3. Secrets
 
 !!! warning "Secrets required"
     This use case requires three Secrets that are **not** included in the repository (they contain credentials):
@@ -42,6 +74,8 @@ LlamaStack connects to the ToolOrchestra `orchestrator-8b` model via the in-clus
     - `gemini-secret` -- key: `api_key` (optional, for Gemini provider)
 
     Create these in the `llamastack` namespace before deploying.
+
+### 4. Inference Backend
 
 !!! info "Dependency on ToolOrchestra"
     The LlamaStack config references `orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local`. Deploy ToolOrchestra first, or update the vLLM endpoint in the ConfigMap to point to your own model.
@@ -57,7 +91,11 @@ LlamaStack connects to the ToolOrchestra `orchestrator-8b` model via the in-clus
 === "Manual"
 
     ```bash
-    # Create the namespace and secrets first
+    # 1. Ensure the LlamaStack Operator is installed (DSC component)
+    #    Use the full or dev overlay, or a custom overlay with llamastackoperator: Managed
+    oc apply -k components/instances/rhoai-instance/overlays/full/
+
+    # 2. Create the namespace and secrets
     oc new-project llamastack
     oc create secret generic postgres-secret --from-literal=password=<your-password> -n llamastack
     oc create secret generic llama-stack-secret \
@@ -68,13 +106,16 @@ LlamaStack connects to the ToolOrchestra `orchestrator-8b` model via the in-clus
       --from-literal=VLLM_MAX_TOKENS=4096 \
       -n llamastack
 
-    # Deploy
+    # 3. Deploy the LlamaStack instance
     oc apply -k usecases/llamastack/profiles/tier1-minimal/
     ```
 
 ## Verify
 
 ```bash
+# Check the LlamaStack Operator is running (installed by DSC)
+oc get pods -n redhat-ods-applications -l app.kubernetes.io/name=llama-stack-operator
+
 # Check PostgreSQL is running
 oc get pods -n llamastack -l app=postgres
 
