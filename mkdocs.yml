@@ -1,0 +1,79 @@
+site_name: RHOAI Deploy GitOps
+site_description: GitOps deployment of Red Hat OpenShift AI 3.3 on OpenShift
+site_url: https://rrbanda.github.io/rhoai-deploy-gitops/
+repo_url: https://github.com/rrbanda/rhoai-deploy-gitops
+repo_name: rrbanda/rhoai-deploy-gitops
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.indexes
+    - navigation.top
+    - content.code.copy
+    - content.tabs.link
+    - search.suggest
+    - search.highlight
+  icon:
+    repo: fontawesome/brands/github
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - tables
+  - def_list
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - Quick Start: quickstart.md
+  - Capabilities:
+    - capabilities/index.md
+    - Model Serving: capabilities/model-serving.md
+    - ModelMesh: capabilities/modelmesh.md
+    - Training: capabilities/training.md
+    - Pipelines: capabilities/pipelines.md
+    - Workbenches: capabilities/workbenches.md
+    - Model Registry: capabilities/model-registry.md
+    - GPU Infrastructure: capabilities/gpu-infrastructure.md
+    - Kueue: capabilities/kueue.md
+  - Use Cases:
+    - usecases/index.md
+    - ToolOrchestra: usecases/toolorchestra.md
+  - Reference:
+    - reference/index.md
+    - ArgoCD Applications: reference/argocd-apps.md
+    - Sync Configuration: reference/sync-config.md
+    - Teardown: reference/teardown.md
+    - Known Issues: reference/known-issues.md

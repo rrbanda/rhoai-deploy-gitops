@@ -5,6 +5,6 @@ resources:
   - ../../base
 
 patches:
-  - path: patch-full.yaml
+  - path: patch-training.yaml
     target:
       kind: DataScienceCluster
