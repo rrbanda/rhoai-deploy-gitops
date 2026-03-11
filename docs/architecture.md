@@ -43,6 +43,9 @@ rhoai-deploy-gitops/
     └── llamastack/                   # Meta LlamaStack Distribution
 ```
 
+!!! warning "Using a fork? Update the repo URL"
+    All ArgoCD manifests reference `https://github.com/rrbanda/rhoai-deploy-gitops.git`. If you forked this repo, update `repoURL` in 8 files before bootstrapping: the 3 files in `clusters/overlays/dev/`, the 3 ApplicationSets in `components/argocd/apps/`, and the 2 projects in `components/argocd/projects/base/`. See the [Quick Start](quickstart.md) for the full list.
+
 ## App-of-Apps Pattern
 
 The installation requires exactly **two** manual commands. After that, Git becomes the single source of truth.

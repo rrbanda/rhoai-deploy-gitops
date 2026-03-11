@@ -137,8 +137,10 @@ oc apply -k components/operators/kueue-operator/      # Required for training
 oc apply -k components/operators/jobset-operator/     # Required for training
 oc apply -k components/operators/rhoai-operator/      # Always required
 
-# Wait for all CSVs
-oc get csv -A | grep -E "cert-manager|nfd|gpu-operator|kueue|jobset|rhods"
+# Wait for all CSVs to reach Succeeded (re-run until all show Succeeded)
+watch "oc get csv -A | grep -E 'cert-manager|nfd|gpu-operator|kueue|jobset|rhods'"
+
+# IMPORTANT: Do NOT proceed until every CSV shows "Succeeded".
 ```
 
 ### 2. Instances (order matters)
@@ -167,8 +169,9 @@ oc apply -k usecases/toolorchestra/profiles/tier1-minimal/
 **"I just want to serve a model"** -- install cert-manager, RHOAI operator, then
 use the `serving` overlay. See [model-serving.md](model-serving.md).
 
-**"I just want notebooks"** -- install RHOAI operator, use the `minimal` overlay
-(Dashboard + Workbenches). See [workbenches.md](workbenches.md).
+**"I just want notebooks"** -- install RHOAI operator, use the `dev` or `full`
+overlay (includes Dashboard + Workbenches). The `minimal` overlay only enables
+Dashboard without Workbenches. See [workbenches.md](workbenches.md).
 
 **"I need training"** -- install RHOAI, Kueue, JobSet, NFD, GPU operators,
 their instances, then use the `training` overlay. See [training.md](training.md).
