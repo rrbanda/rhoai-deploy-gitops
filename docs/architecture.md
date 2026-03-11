@@ -1,6 +1,6 @@
-# Architecture
+# Architecture and GitOps Patterns
 
-The repository implements a fully declarative, GitOps-driven installation of RHOAI 3.3 on OpenShift. The entire platform -- from GPU drivers to AI model serving -- is expressed as Kubernetes manifests managed by ArgoCD via an **app-of-apps pattern**.
+The repository implements a fully declarative, GitOps-driven installation of Red Hat OpenShift AI (RHOAI) 3.3 on OpenShift. The entire platform -- from GPU drivers to AI model serving -- is expressed as Kubernetes manifests managed by ArgoCD via an **app-of-apps pattern**.
 
 ## Repository Structure
 
@@ -35,11 +35,12 @@ rhoai-deploy-gitops/
 │       ├── kueue-instance/
 │       ├── kueue-config/             # ResourceFlavors + ClusterQueue
 │       ├── jobset-instance/
-│       └── rhoai-instance/           # DataScienceCluster with composable overlays
+│       └── rhoai-instance/           # DataScienceCluster (DSC) with composable overlays
 │           ├── base/                 # Minimal DSC (Dashboard only)
 │           └── overlays/             # dev, minimal, serving, training, full
 └── usecases/
-    └── toolorchestra/                # NVIDIA ToolOrchestra
+    ├── toolorchestra/                # NVIDIA ToolOrchestra
+    └── llamastack/                   # Meta LlamaStack Distribution
 ```
 
 ## App-of-Apps Pattern
@@ -97,10 +98,13 @@ graph TD
 
   subgraph usecases ["Phase 6: Use Cases"]
     UsecasesAppSet --> ToolOrch["ToolOrchestra"]
+    UsecasesAppSet --> LlamaStackUC["LlamaStack"]
     ToolOrch --> Models["Model Serving"]
     ToolOrch --> UI["Orchestrator UI"]
     ToolOrch --> TrainInfra["Training Infra"]
     TrainingApp --> TrainWorkloads["Training Workloads"]
+    LlamaStackUC --> LlamaStackSvr["LlamaStack Server"]
+    LlamaStackUC --> Postgres["PostgreSQL"]
   end
 ```
 

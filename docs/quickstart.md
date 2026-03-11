@@ -1,6 +1,15 @@
-# Quick Start
+# Quick Start Guide
 
-Two paths to deploy the full RHOAI stack. Both use the same manifests.
+Two paths to deploy the full Red Hat OpenShift AI (RHOAI) stack. Both use the same manifests.
+
+!!! warning "Prerequisites"
+    Before deploying, verify your cluster meets the [official RHOAI 3.3 requirements](index.md):
+
+    - OpenShift 4.19 or 4.20 with at least 2 worker nodes (8 CPUs, 32 GiB RAM each)
+    - Default storage class with dynamic provisioning
+    - Identity provider configured (not `kubeadmin`)
+    - Open Data Hub **not** installed
+    - Internet access to Red Hat registries (or a disconnected mirror)
 
 ## Deploy
 
@@ -67,7 +76,7 @@ Two paths to deploy the full RHOAI stack. Both use the same manifests.
 
 ## What Gets Deployed
 
-The full stack installs **17 ArgoCD Applications** across three layers:
+The full stack installs **18 ArgoCD Applications** across three layers:
 
 - **6 operators** -- cert-manager, NFD, GPU Operator, Kueue, JobSet, RHOAI
 - **8 instances** -- NFD, GPU ClusterPolicy, GPU MachineSets, ClusterAutoscaler, Kueue, Kueue Config, JobSet, DataScienceCluster

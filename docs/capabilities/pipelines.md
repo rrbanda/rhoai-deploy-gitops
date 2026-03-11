@@ -1,8 +1,6 @@
-# Data Science Pipelines
+# Data Science Pipelines (DSP)
 
-Data Science Pipelines (DSP) provides a Tekton-based ML pipeline platform
-for defining, scheduling, and tracking multi-step ML workflows. It is the
-RHOAI equivalent of Kubeflow Pipelines and supports the KFP v2 SDK.
+Data Science Pipelines provide a Kubeflow Pipelines-compatible platform for building and running ML workflows on OpenShift AI. Use pipelines when you need reproducible, automated ML workflows with experiment tracking, scheduling, and artifact management.
 
 ## Dependencies
 
@@ -78,6 +76,12 @@ oc get pods -n redhat-ods-applications -l app=ds-pipeline-ui
 # Check for the DSP API server
 oc get pods -n redhat-ods-applications -l app=ds-pipeline-api-server
 ```
+
+!!! note "S3-compatible storage required"
+    Pipeline servers require S3-compatible object storage (e.g., MinIO, AWS S3, or OpenShift Data Foundation) for storing pipeline artifacts and metadata.
+
+!!! info "Argo Workflows controller option (DSC v2)"
+    The RHOAI 3.3 DSC v2 API introduces an `aipipelines.argoWorkflowsControllers.managementState` field that lets you configure whether RHOAI manages its own Argo Workflows controller or uses an existing one. This is relevant if you already have Argo Workflows installed and want to avoid conflicts. Note: Argo Workflows (pipeline orchestration) is distinct from ArgoCD (GitOps). This repository uses the v1 DSC API (`datasciencepipelines`), where RHOAI manages the controller automatically. See [Known Issues #3](../reference/known-issues.md) for details on v1 vs v2.
 
 ## Example: Create a Pipeline Server
 

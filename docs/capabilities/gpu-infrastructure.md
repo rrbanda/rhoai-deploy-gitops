@@ -1,12 +1,6 @@
-# GPU Infrastructure
+# GPU Infrastructure (NFD, GPU Operator, MachineSets)
 
-GPU infrastructure enables NVIDIA GPU workloads on OpenShift. It consists of
-three layers: Node Feature Discovery (NFD) labels GPU nodes, the GPU Operator
-installs drivers and the NVIDIA toolkit, and GPU MachineSets provision the
-actual GPU worker nodes.
-
-This capability is a prerequisite for any GPU workload -- model serving,
-training, or GPU-accelerated notebooks.
+GPU infrastructure provides the foundation for all GPU-accelerated workloads on OpenShift. This includes Node Feature Discovery (NFD) for detecting GPU hardware, the NVIDIA GPU Operator for installing drivers and container toolkit, and MachineSets for provisioning GPU worker nodes. Deploy this before any capability that requires GPU acceleration.
 
 ## Dependencies
 
@@ -21,6 +15,9 @@ training, or GPU-accelerated notebooks.
 
 NFD must be installed and running before the GPU Operator, as the GPU Operator
 relies on NFD node labels to identify GPU hardware.
+
+!!! warning "Cluster-specific configuration required"
+    The GPU MachineSet manifests in `components/instances/gpu-workers/` contain cluster-specific values (AMI ID, infrastructure ID, subnets, security groups). You must update these for your cluster before deploying. See [Customizing for your cluster](#customizing-for-your-cluster) below.
 
 ## Deploy
 

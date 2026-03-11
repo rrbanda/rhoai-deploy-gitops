@@ -1,6 +1,6 @@
 # Use Cases
 
-Each use case is a self-contained AI application deployed on top of the RHOAI platform.
+Each use case is a self-contained AI application deployed on top of the Red Hat OpenShift AI (RHOAI) platform.
 
 ## Structure
 
@@ -23,6 +23,7 @@ usecases/
 | Use Case | Description | Guide |
 |----------|------------|-------|
 | **ToolOrchestra** | NVIDIA multi-model orchestrator with specialist routing | [ToolOrchestra](toolorchestra.md) |
+| **LlamaStack** | Meta's LlamaStack Distribution with agents, RAG, and tool use | [LlamaStack](llamastack.md) |
 
 ## Adding a New Use Case
 

@@ -1,4 +1,4 @@
-# ToolOrchestra
+# ToolOrchestra Multi-Model Orchestrator
 
 NVIDIA ToolOrchestra is a multi-model orchestrator that coordinates specialized AI models for complex reasoning tasks.
 
@@ -15,9 +15,12 @@ NVIDIA ToolOrchestra is a multi-model orchestrator that coordinates specialized 
 | Profile | Models | Training | Use Case |
 |---------|--------|----------|----------|
 | `tier1-minimal` | orchestrator-8b, qwen-math-7b | Infra only | Development, demos |
-| `tier2-standard` | + additional models | Infra only | Staging |
-| `tier3-full` | All models including qwen3-32b | Infra only | Production |
-| `training` | tier1-minimal models | Full (infra + workloads) | Training runs |
+| `tier2-standard` | orchestrator-8b, qwen-math-7b, qwen3-32b | Infra only | Staging |
+| `tier3-full` | orchestrator-8b, qwen-math-7b, qwen3-32b | Infra only | Production |
+| `training` | orchestrator-8b, qwen-math-7b | Full (infra + workloads) | Training runs |
+
+!!! note "tier2 vs tier3"
+    `tier2-standard` and `tier3-full` currently deploy the same models. They differ only by a `tier` label ("2" vs "3") for environment separation. Extend `tier3-full` with additional models as your cluster scales.
 
 ## Deploy
 

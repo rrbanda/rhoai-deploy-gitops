@@ -1,6 +1,6 @@
-# Teardown
+# Complete Teardown Procedure
 
-Complete removal of RHOAI and all managed operators. Run steps in order.
+Complete removal of Red Hat OpenShift AI (RHOAI) and all managed operators. Run steps in order.
 
 !!! danger "Destructive operation"
     This procedure deletes all RHOAI components, operator data, CRDs, and namespaces. It is not reversible.

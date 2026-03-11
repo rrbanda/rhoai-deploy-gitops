@@ -1,9 +1,6 @@
 # Model Registry
 
-Model Registry provides a centralized catalog for tracking ML model versions,
-artifacts, and metadata. It implements the ML Metadata (MLMD) API and
-integrates with the RHOAI Dashboard for browsing and deploying registered
-models.
+The Model Registry provides a central catalog for tracking ML model versions, metadata, and artifacts. Use it when you need governance over which models are deployed, version history, and programmatic access to model metadata across your organization.
 
 ## Dependencies
 
@@ -11,9 +8,11 @@ models.
 |-------------|------|------|
 | RHOAI Operator | Operator | `components/operators/rhoai-operator/` |
 | DSC `modelregistry: Managed` | DSC component | `components/instances/rhoai-instance/` |
+| External MySQL database (5.x or later, 8.x recommended) | External service | Provisioned outside the cluster |
+| S3-compatible object storage | External service | Provisioned outside the cluster |
 
-Model Registry is a lightweight component that does not require GPU
-infrastructure or additional operators beyond RHOAI.
+!!! warning "External database and storage required"
+    The official RHOAI 3.3 documentation requires an external MySQL database (version 5.x or later, 8.x recommended) and S3-compatible object storage for Model Registry. These are **not** provisioned by the RHOAI Operator -- you must set them up before enabling this component. Model Registry does not require GPU infrastructure.
 
 ## Enable It
 

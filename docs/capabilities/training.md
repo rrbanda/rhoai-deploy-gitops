@@ -1,6 +1,6 @@
-# Distributed Training
+# Distributed Training with Ray and Training Operator
 
-RHOAI provides distributed training through two components:
+Distributed training enables fine-tuning and training of large models across multiple GPU nodes. This capability uses KubeRay for Ray-based distributed workloads and the Kubeflow Training Operator for PyTorchJob and TrainJob resources. Use this when your model training needs more GPU memory or compute than a single node can provide. RHOAI provides distributed training through two components:
 
 - **Ray (KubeRay)** -- distributed compute framework for RayJob workloads
   (used for GRPO reinforcement learning in this repo)
@@ -15,6 +15,7 @@ multi-pod job orchestration.
 | Requirement | Type | Path |
 |-------------|------|------|
 | RHOAI Operator | Operator | `components/operators/rhoai-operator/` |
+| cert-manager Operator | Operator | `components/operators/cert-manager/` |
 | Kueue Operator | Operator | `components/operators/kueue-operator/` |
 | JobSet Operator | Operator | `components/operators/jobset-operator/` |
 | DSC `ray: Managed` | DSC component | `components/instances/rhoai-instance/` |
@@ -22,6 +23,9 @@ multi-pod job orchestration.
 | Kueue Instance + Config | Instance | `components/instances/kueue-instance/`, `kueue-config/` |
 | JobSet Instance | Instance | `components/instances/jobset-instance/` |
 | GPU Infrastructure | Operator + Instance | See [gpu-infrastructure.md](gpu-infrastructure.md) |
+
+!!! info "cert-manager is required"
+    The official RHOAI 3.3 documentation lists cert-manager as a dependency for Kueue-based workloads (training, Ray). Install the cert-manager Operator before deploying training workloads.
 
 ## Enable It
 
@@ -93,6 +97,9 @@ oc get pods -n redhat-ods-applications -l app.kubernetes.io/name=kuberay-operato
 # Training operator should be running
 oc get pods -n redhat-ods-applications -l control-plane=kubeflow-training-operator
 ```
+
+!!! warning "GPU and Kueue required"
+    Distributed training requires GPU infrastructure (NFD + GPU Operator) and Kueue for quota management. Deploy these first. See [GPU Infrastructure](gpu-infrastructure.md) and [Kueue](kueue.md).
 
 ## Example: RayJob for GRPO Training
 

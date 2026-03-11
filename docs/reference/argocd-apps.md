@@ -1,6 +1,6 @@
 # ArgoCD Applications
 
-After bootstrap, ArgoCD manages **17 Applications** across three layers.
+After bootstrap, ArgoCD manages **18 Applications** across three layers.
 
 ## Application Table
 
@@ -22,6 +22,7 @@ After bootstrap, ArgoCD manages **17 Applications** across three layers.
 | `instance-jobset-instance` | `components/instances/jobset-instance/` | Auto (selfHeal) | JobSet operator instance |
 | `instance-rhoai` | `components/instances/rhoai-instance/overlays/dev/` | Auto (selfHeal, no prune) | DataScienceCluster with ignoreDifferences |
 | `usecase-toolorchestra` | `usecases/toolorchestra/profiles/tier1-minimal/` | Auto (selfHeal, prune) | Serving (2 models), UI, training infra |
+| `usecase-llamastack` | `usecases/llamastack/profiles/tier1-minimal/` | Auto (selfHeal, prune) | LlamaStack Distribution + PostgreSQL |
 | `usecase-toolorchestra-training` | `usecases/toolorchestra/manifests/training/workloads/` | **Manual only** | Download jobs + RayJob (on-demand) |
 
 ## Sync Wave Ordering
