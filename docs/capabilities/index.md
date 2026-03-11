@@ -1,44 +1,50 @@
-# RHOAI Capabilities Guide
+# Capabilities Guide
 
-Pick the capabilities you need, understand their dependencies, and deploy only what matters for your use case.
+Red Hat OpenShift AI (RHOAI) is modular. Pick the capabilities you need, understand their dependencies, and deploy only what matters for your use case.
 
 ## Capability Map
 
-| Capability | DSC Component | Required Operators | Required Instances | Guide |
+| Capability | DataScienceCluster (DSC) Component | Required Operators | Required Instances | Guide |
 |------------|---------------|--------------------|--------------------|-------|
 | KServe Model Serving | `kserve` | rhoai-operator, cert-manager | rhoai-instance | [model-serving.md](model-serving.md) |
 | ModelMesh Serving | `modelmeshserving` | rhoai-operator | rhoai-instance | [modelmesh.md](modelmesh.md) |
-| Distributed Training | `ray`, `trainingoperator` | rhoai-operator, kueue-operator, jobset-operator | rhoai-instance, kueue-instance, jobset-instance | [training.md](training.md) |
+| Distributed Training | `ray`, `trainingoperator` | rhoai-operator, cert-manager, kueue-operator, jobset-operator | rhoai-instance, kueue-instance, jobset-instance | [training.md](training.md) |
 | Data Science Pipelines | `datasciencepipelines` | rhoai-operator | rhoai-instance | [pipelines.md](pipelines.md) |
 | Workbenches | `workbenches` | rhoai-operator | rhoai-instance | [workbenches.md](workbenches.md) |
-| Model Registry | `modelregistry` | rhoai-operator | rhoai-instance | [model-registry.md](model-registry.md) |
+| Model Registry | `modelregistry` | rhoai-operator | rhoai-instance, external MySQL 5.x+, S3 storage | [model-registry.md](model-registry.md) |
 | GPU Infrastructure | N/A | nfd, gpu-operator | nfd-instance, gpu-instance, gpu-workers | [gpu-infrastructure.md](gpu-infrastructure.md) |
-| Kueue (GPU Quotas) | `kueue` (Unmanaged) | kueue-operator | kueue-instance, kueue-config | [kueue.md](kueue.md) |
+| Kueue (GPU Quotas) | `kueue` (Unmanaged) | kueue-operator, cert-manager | kueue-instance, kueue-config | [kueue.md](kueue.md) |
 
 ## Dependency Diagram
 
 ```mermaid
 graph TD
-  CertMgr["cert-manager"] -->|"TLS for Knative"| RHOAI["RHOAI Operator"]
+  CertMgr["cert-manager"] -->|"TLS certificates"| KServe["KServe"]
+  CertMgr -->|"required"| KueueInst["Kueue Instance + ClusterQueue"]
+  CertMgr -->|"required"| Training["Training"]
+  CertMgr -->|"required"| LlamaStackOp["LlamaStack Operator"]
   NFD["NFD Operator"] --> GPU["GPU Operator"]
-  KueueOp["Kueue Operator"] --> KueueInst["Kueue Instance + ClusterQueue"]
-  RHOAI --> DSC["DSC (components)"]
+  KueueOp["Kueue Operator"] --> KueueInst
+  JobSetOp["JobSet Operator"] --> JobSetInst["JobSet Instance"]
+  RHOAI["RHOAI Operator"] --> DSC["DSC (components)"]
   GPU --> GPUWorkers["GPU Workers"]
-  DSC --> KServe["KServe"]
+  DSC --> KServe
   DSC --> ModelMesh["ModelMesh"]
   DSC --> Pipelines["Pipelines"]
   DSC --> Workbenches["Workbenches"]
   DSC --> Registry["Registry"]
   DSC --> TrustyAI["TrustyAI"]
   DSC --> CodeFlare["CodeFlare"]
+  DSC --> LlamaStackOp
   GPUWorkers --> ModelServing["Model Serving"]
   KServe --> ModelServing
   ModelMesh --> ModelServing
   DSC --> Ray["Ray"]
   DSC --> TrainOp["Training Operator"]
-  Ray --> Training["Training"]
+  Ray --> Training
   TrainOp --> Training
   KueueInst --> Training
+  JobSetInst --> Training
 ```
 
 **Key takeaways:**
@@ -46,8 +52,16 @@ graph TD
 - Every capability requires the **RHOAI operator** and a **DataScienceCluster** (DSC)
 - GPU Infrastructure (NFD + GPU Operator) is required for any GPU workload (model serving, training)
 - Kueue is required for training workloads that need GPU quota management
-- cert-manager is required for KServe (provides TLS via Knative)
+- **JobSet** is required for distributed training (TrainJob depends on it)
+- cert-manager is required for KServe (TLS via Knative), Kueue-based workloads (training), distributed inference (llm-d), and LlamaStack
+- Model Registry requires an external MySQL database (5.x+) and S3-compatible object storage
 - Capabilities without GPU needs (Pipelines, Workbenches, Registry) can run on CPU-only clusters
+
+!!! note "Additional RHOAI 3.3 capabilities not covered in this repo"
+    The official RHOAI 3.3 documentation lists additional DSC components that this repository does not deploy or document in detail:
+
+    - **`advancedkserve` (Distributed Inference with llm-d)** -- enables distributed model inference using the llm-d framework. Requires cert-manager, Red Hat Connectivity Link Operator, Red Hat Leader Worker Set Operator, and OpenShift 4.20+. Not included in this repo's manifests.
+    - **`feastoperator` (Feature Store)** -- present in our base DSC as `Removed`. The Feast Operator provides a feature store for ML workloads. Enable it by setting `feastoperator.managementState: Managed` if needed.
 
 ## DSC Overlays -- Pick Your Profile
 
@@ -58,8 +72,11 @@ Instead of editing the DSC YAML directly, use a pre-built overlay:
 | `overlays/minimal/` | Dashboard only | Exploration, start here |
 | `overlays/serving/` | Dashboard, KServe, ModelMesh | Model serving only |
 | `overlays/training/` | Dashboard, Ray, TrainingOperator | Distributed training only |
-| `overlays/full/` | All components | Full platform |
-| `overlays/dev/` | All components | Development (current default) |
+| `overlays/full/` | All 10 DSC components (see below) | Full platform |
+| `overlays/dev/` | All 10 DSC components (same as full) | Development (current default) |
+
+!!! info "What 'All components' means"
+    The `full` and `dev` overlays enable: workbenches, kserve, ray, trainingoperator, modelregistry, trustyai, datasciencepipelines, modelmeshserving, codeflare, and llamastackoperator. The base DSC always keeps `dashboard` Managed and `kueue` Unmanaged (Red Hat Build of Kueue is deployed as a standalone operator).
 
 ### Deploy with an overlay
 
@@ -113,7 +130,7 @@ before moving to the next.
 ### 1. Operators (install all you need)
 
 ```bash
-oc apply -k components/operators/cert-manager/       # Required for KServe
+oc apply -k components/operators/cert-manager/       # Required for KServe, training, Kueue, LlamaStack
 oc apply -k components/operators/nfd/                 # Required for GPU
 oc apply -k components/operators/gpu-operator/        # Required for GPU
 oc apply -k components/operators/kueue-operator/      # Required for training

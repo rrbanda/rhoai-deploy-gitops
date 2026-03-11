@@ -1,18 +1,19 @@
-# Kueue (GPU Quota Management)
+# GPU Quota Management with Kueue
 
-Kueue is a Kubernetes-native job queuing system that manages GPU quotas,
-fair-sharing, and preemption for batch workloads. In this repo, Kueue is
-deployed as a **standalone operator** (Red Hat Build of Kueue) rather than
-through the RHOAI DSC, which is why the DSC sets `kueue: Unmanaged`.
+Kueue provides job queuing and GPU quota management for OpenShift AI training workloads. It controls which jobs can run, how many GPUs they consume, and supports preemption for priority-based scheduling. Use Kueue when you need to share GPU resources across multiple teams or workloads with fair scheduling.
 
 ## Dependencies
 
 | Requirement | Type | Path |
 |-------------|------|------|
+| cert-manager Operator | Operator | `components/operators/cert-manager/` |
 | Kueue Operator | Operator | `components/operators/kueue-operator/` |
 | Kueue Instance | Instance | `components/instances/kueue-instance/` |
 | Kueue Config (Flavors + Queue) | Instance | `components/instances/kueue-config/` |
 | GPU Infrastructure | Operator + Instance | See [gpu-infrastructure.md](gpu-infrastructure.md) |
+
+!!! info "cert-manager is required"
+    The official RHOAI 3.3 documentation lists cert-manager as a dependency for Kueue-based workloads. Install it before deploying the Kueue Operator.
 
 ## Why Standalone?
 

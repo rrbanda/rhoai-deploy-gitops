@@ -1,10 +1,10 @@
 # Reference
 
-Detailed reference documentation for ArgoCD configuration, sync behavior, teardown procedures, and known issues.
+Detailed reference documentation for the operational aspects of this GitOps deployment. Consult these pages when you need to understand ArgoCD behavior, troubleshoot sync issues, or remove the platform.
 
-| Page | Description |
-|------|-------------|
-| [ArgoCD Applications](argocd-apps.md) | All 17 managed Applications, sync waves, and sync policies |
-| [Sync Configuration](sync-config.md) | Production-grade sync options, retry policies, ignoreDifferences |
-| [Teardown](teardown.md) | Complete removal procedure for RHOAI and all operators |
-| [Known Issues](known-issues.md) | Common pitfalls and workarounds |
+| Page | When to Use | Description |
+|------|-------------|-------------|
+| [ArgoCD Applications](argocd-apps.md) | Understanding what ArgoCD manages | All 18 managed Applications, sync waves, bootstrap mechanism |
+| [Sync Configuration](sync-config.md) | Debugging sync drift or failures | Production-grade sync options, retry policies, ignoreDifferences rules |
+| [Teardown](teardown.md) | Removing the platform completely | 12-step removal procedure for RHOAI and all operators |
+| [Known Issues](known-issues.md) | Troubleshooting deployments | Common pitfalls with PVCs, DSC API, GPU operators, and webhooks |

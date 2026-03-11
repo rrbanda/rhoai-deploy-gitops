@@ -1,6 +1,6 @@
-# Model Serving (KServe)
+# Model Serving with KServe
 
-KServe provides serverless model inference on OpenShift. It deploys models as
+KServe provides scalable, standards-based model serving on OpenShift AI. It supports popular frameworks (vLLM, TensorRT, Triton) and handles autoscaling, canary rollouts, and request batching. Use KServe when you need to deploy individual models with dedicated resources and independent scaling. It deploys models as
 `InferenceService` resources with auto-scaling, canary rollouts, and an
 OpenAI-compatible API. RHOAI ships a validated vLLM runtime for GPU-accelerated
 LLM serving.
@@ -16,6 +16,9 @@ LLM serving.
 
 cert-manager is required because KServe uses Knative Serving, which needs TLS
 certificates for internal routing.
+
+!!! tip "GPU not always required"
+    KServe can serve CPU-only models. GPU infrastructure (NFD + GPU Operator) is only needed for GPU-accelerated inference.
 
 ## Enable It
 

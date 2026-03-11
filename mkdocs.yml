@@ -1,5 +1,5 @@
-site_name: RHOAI Deploy GitOps
-site_description: GitOps deployment of Red Hat OpenShift AI 3.3 on OpenShift
+site_name: Deploying OpenShift AI
+site_description: Deploy Red Hat OpenShift AI 3.3 on OpenShift -- GitOps or manual, full stack or individual capabilities
 site_url: https://rrbanda.github.io/rhoai-deploy-gitops/
 repo_url: https://github.com/rrbanda/rhoai-deploy-gitops
 repo_name: rrbanda/rhoai-deploy-gitops
@@ -49,6 +49,9 @@ markdown_extensions:
   - pymdownx.details
   - attr_list
   - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - tables
   - def_list
   - toc:
@@ -71,6 +74,7 @@ nav:
   - Use Cases:
     - usecases/index.md
     - ToolOrchestra: usecases/toolorchestra.md
+    - LlamaStack: usecases/llamastack.md
   - Reference:
     - reference/index.md
     - ArgoCD Applications: reference/argocd-apps.md

@@ -1,9 +1,6 @@
-# ModelMesh Serving
+# ModelMesh Multi-Model Serving
 
-ModelMesh is a multi-model serving runtime that efficiently packs many models
-onto shared GPU/CPU resources. Unlike KServe (one model per pod), ModelMesh
-loads and unloads models dynamically into a shared serving pool, making it
-cost-effective for scenarios with many smaller models and variable traffic.
+ModelMesh enables efficient multi-model serving by packing multiple models into shared serving pods. Use ModelMesh when you need to serve many smaller models cost-effectively with shared GPU resources, rather than dedicating a full pod per model as KServe does.
 
 ## Dependencies
 
