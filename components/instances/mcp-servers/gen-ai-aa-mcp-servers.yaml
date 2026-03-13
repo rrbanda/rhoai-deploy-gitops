@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gen-ai-aa-mcp-servers
+  namespace: redhat-ods-applications
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+data:
+  GenAI-Toolbox-Database: |
+    {
+      "url": "http://genai-toolbox.genai-toolbox.svc.cluster.local:5000/mcp",
+      "description": "MCP Toolbox for Databases -- query and explore PostgreSQL databases via natural language. Provides tools to list tables, describe schemas, and run read-only SQL queries."
+    }

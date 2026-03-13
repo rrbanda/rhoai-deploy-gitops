@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: genai-toolbox
+  labels:
+    app.kubernetes.io/name: genai-toolbox
+    app.kubernetes.io/component: mcp-server
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: genai-toolbox
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: genai-toolbox
+        app.kubernetes.io/name: genai-toolbox
+        app.kubernetes.io/component: mcp-server
+    spec:
+      serviceAccountName: genai-toolbox-sa
+      containers:
+        - name: toolbox
+          image: us-central1-docker.pkg.dev/database-toolbox/toolbox/toolbox:0.28.0
+          args:
+            - --address
+            - "0.0.0.0"
+            - --tools-file
+            - /app/tools.yaml
+          ports:
+            - containerPort: 5000
+              protocol: TCP
+              name: http
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          volumeMounts:
+            - name: tools-config
+              mountPath: /app/tools.yaml
+              subPath: tools.yaml
+              readOnly: true
+      volumes:
+        - name: tools-config
+          configMap:
+            name: genai-toolbox-config
+            items:
+              - key: tools.yaml
+                path: tools.yaml
