@@ -10,7 +10,7 @@ metadata:
     machine.openshift.io/memoryMb: "32768"
     machine.openshift.io/vCPU: "8"
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       machine.openshift.io/cluster-api-cluster: ocp-2qkbk
