@@ -10,3 +10,4 @@ labels:
 resources:
   - serving-runtime.yaml
   - inference-service.yaml
+  - route.yaml
