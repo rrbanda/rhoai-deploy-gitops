@@ -9,6 +9,7 @@ labels:
 
 resources:
   - tools-configmap.yaml
+  - pg-secret.yaml
   - deployment.yaml
   - service.yaml
   - route.yaml

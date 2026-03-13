@@ -33,6 +33,9 @@ spec:
             - "0.0.0.0"
             - --tools-file
             - /app/tools.yaml
+          envFrom:
+            - secretRef:
+                name: genai-toolbox-pg-credentials
           ports:
             - containerPort: 5000
               protocol: TCP
