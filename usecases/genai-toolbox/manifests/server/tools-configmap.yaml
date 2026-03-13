@@ -42,14 +42,9 @@ data:
     ---
     kind: tools
     name: run-query
-    type: postgres-sql
+    type: postgres-execute-sql
     source: my-pg-source
-    description: Run a read-only SQL query against the database.
-    parameters:
-      - name: query
-        type: string
-        description: The SQL SELECT query to execute.
-    statement: $1
+    description: Execute a SQL query against the database to explore data, count rows, or answer questions.
     ---
     kind: toolsets
     name: database-explorer
