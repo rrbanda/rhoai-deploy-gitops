@@ -10,19 +10,11 @@ spec:
   resourceGroups:
     - coveredResources: ["cpu", "memory", "nvidia.com/gpu"]
       flavors:
-        - name: gpu-l40s
+        - name: default-gpu
           resources:
             - name: "cpu"
-              nominalQuota: 16
+              nominalQuota: 48
             - name: "memory"
-              nominalQuota: "64Gi"
+              nominalQuota: "192Gi"
             - name: "nvidia.com/gpu"
-              nominalQuota: 1
-        - name: gpu-l4
-          resources:
-            - name: "cpu"
-              nominalQuota: 32
-            - name: "memory"
-              nominalQuota: "128Gi"
-            - name: "nvidia.com/gpu"
-              nominalQuota: 4
+              nominalQuota: 8

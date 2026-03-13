@@ -1,0 +1,23 @@
+# Example: Per-GPU-type ResourceFlavors for NVIDIA L4 and L40S.
+# Apply this instead of the default resource-flavor.yaml if you want
+# separate quotas per GPU type.
+#
+# Usage:
+#   Replace resource-flavor.yaml in kustomization.yaml with this file,
+#   and update cluster-queue.yaml to reference gpu-l4 and gpu-l40s flavors.
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: ResourceFlavor
+metadata:
+  name: gpu-l4
+spec:
+  nodeLabels:
+    nvidia.com/gpu.product: NVIDIA-L4
+---
+apiVersion: kueue.x-k8s.io/v1beta1
+kind: ResourceFlavor
+metadata:
+  name: gpu-l40s
+spec:
+  nodeLabels:
+    nvidia.com/gpu.product: NVIDIA-L40S
