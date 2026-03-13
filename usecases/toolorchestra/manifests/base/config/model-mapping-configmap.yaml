@@ -10,47 +10,47 @@ metadata:
   annotations:
     description: >-
       Maps ToolOrchestra tool model names (from the paper's tools.json) to
-      actual endpoints. Tier strategy: tier-3 uses local Llama-3.2-3B (cheapest),
-      tier-2 uses local Llama-3.2-3B, tier-1 uses Gemini Flash (not Pro),
-      math tiers use local Qwen-Math-7B. This avoids over-routing to
-      expensive cloud models.
+      actual endpoints. tier1-minimal profile: tier-1 uses Gemini Flash via
+      LlamaStack (cloud), tier-2/3 use local Orchestrator-8B, math tiers
+      use local Qwen-Math-7B. All local endpoints are InferenceServices in
+      the orchestrator-rhoai namespace.
 data:
   mapping.json: |
     {
       "reasoner-1": {
         "model": "gemini/models/gemini-2.5-flash",
         "endpoint": "https://llamastack-llamastack.apps.ocp.v7hjl.sandbox2288.opentlc.com/v1",
-        "role": "Strong reasoning (Gemini 2.5 Flash, cloud)"
+        "role": "Strong reasoning (Gemini 2.5 Flash, cloud via LlamaStack)"
       },
       "reasoner-2": {
-        "model": "llama-32-3b-instruct",
-        "endpoint": "http://llama-32-3b-instruct-predictor.my-first-model.svc.cluster.local:8080/v1",
-        "role": "Moderate reasoning (Llama-3.2-3B, local GPU)"
+        "model": "orchestrator-8b",
+        "endpoint": "http://orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local:8080/v1",
+        "role": "Moderate reasoning (Nemotron-Orchestrator-8B, local GPU)"
       },
       "reasoner-3": {
-        "model": "llama-32-3b-instruct",
-        "endpoint": "http://llama-32-3b-instruct-predictor.my-first-model.svc.cluster.local:8080/v1",
-        "role": "Context-based reasoning (Llama-3.2-3B, local GPU)"
+        "model": "orchestrator-8b",
+        "endpoint": "http://orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local:8080/v1",
+        "role": "Context-based reasoning (Nemotron-Orchestrator-8B, local GPU)"
       },
       "answer-1": {
         "model": "gemini/models/gemini-2.5-flash",
         "endpoint": "https://llamastack-llamastack.apps.ocp.v7hjl.sandbox2288.opentlc.com/v1",
-        "role": "Strongest general-purpose answer (Gemini 2.5 Flash, cloud)"
+        "role": "Strongest general-purpose answer (Gemini 2.5 Flash, cloud via LlamaStack)"
       },
       "answer-2": {
-        "model": "llama-32-3b-instruct",
-        "endpoint": "http://llama-32-3b-instruct-predictor.my-first-model.svc.cluster.local:8080/v1",
-        "role": "Good all-rounder (Llama-3.2-3B, local GPU)"
+        "model": "orchestrator-8b",
+        "endpoint": "http://orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local:8080/v1",
+        "role": "Good all-rounder (Nemotron-Orchestrator-8B, local GPU)"
       },
       "answer-3": {
-        "model": "llama-32-3b-instruct",
-        "endpoint": "http://llama-32-3b-instruct-predictor.my-first-model.svc.cluster.local:8080/v1",
-        "role": "Cost-effective answer (Llama-3.2-3B, local GPU)"
+        "model": "orchestrator-8b",
+        "endpoint": "http://orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local:8080/v1",
+        "role": "Cost-effective answer (Nemotron-Orchestrator-8B, local GPU)"
       },
       "answer-4": {
-        "model": "llama-32-3b-instruct",
-        "endpoint": "http://llama-32-3b-instruct-predictor.my-first-model.svc.cluster.local:8080/v1",
-        "role": "Fast cheap answer (Llama-3.2-3B, local GPU)"
+        "model": "orchestrator-8b",
+        "endpoint": "http://orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local:8080/v1",
+        "role": "Fast cheap answer (Nemotron-Orchestrator-8B, local GPU)"
       },
       "answer-math-1": {
         "model": "qwen-math-7b",
@@ -65,16 +65,16 @@ data:
       "search-1": {
         "model": "gemini/models/gemini-2.0-flash",
         "endpoint": "https://llamastack-llamastack.apps.ocp.v7hjl.sandbox2288.opentlc.com/v1",
-        "role": "Thorough query generation (Gemini 2.0 Flash, cloud)"
+        "role": "Thorough query generation (Gemini 2.0 Flash, cloud via LlamaStack)"
       },
       "search-2": {
-        "model": "llama-32-3b-instruct",
-        "endpoint": "http://llama-32-3b-instruct-predictor.my-first-model.svc.cluster.local:8080/v1",
-        "role": "Context-aware query generation (Llama-3.2-3B, local GPU)"
+        "model": "orchestrator-8b",
+        "endpoint": "http://orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local:8080/v1",
+        "role": "Context-aware query generation (Nemotron-Orchestrator-8B, local GPU)"
       },
       "search-3": {
-        "model": "llama-32-3b-instruct",
-        "endpoint": "http://llama-32-3b-instruct-predictor.my-first-model.svc.cluster.local:8080/v1",
-        "role": "Fast query generation (Llama-3.2-3B, local GPU)"
+        "model": "orchestrator-8b",
+        "endpoint": "http://orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local:8080/v1",
+        "role": "Fast query generation (Nemotron-Orchestrator-8B, local GPU)"
       }
     }
