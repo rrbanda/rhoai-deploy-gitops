@@ -10,4 +10,5 @@ labels:
 resources:
   - serving-runtime.yaml
   - inference-service.yaml
+  - service.yaml
   - route.yaml
