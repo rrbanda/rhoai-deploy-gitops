@@ -10,7 +10,7 @@ metadata:
 spec:
   to:
     kind: Service
-    name: gpt-oss-120b-predictor
+    name: gpt-oss-120b-route-svc
     weight: 100
   port:
     targetPort: 8080
