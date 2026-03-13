@@ -1,0 +1,8 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - gpu-machineset-l4.yaml
+  - gpu-machineset-l40s.yaml
+  - machine-autoscaler-l4.yaml
+  - machine-autoscaler-l40s.yaml

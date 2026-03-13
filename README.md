@@ -26,7 +26,7 @@ rhoai-deploy-gitops/
 │   └── instances/                    # Operator instance CRs
 │       ├── nfd-instance/
 │       ├── gpu-instance/
-│       ├── gpu-workers/              # GPU MachineSets (L4, L40S) + MachineAutoscalers
+│       ├── gpu-workers/              # GPU node provisioning (cloud-specific, see examples/)
 │       ├── cluster-autoscaler/
 │       ├── kueue-instance/
 │       ├── kueue-config/             # ResourceFlavors + ClusterQueue
@@ -34,9 +34,16 @@ rhoai-deploy-gitops/
 │       └── rhoai-instance/           # DataScienceCluster with composable overlays
 │           ├── base/                 # Minimal DSC (Dashboard only)
 │           └── overlays/             # dev, minimal, serving, training, full
-└── usecases/
-    ├── toolorchestra/                # NVIDIA ToolOrchestra multi-model orchestrator
-    └── llamastack/                   # Meta LlamaStack Distribution
+├── usecases/
+│   ├── models/                       # Model serving catalog (per-model GitOps)
+│   │   ├── gpt-oss-120b/
+│   │   ├── orchestrator-8b/
+│   │   └── qwen-math-7b/
+│   └── services/                     # Supporting services
+│       ├── genai-toolbox/
+│       ├── llamastack/
+│       └── toolorchestra-app/
+└── setup.sh                          # Configure repo URL for your fork
 ```
 
 ## Prerequisites
@@ -48,8 +55,22 @@ rhoai-deploy-gitops/
 - `oc` CLI authenticated as cluster-admin
 - **Open Data Hub must NOT be installed** on the same cluster
 - **No upgrade path from RHOAI 2.x (as of 3.3)** -- 3.0 requires a fresh installation; upgrade support is planned for a later release
-- GPU nodes available (NVIDIA L4, L40S, A100, or H100) for model serving and training
+- GPU nodes available (any NVIDIA GPU supported by the GPU Operator) for model serving and training
 - At least 50Gi storage per model in the GPU node availability zone
+
+## Cluster Setup
+
+After forking this repo, configure it for your cluster:
+
+```bash
+# 1. Point all ArgoCD apps at your fork
+./setup.sh --repo https://github.com/YOURORG/rhoai-deploy-gitops.git
+
+# 2. (AWS only) Edit GPU MachineSets with your cluster's infra ID, AMI, subnet, etc.
+#    See components/instances/gpu-workers/README.md
+
+# 3. Update secrets (pg-secret.yaml, etc.) for your environment
+```
 
 ## Quick Start
 
@@ -84,8 +105,8 @@ oc apply -k components/instances/kueue-config/
 oc apply -k components/instances/jobset-instance/
 oc apply -k components/instances/rhoai-instance/overlays/dev/
 
-# 3. Deploy a use case
-oc apply -k usecases/toolorchestra/profiles/tier1-minimal/
+# 3. Deploy a model
+oc apply -k usecases/models/gpt-oss-120b/profiles/tier1-minimal/
 ```
 
 See the [Quick Start Guide](https://rrbanda.github.io/rhoai-deploy-gitops/quickstart/) for detailed instructions with wait commands and verification steps.
@@ -119,12 +140,18 @@ The base DataScienceCluster starts minimal (Dashboard only). Pick an overlay:
 | `full` | All 10 DSC components | `oc apply -k components/instances/rhoai-instance/overlays/full/` |
 | `dev` | All 10 DSC components (default) | `oc apply -k components/instances/rhoai-instance/overlays/dev/` |
 
-## Use Cases
+## Models and Services
 
-| Use Case | Description | Guide |
-|----------|-------------|-------|
-| **ToolOrchestra** | NVIDIA multi-model orchestrator with specialist routing | [ToolOrchestra](https://rrbanda.github.io/rhoai-deploy-gitops/usecases/toolorchestra/) |
-| **LlamaStack** | Meta's LlamaStack Distribution with agents, RAG, and tool use | [LlamaStack](https://rrbanda.github.io/rhoai-deploy-gitops/usecases/llamastack/) |
+Models are independently deployable via the `cluster-models` ApplicationSet. Services are discovered by the `cluster-services` ApplicationSet. See [usecases/README.md](usecases/README.md) for the full catalog.
+
+| Category | Name | Description |
+|----------|------|-------------|
+| Model | **gpt-oss-120b** | OpenAI GPT-OSS 120B MoE (MXFP4 quantized, Red Hat AI validated) |
+| Model | **orchestrator-8b** | NVIDIA Nemotron-Orchestrator-8B for multi-tool coordination |
+| Model | **qwen-math-7b** | Qwen2.5-Math-7B-Instruct math specialist |
+| Service | **genai-toolbox** | MCP Toolbox for Databases (PostgreSQL) |
+| Service | **llamastack** | Meta LlamaStack Distribution with agents, RAG, and tool use |
+| Service | **toolorchestra-app** | ToolOrchestra UI for multi-model orchestration |
 
 ## Documentation
 

@@ -19,8 +19,6 @@ spec:
         app.kubernetes.io/component: training
     spec:
       restartPolicy: OnFailure
-      nodeSelector:
-        nvidia.com/gpu.present: "true"
       containers:
         - name: download
           image: registry.access.redhat.com/ubi9/python-311:latest
