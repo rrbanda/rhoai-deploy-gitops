@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: orchestrator-8b-route-svc
+  labels:
+    app.kubernetes.io/name: orchestrator-8b
+    app.kubernetes.io/component: route-service
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  type: ClusterIP
+  selector:
+    app: isvc.orchestrator-8b-predictor
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP

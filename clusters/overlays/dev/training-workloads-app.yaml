@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
     targetRevision: main
-    path: usecases/toolorchestra/manifests/training/workloads
+    path: usecases/services/toolorchestra-app/manifests/training/workloads
   destination:
     server: https://kubernetes.default.svc
     namespace: orchestrator-rhoai
