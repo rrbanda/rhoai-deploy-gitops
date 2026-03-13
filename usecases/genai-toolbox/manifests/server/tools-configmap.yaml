@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: genai-toolbox-config
+  labels:
+    app.kubernetes.io/name: genai-toolbox-config
+    app.kubernetes.io/component: config
+data:
+  tools.yaml: |
+    sources:
+      my-pg-source:
+        kind: postgres
+        host: postgres.llamastack.svc.cluster.local
+        port: 5432
+        database: llamastack
+        user: llamastack
+        password: changeme
+
+    tools:
+      list-tables:
+        kind: postgres-sql
+        source: my-pg-source
+        description: List all tables in the database.
+        statement: "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname = 'public';"
+
+      describe-table:
+        kind: postgres-sql
+        source: my-pg-source
+        description: Describe the columns of a specific table.
+        parameters:
+          - name: table_name
+            type: string
+            description: The name of the table to describe.
+        statement: >-
+          SELECT column_name, data_type, is_nullable
+          FROM information_schema.columns
+          WHERE table_schema = 'public' AND table_name = $1
+          ORDER BY ordinal_position;
+
+      run-query:
+        kind: postgres-sql
+        source: my-pg-source
+        description: Run a read-only SQL query against the database.
+        parameters:
+          - name: query
+            type: string
+            description: The SQL SELECT query to execute.
+        statement: $1
+
+    toolsets:
+      database-explorer:
+        - list-tables
+        - describe-table
+        - run-query
