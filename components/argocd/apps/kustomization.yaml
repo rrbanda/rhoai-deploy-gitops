@@ -5,4 +5,5 @@ resources:
   - ../projects/base
   - cluster-operators-appset.yaml
   - cluster-instances-appset.yaml
-  - cluster-usecases-appset.yaml
+  - cluster-models-appset.yaml
+  - cluster-services-appset.yaml

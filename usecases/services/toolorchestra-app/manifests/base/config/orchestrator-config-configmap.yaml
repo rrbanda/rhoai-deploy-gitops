@@ -1,0 +1,225 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: orchestrator-config
+  namespace: orchestrator-rhoai
+  labels:
+    app.kubernetes.io/name: orchestrator-config
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: orchestrator-rhoai
+  annotations:
+    description: >-
+      Single source of truth for all ToolOrchestra runtime configuration.
+      Contains config.yaml (orchestrator settings, model mapping, pricing,
+      prompts, context limits) and tools.json (paper's tool definitions).
+      Edit this ConfigMap and restart the UI pod to apply changes.
+data:
+  config.yaml: |
+    orchestrator:
+      endpoint: http://orchestrator-8b-predictor.orchestrator-8b.svc.cluster.local:8080/v1
+      model: orchestrator-8b
+      max_tokens: 12000
+      temperature: 1.0
+      system_prompt: "You are good at using tools."
+      max_turns: 30
+
+    # Tier1-minimal: all specialists use the two deployed models.
+    # orchestrator-8b serves as general-purpose reasoner/searcher/answerer.
+    # qwen-math-7b handles math-specific answering.
+    specialists:
+      reasoner-1:
+        endpoint: http://orchestrator-8b-predictor.orchestrator-8b.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.7
+        max_tokens: 8000
+      reasoner-2:
+        endpoint: http://orchestrator-8b-predictor.orchestrator-8b.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.5
+        max_tokens: 8000
+      reasoner-3:
+        endpoint: http://orchestrator-8b-predictor.orchestrator-8b.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.5
+        max_tokens: 8000
+      answer-1:
+        endpoint: http://orchestrator-8b-predictor.orchestrator-8b.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.7
+        max_tokens: 8000
+      answer-2:
+        endpoint: http://orchestrator-8b-predictor.orchestrator-8b.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.5
+        max_tokens: 8000
+      answer-3:
+        endpoint: http://orchestrator-8b-predictor.orchestrator-8b.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.5
+        max_tokens: 8000
+      answer-4:
+        endpoint: http://orchestrator-8b-predictor.orchestrator-8b.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.3
+        max_tokens: 4000
+      answer-math-1:
+        endpoint: http://qwen-math-7b-predictor.qwen-math-7b.svc.cluster.local:8080/v1
+        model: qwen-math-7b
+        display: Qwen2.5-Math-7B
+        temperature: 0.2
+        max_tokens: 2000
+      answer-math-2:
+        endpoint: http://qwen-math-7b-predictor.qwen-math-7b.svc.cluster.local:8080/v1
+        model: qwen-math-7b
+        display: Qwen2.5-Math-7B
+        temperature: 0.2
+        max_tokens: 2000
+      search-1:
+        endpoint: http://orchestrator-8b-predictor.orchestrator-8b.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.7
+        max_tokens: 8000
+      search-2:
+        endpoint: http://orchestrator-8b-predictor.orchestrator-8b.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.5
+        max_tokens: 8000
+      search-3:
+        endpoint: http://orchestrator-8b-predictor.orchestrator-8b.svc.cluster.local:8080/v1
+        model: orchestrator-8b
+        display: Orchestrator-8B
+        temperature: 0.3
+        max_tokens: 4000
+
+    pricing:
+      reasoner-1:    { input: 1.25, output: 10.0 }
+      reasoner-2:    { input: 0.25, output: 2.0  }
+      reasoner-3:    { input: 0.8,  output: 0.8  }
+      answer-1:      { input: 1.25, output: 10.0 }
+      answer-2:      { input: 0.25, output: 2.0  }
+      answer-3:      { input: 0.9,  output: 0.9  }
+      answer-4:      { input: 0.8,  output: 0.8  }
+      answer-math-1: { input: 0.9,  output: 0.9  }
+      answer-math-2: { input: 0.2,  output: 0.2  }
+      search-1:      { input: 1.25, output: 10.0 }
+      search-2:      { input: 0.25, output: 2.0  }
+      search-3:      { input: 0.8,  output: 0.8  }
+
+    context_limits:
+      enhance_reasoning:
+        gemini:  { max_code: 40000, max_ctx: 120000, doc_trunc: null }
+        default: { max_code: 16000, max_ctx: 24000,  doc_trunc: 1000 }
+      answer:
+        qwen-math: { max_code: 1000,  max_ctx: 2000,   doc_trunc: 1000 }
+        gemini:    { max_code: 40000, max_ctx: 120000, doc_trunc: null }
+        llama:     { max_code: 10000, max_ctx: 80000,  doc_trunc: null }
+        default:   { max_code: 12000, max_ctx: 24000,  doc_trunc: 1000 }
+      search:
+        gemini:  { max_code: 40000, max_ctx: 120000, doc_trunc: null }
+        default: { max_code: 12000, max_ctx: 24000,  doc_trunc: 1000 }
+
+    prompts:
+      search_query: >-
+        Instead of directly answering the question, please write a query
+        to search for a piece of relevant and missing information. The
+        query should be a few key words about the information to search
+        or a short sentence. Wrap the query within <query> and </query>.
+      reasoning_code: >-
+        Instead of directly answering the question, please write
+        additional python code that will give intermidiate results
+        after execution. Wrap the code within ```python and ```.
+        The code should be self-contained with all the import and
+        initialization.
+      answer_qwen_system: >-
+        Please reason step by step, and put your final answer within \boxed{}.
+      answer_general: >-
+        Use the provided documents and your own knowledge to answer the question.
+        Take a deep breath and think hard with high reasoning,
+        wrap the thoughts within <think> and </think>, and wrap only the exact answer
+        without any explanation within <answer> and </answer>. Output using the following format:
+        <think>
+        ...
+        </think>
+        <answer>
+        ...
+        </answer>
+      answer_llama: >-
+        Wrap the thinking process and explanation between <think> and </think>
+        and wrap only the exact answer without any explanation within <answer>
+        and </answer>.
+
+    preset_questions:
+      - "What is 17 factorial divided by 13 factorial, and is the result a prime number?"
+      - "What is the population of Tokyo compared to Paris?"
+      - "Solve: If f(x) = 3x^2 + 2x - 5, find f'(x) and evaluate f'(3)."
+      - "Who won the Nobel Prize in Physics in 2023 and what was it for?"
+      - "Calculate the compound interest on $10,000 at 5% annual rate compounded quarterly for 3 years."
+
+    tools_json_path: tools.json
+
+  tools.json: |
+    [
+      {
+        "type": "function",
+        "function": {
+          "name": "enhance_reasoning",
+          "description": "tool to enhance answer model reasoning. analyze the problem, write code, execute it and return intermidiate results that will help solve the problem",
+          "parameters": {
+            "properties": {
+              "model": {
+                "description": "The model used to reason. Choices: ['reasoner-1', 'reasoner-2', 'reasoner-3']. reasoner-1 demonstrates strong understanding and reasoning capabilities, which usually provides reliable insights. reasoner-2 can analyze some problems, but could hallucinate and make mistakes in difficult scenarios. reasoner-3 can reason over the context and reveal the logic. \nModel | price per million input tokens | price per million output tokens | average latency\nreasoner-1 | $1.25 | $10 | 31s\nreasoner-2 | $0.25 | $2 | 25s\nreasoner-3 | $0.8 | $0.8 | 9s",
+                "type": "string"
+              }
+            },
+            "required": ["model"],
+            "title": "parameters",
+            "type": "object"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "answer",
+          "description": "give the final answer. Not allowed to call if documents is empty.",
+          "parameters": {
+            "properties": {
+              "model": {
+                "description": "The model used to answer. Choices: ['answer-1', 'answer-2', 'answer-3', 'answer-4', 'answer-math-1', 'answer-math-2']. answer-1 exhibits strong functional calling abilities and performs excellent in most domains (math, physics, social science, etc.). answer-2 presents reasonable solutions in some tasks, but could get stuck in complex reasoning and specific domain knowledge. answer-3 could solve easy to medium tasks, but is not capable of tackling tasks with strong expertise and long-horizon planning. answer-4 demonstrates basic capability: it can understand basic instructions, do simple steps, yet it sometimes misreads details, mixes concepts. answer-math-1 can solve moderate math problems but is a math-only model that will fail on non-math questions. answer-math-2 can perform basic math problems but is a math-only model that will fail on non-math questions. The table below shows the pricing and latency of each model:\nModel | price per million input tokens | price per million output tokens | average latency\nanswer-1 | $1.25 | $10 | 96s\nanswer-2 | $0.25 | $2 | 27s\nanswer-3 | $0.9 | $0.9 | 15s\nanswer-4 | $0.8 | $0.8 | 11s\nanswer-math-1 | $0.9 | $0.9 | 13s\nanswer-math-2 | $0.2 | $0.2 | 9s",
+                "type": "string"
+              }
+            },
+            "required": ["model"],
+            "title": "parameters",
+            "type": "object"
+          }
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "search",
+          "description": "Search for missing information",
+          "parameters": {
+            "properties": {
+              "model": {
+                "description": "The model used to search for missing information. Choices: ['search-1', 'search-2', 'search-3']. search-1 usually identifies the missing information and can write concise queries for effective search. search-2 can reason over the context and write queries to find the missing content for answering questions. search-3 can also write queries to find information. The table below shows the pricing and latency:\nModel | price per million input tokens | price per million output tokens | average latency\nsearch-1 | $1.25 | $10 | 22s\nsearch-2 | $0.25 | $2 | 16s\nsearch-3 | $0.8 | $0.8 | 8s",
+                "type": "string"
+              }
+            },
+            "required": ["model"],
+            "title": "parameters",
+            "type": "object"
+          }
+        }
+      }
+    ]
