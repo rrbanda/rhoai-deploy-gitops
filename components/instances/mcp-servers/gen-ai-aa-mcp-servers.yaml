@@ -11,3 +11,8 @@ data:
       "url": "http://genai-toolbox.genai-toolbox.svc.cluster.local:5000/mcp",
       "description": "MCP Toolbox for Databases -- query and explore PostgreSQL databases via natural language. Provides tools to list tables, describe schemas, and run read-only SQL queries."
     }
+  RHOKP-Documentation: |
+    {
+      "url": "http://rhokp-mcp.rhokp.svc.cluster.local:8000/mcp",
+      "description": "Red Hat OKP -- search RHEL documentation, CVEs, errata, solutions, and articles via natural language. Powered by the Offline Knowledge Portal Solr index."
+    }

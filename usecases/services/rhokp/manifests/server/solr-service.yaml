@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rhokp-solr
+  labels:
+    app.kubernetes.io/name: rhokp-solr
+    app.kubernetes.io/component: solr
+spec:
+  ports:
+    - port: 8983
+      protocol: TCP
+      targetPort: 8983
+      name: solr
+  selector:
+    app: rhokp-solr

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rhokp
+  labels:
+    kubernetes.io/metadata.name: rhokp
+    opendatahub.io/dashboard: "true"
+    app.kubernetes.io/name: rhokp
+    app.kubernetes.io/part-of: rhokp

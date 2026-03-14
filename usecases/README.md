@@ -41,6 +41,7 @@ usecases/
 | **toolorchestra-app** | orchestrator-rhoai | orchestrator-8b, qwen-math-7b | ToolOrchestra UI for multi-model orchestration |
 | **llamastack** | llamastack | orchestrator-8b | LlamaStack distribution with PostgreSQL backend |
 | **genai-toolbox** | genai-toolbox | None (uses llamastack's PostgreSQL) | MCP Toolbox for Databases (PostgreSQL) |
+| **rhokp** | rhokp | None (self-contained with OKP Solr) | Red Hat OKP MCP Server for RHEL docs, CVEs, errata |
 
 > **Deploy models before services.** Services depend on model endpoints being reachable. When deploying manually, deploy all required models and wait for them to become Ready before deploying services.
 

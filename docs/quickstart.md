@@ -84,8 +84,8 @@ Two paths to deploy the full Red Hat OpenShift AI (RHOAI) stack. Both use the sa
     oc wait --for=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'=True \
       datasciencecluster/default-dsc --timeout=600s
 
-    oc apply -k components/instances/dashboard-config/      # Enables GenAI Studio in dashboard
-    oc apply -k components/instances/mcp-servers/            # Registers MCP servers in dashboard
+    oc apply -k components/instances/dashboard-config/      # Enables GenAI Studio (Tech Preview, not enabled by default)
+    oc apply -k components/instances/mcp-servers/            # Registers MCP servers in GenAI Studio
 
     # Phase 4 -- Use Cases (deploy models first, then services)
     oc apply -k usecases/models/orchestrator-8b/profiles/tier1-minimal/

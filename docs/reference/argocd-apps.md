@@ -1,6 +1,6 @@
 # ArgoCD Applications
 
-After bootstrap, ArgoCD manages **24 Applications** across four layers.
+After bootstrap, ArgoCD manages **25 Applications** across four layers.
 
 ## Application Table
 
@@ -22,13 +22,14 @@ After bootstrap, ArgoCD manages **24 Applications** across four layers.
 | `instance-jobset-instance` | `components/instances/jobset-instance/` | Auto (selfHeal) | JobSet operator instance |
 | `instance-rhoai` | `components/instances/rhoai-instance/overlays/dev/` | Auto (selfHeal, no prune) | DataScienceCluster with ignoreDifferences |
 | `instance-dashboard-config` | `components/instances/dashboard-config/` | Auto (selfHeal) | Enables genAiStudio in the RHOAI dashboard |
-| `instance-mcp-servers` | `components/instances/mcp-servers/` | Auto (selfHeal) | Registers GenAI Toolbox as an MCP server in the RHOAI dashboard |
+| `instance-mcp-servers` | `components/instances/mcp-servers/` | Auto (selfHeal) | Registers MCP servers (GenAI Toolbox, OKP) in the RHOAI dashboard |
 | `model-orchestrator-8b` | `usecases/models/orchestrator-8b/profiles/tier1-minimal/` | Auto (selfHeal, prune) | Nemotron-Orchestrator-8B model serving |
 | `model-qwen-math-7b` | `usecases/models/qwen-math-7b/profiles/tier1-minimal/` | Auto (selfHeal, prune) | Qwen2.5-Math-7B-Instruct model serving |
 | `model-gpt-oss-120b` | `usecases/models/gpt-oss-120b/profiles/tier1-minimal/` | Auto (selfHeal, prune) | GPT-OSS-120B model serving (ModelCar) |
 | `service-toolorchestra-app` | `usecases/services/toolorchestra-app/profiles/tier1-minimal/` | Auto (selfHeal, prune) | ToolOrchestra UI + training infra |
 | `service-llamastack` | `usecases/services/llamastack/profiles/tier1-minimal/` | Auto (selfHeal, prune) | LlamaStack Distribution + PostgreSQL |
 | `service-genai-toolbox` | `usecases/services/genai-toolbox/profiles/tier1-minimal/` | Auto (selfHeal, prune) | GenAI Toolbox MCP Server |
+| `service-rhokp` | `usecases/services/rhokp/profiles/tier1-minimal/` | Auto (selfHeal, prune) | Red Hat OKP MCP Server (Solr + MCP) |
 | `usecase-toolorchestra-training` | `usecases/services/toolorchestra-app/manifests/training/workloads/` | **Manual only** | Download jobs + RayJob (on-demand) |
 
 ## Sync Wave Ordering

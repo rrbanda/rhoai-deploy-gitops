@@ -17,7 +17,7 @@ This repository provides production-ready Kustomize manifests for deploying Red 
 - GPU infrastructure (cloud-specific examples provided for AWS)
 - A composable DataScienceCluster (DSC) with 10+ AI capabilities
 - 3 models (orchestrator-8b, qwen-math-7b, gpt-oss-120b) independently deployable via GitOps
-- 3 services (ToolOrchestra, LlamaStack, GenAI Toolbox) auto-discovered by ArgoCD
+- 4 services (ToolOrchestra, LlamaStack, GenAI Toolbox, Red Hat OKP) auto-discovered by ArgoCD
 
 ## What's Inside
 

@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rhokp-solr
+  labels:
+    app.kubernetes.io/name: rhokp-solr
+    app.kubernetes.io/component: solr
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: rhokp-solr
+  template:
+    metadata:
+      labels:
+        app: rhokp-solr
+        app.kubernetes.io/name: rhokp-solr
+        app.kubernetes.io/component: solr
+    spec:
+      serviceAccountName: rhokp-sa
+      containers:
+        - name: solr
+          image: registry.redhat.io/offline-knowledge-portal/rhokp-rhel9:latest
+          env:
+            - name: ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: okp-access-secret
+                  key: OKP_ACCESS_KEY
+            - name: SOLR_JETTY_HOST
+              value: "0.0.0.0"
+          ports:
+            - containerPort: 8983
+              protocol: TCP
+              name: solr
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          readinessProbe:
+            tcpSocket:
+              port: 8983
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            tcpSocket:
+              port: 8983
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            failureThreshold: 3
+          volumeMounts:
+            - name: solr-data
+              mountPath: /var/solr
+      volumes:
+        - name: solr-data
+          persistentVolumeClaim:
+            claimName: okp-solr-data

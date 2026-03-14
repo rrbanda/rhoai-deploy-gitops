@@ -50,6 +50,7 @@ rhoai-deploy-gitops/
 │   └── services/                     # Supporting services
 │       ├── genai-toolbox/
 │       ├── llamastack/
+│       ├── rhokp/
 │       └── toolorchestra-app/
 └── setup.sh                          # Configure repo URL for your fork
 ```
@@ -121,8 +122,8 @@ oc apply -k components/instances/jobset-instance/
 oc apply -k components/instances/rhoai-instance/overlays/dev/
 oc wait --for=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'=True \
   datasciencecluster/default-dsc --timeout=600s
-oc apply -k components/instances/dashboard-config/      # Optional: enables GenAI Studio
-oc apply -k components/instances/mcp-servers/            # Optional: registers MCP servers
+oc apply -k components/instances/dashboard-config/      # Optional: enables GenAI Studio (Tech Preview, not enabled by default)
+oc apply -k components/instances/mcp-servers/            # Optional: registers MCP servers in GenAI Studio
 
 # Phase 4 -- Use Cases (models first, then services)
 oc apply -k usecases/models/orchestrator-8b/profiles/tier1-minimal/
@@ -172,6 +173,7 @@ Models are independently deployable via the `cluster-models` ApplicationSet. Ser
 | Model | **qwen-math-7b** | Qwen2.5-Math-7B-Instruct math specialist |
 | Service | **genai-toolbox** | MCP Toolbox for Databases (PostgreSQL) |
 | Service | **llamastack** | Meta LlamaStack Distribution with agents, RAG, and tool use |
+| Service | **rhokp** | Red Hat OKP MCP Server for RHEL docs, CVEs, errata |
 | Service | **toolorchestra-app** | ToolOrchestra UI for multi-model orchestration |
 
 ## Documentation
@@ -181,7 +183,7 @@ The full documentation site covers:
 - [Architecture and GitOps Patterns](https://rrbanda.github.io/rhoai-deploy-gitops/architecture/) -- app-of-apps, ApplicationSets, dependency chain
 - [Quick Start Guide](https://rrbanda.github.io/rhoai-deploy-gitops/quickstart/) -- GitOps and manual deployment paths
 - [Capabilities Guide](https://rrbanda.github.io/rhoai-deploy-gitops/capabilities/) -- per-capability deployment with composable DSC overlays
-- [ArgoCD Applications](https://rrbanda.github.io/rhoai-deploy-gitops/reference/argocd-apps/) -- all 24 managed applications
+- [ArgoCD Applications](https://rrbanda.github.io/rhoai-deploy-gitops/reference/argocd-apps/) -- all 25 managed applications
 - [Sync Configuration](https://rrbanda.github.io/rhoai-deploy-gitops/reference/sync-config/) -- production-grade ArgoCD settings
 - [Teardown](https://rrbanda.github.io/rhoai-deploy-gitops/reference/teardown/) -- complete removal procedure
 - [Known Issues](https://rrbanda.github.io/rhoai-deploy-gitops/reference/known-issues/) -- gotchas and workarounds
