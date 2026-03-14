@@ -33,7 +33,7 @@ data:
       - provider_id: vllm-orchestrator
         provider_type: remote::vllm
         config:
-          base_url: http://orchestrator-8b-predictor.orchestrator-8b.svc.cluster.local:8080/v1
+          base_url: http://gpt-oss-120b-predictor.gpt-oss-120b.svc.cluster.local:8080/v1
           max_tokens: 4096
           api_token: fake
           network:
@@ -179,7 +179,7 @@ data:
         provider_id: vllm-inference
         model_type: llm
       - metadata: {}
-        model_id: orchestrator-8b
+        model_id: gpt-oss-120b
         provider_id: vllm-orchestrator
         model_type: llm
       - metadata:

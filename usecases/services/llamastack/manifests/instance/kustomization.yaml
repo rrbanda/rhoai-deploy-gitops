@@ -4,5 +4,6 @@ kind: Kustomization
 namespace: llamastack
 
 resources:
+  - llama-stack-secret.yaml
   - llamastack-custom-config.yaml
   - llamastack-distribution.yaml

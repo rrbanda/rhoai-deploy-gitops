@@ -6,9 +6,9 @@ metadata:
   labels:
     machine.openshift.io/cluster-api-cluster: ocp-2qkbk
   annotations:
-    machine.openshift.io/GPU: "4"
-    machine.openshift.io/memoryMb: "393216"
-    machine.openshift.io/vCPU: "48"
+    machine.openshift.io/GPU: "1"
+    machine.openshift.io/memoryMb: "65536"
+    machine.openshift.io/vCPU: "8"
 spec:
   replicas: 1
   selector:
@@ -35,7 +35,7 @@ spec:
           kind: AWSMachineProviderConfig
           ami:
             id: ami-0fd7c367ed8a90d52
-          instanceType: g6e.12xlarge
+          instanceType: g6e.2xlarge
           blockDevices:
             - ebs:
                 encrypted: true
