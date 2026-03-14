@@ -27,20 +27,20 @@ The operator must be installed first (via the DSC) before the use case manifests
 |-----------|----------|-------------|
 | `llamastack` | `LlamaStackDistribution` CR | Runs the LlamaStack server (agents, inference, safety, eval, vector I/O) using a custom patched image |
 | `postgres` | Deployment + PVC + Service | PostgreSQL 16 for agent state, conversations, and metadata |
-| `llamastack-custom-config` | ConfigMap | LlamaStack v2 config with vLLM inference, FAISS, sentence-transformers, and tool runtimes |
+| `llamastack-custom-config` | ConfigMap | LlamaStack v2 config with vLLM inference providers, FAISS, sentence-transformers, and tool runtimes |
 
 ## Architecture
 
 ```mermaid
 graph LR
   Client["Client"] --> LS["LlamaStack Server"]
-  LS --> vLLM["vLLM (orchestrator-8b)"]
+  LS --> vLLM["vLLM (gpt-oss-120b)"]
   LS --> Embed["Sentence Transformers"]
   LS --> FAISS["FAISS Vector Store"]
   LS --> PG["PostgreSQL"]
 ```
 
-LlamaStack connects to the ToolOrchestra `orchestrator-8b` model via the in-cluster service endpoint for inference, and uses local sentence-transformers for embeddings and FAISS for vector storage.
+LlamaStack connects to **GPT-OSS-120B** for inference. By default, the config points to a remote vLLM endpoint; when the local model is running, you can switch to the in-cluster service endpoint. Embeddings use local sentence-transformers (`nomic-embed-text-v1.5`) and vector storage uses FAISS.
 
 ## Prerequisites
 
@@ -66,56 +66,81 @@ The `llamastackoperator` DSC component must be set to `Managed`. This is include
 
 ### 3. Secrets
 
-!!! warning "Secrets required"
-    This use case requires three Secrets that are **not** included in the repository (they contain credentials):
+!!! info "Secret placeholders are in Git -- real values are patched on the cluster"
+    This use case includes two Secret manifests with `CHANGE_ME` placeholder values. ArgoCD's `ignoreDifferences` for Secret `data`/`stringData` prevents it from overwriting manually-patched values on the cluster. After the first GitOps sync, patch the secrets with real values:
 
-    - `postgres-secret` -- key: `password` (PostgreSQL password)
-    - `llama-stack-secret` -- keys: `INFERENCE_MODEL`, `VLLM_URL`, `VLLM_TLS_VERIFY`, `VLLM_API_TOKEN`, `VLLM_MAX_TOKENS`
-    - `gemini-secret` -- key: `api_key` (optional, for Gemini provider)
+    **`postgres-secret`** (key: `password`):
 
-    Create these in the `llamastack` namespace before deploying.
+    ```bash
+    oc patch secret postgres-secret -n llamastack \
+      -p '{"stringData":{"password":"<your-password>"}}'
+    oc rollout restart deployment/postgres -n llamastack
+    ```
+
+    **`llama-stack-secret`** (keys: `INFERENCE_MODEL`, `VLLM_URL`, `VLLM_TLS_VERIFY`, `VLLM_API_TOKEN`, `VLLM_MAX_TOKENS`):
+
+    ```bash
+    oc patch secret llama-stack-secret -n llamastack \
+      -p '{"stringData":{
+        "INFERENCE_MODEL":"gpt-oss-120b",
+        "VLLM_URL":"<vllm-endpoint-url>",
+        "VLLM_TLS_VERIFY":"false",
+        "VLLM_API_TOKEN":"fake",
+        "VLLM_MAX_TOKENS":"4096"
+      }}'
+    oc rollout restart deployment/llamastack -n llamastack
+    ```
 
 ### 4. Inference Backend
 
-!!! info "Dependency on orchestrator-8b model"
-    The LlamaStack config references `orchestrator-8b-predictor.orchestrator-8b.svc.cluster.local`. Deploy the orchestrator-8b model first, or update the vLLM endpoint in the ConfigMap to point to your own model.
+!!! info "Default: remote GPT-OSS-120B endpoint"
+    The default config points both vLLM providers to a remote GPT-OSS-120B endpoint. To use a local model instead, update the `VLLM_URL` in `llama-stack-secret` and the `vllm-orchestrator` `base_url` in `llamastack-custom-config.yaml` to point to your in-cluster InferenceService:
+
+    ```
+    http://<model>-predictor.<namespace>.svc.cluster.local:8080/v1
+    ```
+
+## Inference Providers
+
+The config defines two vLLM providers for different roles:
+
+| Provider | Role | URL Source | Purpose |
+|----------|------|-----------|---------|
+| `vllm-inference` | Primary inference | `${env.VLLM_URL}` (from `llama-stack-secret`) | Main model for chat completions |
+| `vllm-orchestrator` | Orchestration / agents | Hard-coded in ConfigMap | Model for agent orchestration and tool routing |
+
+Both can point to the same model endpoint. Keeping them separate allows swapping one independently (e.g., using a smaller model for orchestration while keeping a large model for inference).
 
 ## Deploy
-
-!!! warning "Model dependency required"
-    LlamaStack requires the **orchestrator-8b** model to be deployed and Ready. The LlamaStack config connects to `orchestrator-8b-predictor.orchestrator-8b.svc.cluster.local` for inference. Deploy the model first, or update the vLLM endpoint in the ConfigMap to point to your own model.
 
 === "GitOps"
 
     LlamaStack is auto-deployed by the `cluster-services` ApplicationSet when using the `tier1-minimal` profile.
 
-    After bootstrapping the cluster, the `service-llamastack` Application is created automatically. Ensure the required Secrets exist in the `llamastack` namespace.
+    After bootstrapping the cluster, the `service-llamastack` Application is created automatically. After the first sync, patch the secrets with real values (see Prerequisites above).
 
 === "Manual"
 
     ```bash
-    # 1. Deploy the orchestrator-8b model (LlamaStack depends on it)
-    oc apply -k usecases/models/orchestrator-8b/profiles/tier1-minimal/
-    oc wait --for=condition=Ready inferenceservice/orchestrator-8b \
-      -n orchestrator-8b --timeout=1800s
+    # 1. Deploy GPT-OSS-120B model (or use a remote endpoint)
+    oc apply -k usecases/models/gpt-oss-120b/profiles/tier1-minimal/
+    oc wait --for=condition=Ready inferenceservice/gpt-oss-120b \
+      -n gpt-oss-120b --timeout=3600s
 
     # 2. Ensure the LlamaStack Operator is installed (DSC component)
-    #    Use the full or dev overlay, or a custom overlay with llamastackoperator: Managed
     oc apply -k components/instances/rhoai-instance/overlays/full/
 
-    # 3. Create the namespace and secrets
-    oc new-project llamastack
-    oc create secret generic postgres-secret --from-literal=password=<your-password> -n llamastack
-    oc create secret generic llama-stack-secret \
-      --from-literal=INFERENCE_MODEL=<model-id> \
-      --from-literal=VLLM_URL=<vllm-endpoint> \
-      --from-literal=VLLM_TLS_VERIFY=false \
-      --from-literal=VLLM_API_TOKEN=<token> \
-      --from-literal=VLLM_MAX_TOKENS=4096 \
-      -n llamastack
-
-    # 4. Deploy the LlamaStack instance
+    # 3. Deploy the LlamaStack instance (creates namespace, secrets, config, CR)
     oc apply -k usecases/services/llamastack/profiles/tier1-minimal/
+
+    # 4. Patch secrets with real values
+    oc patch secret postgres-secret -n llamastack \
+      -p '{"stringData":{"password":"<your-password>"}}'
+    oc patch secret llama-stack-secret -n llamastack \
+      -p '{"stringData":{
+        "VLLM_URL":"http://gpt-oss-120b-predictor.gpt-oss-120b.svc.cluster.local:8080/v1"
+      }}'
+    oc rollout restart deployment/postgres deployment/llamastack -n llamastack
     ```
 
 ## Verify
@@ -132,13 +157,18 @@ oc get llamastackdistribution -n llamastack
 
 # Check the route
 oc get route -n llamastack
+
+# Test inference
+curl -sk https://$(oc get route llamastack -n llamastack -o jsonpath='{.spec.host}')/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model":"vllm-orchestrator/gpt-oss-120b","messages":[{"role":"user","content":"Hello!"}],"max_tokens":50}'
 ```
 
 ## Sync Wave Ordering
 
 | Wave | Resources | Purpose |
 |------|-----------|---------|
-| -1 (default) | Namespace, PostgreSQL (Deployment, PVC, Service) | Infrastructure and database ready first |
+| -1 (default) | Namespace, PostgreSQL (Deployment, PVC, Service), Secrets | Infrastructure and database ready first |
 | 0 | ConfigMap (`llamastack-custom-config`) | Configuration available before server starts |
 | 1 | LlamaStackDistribution CR | Server starts after database and config are ready |
 
@@ -148,17 +178,19 @@ The LlamaStack server exposes these APIs:
 
 | API | Provider | Description |
 |-----|----------|-------------|
-| Inference | `remote::vllm` | Proxies to vLLM-served models |
+| Inference | `remote::vllm` (x2) | Proxies to vLLM-served models (inference + orchestrator) |
 | Agents | `inline::meta-reference` | Stateful agent conversations with tool use |
 | Vector I/O | `inline::faiss` | In-memory vector storage for RAG |
-| Safety | `inline::llama-guard` | Content safety filtering |
+| Safety | `inline::llama-guard` | Content safety filtering (requires `SAFETY_MODEL` env var) |
 | Eval | `inline::meta-reference` | Model evaluation benchmarks |
-| Tool Runtime | `remote::tavily-search`, `inline::rag-runtime` | Web search and RAG tools |
+| Tool Runtime | `remote::tavily-search`, `remote::brave-search`, `inline::rag-runtime`, `remote::model-context-protocol` | Web search, RAG, and MCP tools |
 | Embeddings | `inline::sentence-transformers` | Local embedding model (`nomic-embed-text-v1.5`) |
 
 ## Customization
 
-To change the inference backend, edit the `llamastack-custom-config` ConfigMap in `usecases/services/llamastack/manifests/instance/llamastack-custom-config.yaml`. The `vllm-inference` provider section controls the model endpoint:
+### Changing the Inference Backend
+
+Edit `llama-stack-secret` to change the `VLLM_URL` for the primary inference provider, or edit the `llamastack-custom-config` ConfigMap to change the `vllm-orchestrator` base URL:
 
 ```yaml
 providers:
@@ -166,9 +198,17 @@ providers:
   - provider_id: vllm-inference
     provider_type: remote::vllm
     config:
-      base_url: ${env.VLLM_URL}
-      max_tokens: ${env.VLLM_MAX_TOKENS:=4096}
-      api_token: ${env.VLLM_API_TOKEN:=fake}
+      base_url: ${env.VLLM_URL}          # from llama-stack-secret
+  - provider_id: vllm-orchestrator
+    provider_type: remote::vllm
+    config:
+      base_url: <hard-coded-endpoint>     # edit in ConfigMap
 ```
 
-Update the `llama-stack-secret` with your model's endpoint and credentials.
+### Enabling Safety (Llama Guard)
+
+To enable content safety filtering, deploy a Llama Guard model and set the `SAFETY_MODEL` environment variable in the `LlamaStackDistribution` CR. Without this, the safety provider is registered but non-functional.
+
+### Re-enabling Gemini or OpenAI Providers
+
+Gemini and OpenAI inference providers were removed from the default config. To re-enable them, add the provider blocks back to `llamastack-custom-config.yaml` and create the corresponding secrets (`gemini-secret` with key `api_key`, or set `OPENAI_API_KEY` env var).

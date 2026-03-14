@@ -178,10 +178,7 @@ data:
         model_id: ${env.EMBEDDING_MODEL:=nomic-ai/nomic-embed-text-v1.5}
         provider_id: sentence-transformers
         model_type: embedding
-      shields:
-      - shield_id: llama-guard
-        provider_id: ${env.SAFETY_MODEL:+llama-guard}
-        provider_shield_id: ${env.SAFETY_MODEL:=}
+      shields: []
       vector_dbs: []
       datasets: []
       scoring_fns: []
