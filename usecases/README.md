@@ -30,7 +30,7 @@ usecases/
 
 | Model | Namespace | GPU | Storage | Default | Description |
 |-------|-----------|-----|---------|:---:|-------------|
-| **gpt-oss-120b** | gpt-oss-120b | 1x L40S | OCI ModelCar | Yes | OpenAI GPT-OSS 120B MoE, MXFP4 quantized, Red Hat AI validated |
+| **gpt-oss-120b** | gpt-oss-120b | 4x L40S (TP=4) | OCI ModelCar | Yes | OpenAI GPT-OSS 120B MoE, MXFP4 quantized, Red Hat AI validated |
 | **orchestrator-8b** | orchestrator-8b | 1x | PVC (50Gi) | Excluded | NVIDIA Nemotron-Orchestrator-8B for multi-tool coordination |
 | **qwen-math-7b** | qwen-math-7b | 1x | PVC (30Gi) | Excluded | Qwen2.5-Math-7B-Instruct math specialist |
 
@@ -40,7 +40,7 @@ usecases/
 
 | Service | Namespace | Model Dependencies | Default | Description |
 |---------|-----------|-------------------|:---:|-------------|
-| **llamastack** | llamastack | gpt-oss-120b | Yes | LlamaStack distribution with PostgreSQL backend |
+| **llamastack** | llamastack | gpt-oss-120b (remote) | Yes | LlamaStack distribution with PostgreSQL backend |
 | **genai-toolbox** | genai-toolbox | None (uses llamastack's PostgreSQL) | Yes | MCP Toolbox for Databases (PostgreSQL) |
 | **rhokp** | rhokp | None (self-contained with OKP Solr) | Yes | Red Hat OKP MCP Server for RHEL docs, CVEs, errata |
 | **toolorchestra-app** | orchestrator-rhoai | orchestrator-8b, qwen-math-7b | Excluded | ToolOrchestra UI for multi-model orchestration |
@@ -70,11 +70,19 @@ usecases/
 ## Manual Deployment
 
 ```bash
-# Models (deploy first)
+# Models (deploy first -- only gpt-oss-120b is enabled by default)
 oc apply -k usecases/models/gpt-oss-120b/profiles/tier1-minimal/
+
+# Wait for the model to be ready (image pull takes 30-45 min on fresh nodes)
+oc wait --for=condition=Ready inferenceservice/gpt-oss-120b -n gpt-oss-120b --timeout=3600s
 
 # Services (deploy after models are Ready)
 oc apply -k usecases/services/llamastack/profiles/tier1-minimal/
 oc apply -k usecases/services/genai-toolbox/profiles/tier1-minimal/
 oc apply -k usecases/services/rhokp/profiles/tier1-minimal/
+
+# To deploy excluded models/services, apply their profiles directly:
+# oc apply -k usecases/models/orchestrator-8b/profiles/tier1-minimal/
+# oc apply -k usecases/models/qwen-math-7b/profiles/tier1-minimal/
+# oc apply -k usecases/services/toolorchestra-app/profiles/tier1-minimal/
 ```

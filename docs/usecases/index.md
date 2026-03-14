@@ -27,7 +27,7 @@ usecases/
 
 | Model | Description | Deployed by Default |
 |-------|------------|:---:|
-| **gpt-oss-120b** | OpenAI GPT-OSS 120B MoE (MXFP4, Red Hat AI validated ModelCar) | Yes |
+| **gpt-oss-120b** | OpenAI GPT-OSS 120B MoE (MXFP4, 4x L40S tensor-parallel, Red Hat AI validated ModelCar) | Yes |
 | **orchestrator-8b** | NVIDIA Nemotron-Orchestrator-8B for multi-tool coordination | No (excluded) |
 | **qwen-math-7b** | Qwen2.5-Math-7B-Instruct math specialist | No (excluded) |
 
@@ -38,7 +38,7 @@ usecases/
 
 | Service | Description | Model Dependencies | Deployed by Default | Guide |
 |---------|------------|-------------------|:---:|-------|
-| **llamastack** | Meta's LlamaStack Distribution with agents, RAG, and tool use | gpt-oss-120b | Yes | [LlamaStack](llamastack.md) |
+| **llamastack** | Meta's LlamaStack Distribution with agents, RAG, and tool use | gpt-oss-120b (remote by default) | Yes | [LlamaStack](llamastack.md) |
 | **genai-toolbox** | GenAI Toolbox MCP Server for database tools | None (uses llamastack's PostgreSQL) | Yes | [GenAI Toolbox](genai-toolbox.md) |
 | **rhokp** | Red Hat OKP MCP Server for RHEL documentation, CVEs, errata | None (self-contained with OKP Solr) | Yes | [Red Hat OKP](rhokp.md) |
 | **toolorchestra-app** | NVIDIA ToolOrchestra UI for multi-model orchestration | orchestrator-8b, qwen-math-7b | No (excluded) | [ToolOrchestra](toolorchestra.md) |
