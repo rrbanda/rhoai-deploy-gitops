@@ -29,19 +29,19 @@ spec:
       args:
         - --dtype=auto
         - --max-model-len=16384
-        - --gpu-memory-utilization=0.92
-        - --tensor-parallel-size=2
+        - --gpu-memory-utilization=0.90
+        - --tensor-parallel-size=4
         - --enforce-eager
         - --trust-remote-code
       resources:
         requests:
-          cpu: "4"
-          memory: "48Gi"
-          nvidia.com/gpu: "2"
-        limits:
-          cpu: "12"
+          cpu: "8"
           memory: "96Gi"
-          nvidia.com/gpu: "2"
+          nvidia.com/gpu: "4"
+        limits:
+          cpu: "16"
+          memory: "192Gi"
+          nvidia.com/gpu: "4"
     nodeSelector:
       gpu-type: l40s
     tolerations:
