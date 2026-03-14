@@ -50,7 +50,8 @@ rhoai-deploy-gitops/
     └── services/                     # Application services
         ├── toolorchestra-app/        # NVIDIA ToolOrchestra UI
         ├── llamastack/               # Meta LlamaStack Distribution
-        └── genai-toolbox/            # GenAI Toolbox MCP Server
+        ├── genai-toolbox/            # GenAI Toolbox MCP Server
+        └── rhokp/                    # Red Hat OKP MCP Server
 ```
 
 !!! warning "Using a fork? Update the repo URL"

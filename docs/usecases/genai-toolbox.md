@@ -28,7 +28,7 @@ GenAI Toolbox connects to the LlamaStack PostgreSQL database at `postgres.llamas
 |-------------|-----|
 | RHOAI platform (DSC Ready) | Namespace and dashboard integration |
 | LlamaStack PostgreSQL | Toolbox connects to `postgres.llamastack.svc.cluster.local` |
-| `dashboard-config` instance | Enables GenAI Studio in the RHOAI dashboard |
+| `dashboard-config` instance | Enables GenAI Studio in the RHOAI dashboard (Tech Preview, not enabled by default) |
 | `mcp-servers` instance | Registers GenAI Toolbox as an MCP server in the dashboard |
 
 !!! warning "Secrets required"

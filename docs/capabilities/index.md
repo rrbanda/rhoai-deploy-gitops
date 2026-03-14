@@ -169,8 +169,8 @@ oc wait --for=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'=True \
   datasciencecluster/default-dsc --timeout=600s
 
 # Post-DSC instances (target the redhat-ods-applications namespace created by DSC)
-oc apply -k components/instances/dashboard-config/     # Enables GenAI Studio in dashboard
-oc apply -k components/instances/mcp-servers/           # Registers MCP servers in dashboard
+oc apply -k components/instances/dashboard-config/     # Enables GenAI Studio (Tech Preview, not enabled by default)
+oc apply -k components/instances/mcp-servers/           # Registers MCP servers in GenAI Studio
 ```
 
 ### Phase 4 -- Use Cases (models before services)
