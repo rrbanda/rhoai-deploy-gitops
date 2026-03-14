@@ -13,6 +13,9 @@ spec:
         revision: main
         directories:
           - path: usecases/services/*/profiles/tier1-minimal
+          # Exclude services not currently deployed (re-enable by removing exclude)
+          - path: usecases/services/toolorchestra-app/profiles/tier1-minimal
+            exclude: true
   template:
     metadata:
       name: 'service-{{ index .path.segments 2 }}'
