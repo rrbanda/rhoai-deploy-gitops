@@ -126,9 +126,17 @@ oc apply -k components/instances/dashboard-config/      # Optional: enables GenA
 oc apply -k components/instances/mcp-servers/            # Optional: registers MCP servers in GenAI Studio
 
 # Phase 4 -- Use Cases (models first, then services)
-oc apply -k usecases/models/orchestrator-8b/profiles/tier1-minimal/
-oc apply -k usecases/models/qwen-math-7b/profiles/tier1-minimal/
-oc apply -k usecases/services/toolorchestra-app/profiles/tier1-minimal/
+# Only gpt-oss-120b is deployed by default; other models are available but excluded
+oc apply -k usecases/models/gpt-oss-120b/profiles/tier1-minimal/
+oc wait --for=condition=Ready inferenceservice/gpt-oss-120b -n gpt-oss-120b --timeout=3600s
+oc apply -k usecases/services/llamastack/profiles/tier1-minimal/
+oc apply -k usecases/services/genai-toolbox/profiles/tier1-minimal/
+oc apply -k usecases/services/rhokp/profiles/tier1-minimal/
+
+# Optional: deploy excluded models/services
+# oc apply -k usecases/models/orchestrator-8b/profiles/tier1-minimal/
+# oc apply -k usecases/models/qwen-math-7b/profiles/tier1-minimal/
+# oc apply -k usecases/services/toolorchestra-app/profiles/tier1-minimal/
 ```
 
 See the [Quick Start Guide](https://rrbanda.github.io/rhoai-deploy-gitops/quickstart/) for detailed instructions with wait commands and verification steps.
@@ -166,15 +174,17 @@ The base DataScienceCluster starts minimal (Dashboard only). Pick an overlay:
 
 Models are independently deployable via the `cluster-models` ApplicationSet. Services are discovered by the `cluster-services` ApplicationSet. See [usecases/README.md](usecases/README.md) for the full catalog.
 
-| Category | Name | Description |
-|----------|------|-------------|
-| Model | **gpt-oss-120b** | OpenAI GPT-OSS 120B MoE (MXFP4 quantized, Red Hat AI validated) |
-| Model | **orchestrator-8b** | NVIDIA Nemotron-Orchestrator-8B for multi-tool coordination |
-| Model | **qwen-math-7b** | Qwen2.5-Math-7B-Instruct math specialist |
-| Service | **genai-toolbox** | MCP Toolbox for Databases (PostgreSQL) |
-| Service | **llamastack** | Meta LlamaStack Distribution with agents, RAG, and tool use |
-| Service | **rhokp** | Red Hat OKP MCP Server for RHEL docs, CVEs, errata |
-| Service | **toolorchestra-app** | ToolOrchestra UI for multi-model orchestration |
+| Category | Name | Default | Description |
+|----------|------|:---:|-------------|
+| Model | **gpt-oss-120b** | Yes | OpenAI GPT-OSS 120B MoE (MXFP4, 4x L40S tensor-parallel) |
+| Model | **orchestrator-8b** | Excluded | NVIDIA Nemotron-Orchestrator-8B for multi-tool coordination |
+| Model | **qwen-math-7b** | Excluded | Qwen2.5-Math-7B-Instruct math specialist |
+| Service | **llamastack** | Yes | Meta LlamaStack Distribution with agents, RAG, and tool use |
+| Service | **genai-toolbox** | Yes | MCP Toolbox for Databases (PostgreSQL) |
+| Service | **rhokp** | Yes | Red Hat OKP MCP Server for RHEL docs, CVEs, errata |
+| Service | **toolorchestra-app** | Excluded | ToolOrchestra UI for multi-model orchestration |
+
+> **Selective deployment:** Models and services marked "Excluded" have manifests in Git but are skipped by ArgoCD. To deploy one, remove its `exclude` entry from the relevant ApplicationSet and push. See [usecases/README.md](usecases/README.md) for details.
 
 ## Documentation
 
