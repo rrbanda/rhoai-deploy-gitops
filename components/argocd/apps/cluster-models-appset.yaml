@@ -5,6 +5,8 @@ metadata:
   namespace: openshift-gitops
 spec:
   goTemplate: true
+  syncPolicy:
+    applicationsSync: sync
   generators:
     - git:
         repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
