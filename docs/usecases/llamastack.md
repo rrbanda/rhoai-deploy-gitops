@@ -8,7 +8,7 @@ LlamaStack is Meta's open framework for building AI applications with agents, RA
 graph TD
   DSC["DataScienceCluster"] -->|"llamastackoperator: Managed"| LSO["Llama Stack Operator (installed by RHOAI)"]
   LSO -->|"provides CRD"| CRD["LlamaStackDistribution CRD"]
-  CRD -->|"instance created by"| UC["usecases/llamastack/ manifests"]
+  CRD -->|"instance created by"| UC["usecases/services/llamastack/ manifests"]
   UC --> LSD["LlamaStackDistribution CR"]
   UC --> PG["PostgreSQL 16"]
   UC --> CM["ConfigMap (custom config)"]
@@ -17,7 +17,7 @@ graph TD
 | Layer | What | Who manages it | Path in this repo |
 |-------|------|----------------|-------------------|
 | **Operator** (DSC component) | Installs the Llama Stack Operator and `LlamaStackDistribution` CRD | RHOAI Operator via the DSC | `components/instances/rhoai-instance/` -- set `llamastackoperator: Managed` |
-| **Instance** (use case) | Creates a `LlamaStackDistribution` CR, PostgreSQL database, and custom config | This repo's use case manifests | `usecases/llamastack/` |
+| **Instance** (use case) | Creates a `LlamaStackDistribution` CR, PostgreSQL database, and custom config | This repo's use case manifests | `usecases/services/llamastack/` |
 
 The operator must be installed first (via the DSC) before the use case manifests can create an instance.
 
@@ -77,25 +77,33 @@ The `llamastackoperator` DSC component must be set to `Managed`. This is include
 
 ### 4. Inference Backend
 
-!!! info "Dependency on ToolOrchestra"
-    The LlamaStack config references `orchestrator-8b-predictor.orchestrator-rhoai.svc.cluster.local`. Deploy ToolOrchestra first, or update the vLLM endpoint in the ConfigMap to point to your own model.
+!!! info "Dependency on orchestrator-8b model"
+    The LlamaStack config references `orchestrator-8b-predictor.orchestrator-8b.svc.cluster.local`. Deploy the orchestrator-8b model first, or update the vLLM endpoint in the ConfigMap to point to your own model.
 
 ## Deploy
 
+!!! warning "Model dependency required"
+    LlamaStack requires the **orchestrator-8b** model to be deployed and Ready. The LlamaStack config connects to `orchestrator-8b-predictor.orchestrator-8b.svc.cluster.local` for inference. Deploy the model first, or update the vLLM endpoint in the ConfigMap to point to your own model.
+
 === "GitOps"
 
-    LlamaStack is auto-deployed by the `cluster-usecases` ApplicationSet when using the `tier1-minimal` profile.
+    LlamaStack is auto-deployed by the `cluster-services` ApplicationSet when using the `tier1-minimal` profile.
 
-    After bootstrapping the cluster, the `usecase-llamastack` Application is created automatically. Ensure the required Secrets exist in the `llamastack` namespace.
+    After bootstrapping the cluster, the `service-llamastack` Application is created automatically. Ensure the required Secrets exist in the `llamastack` namespace.
 
 === "Manual"
 
     ```bash
-    # 1. Ensure the LlamaStack Operator is installed (DSC component)
+    # 1. Deploy the orchestrator-8b model (LlamaStack depends on it)
+    oc apply -k usecases/models/orchestrator-8b/profiles/tier1-minimal/
+    oc wait --for=condition=Ready inferenceservice/orchestrator-8b \
+      -n orchestrator-8b --timeout=1800s
+
+    # 2. Ensure the LlamaStack Operator is installed (DSC component)
     #    Use the full or dev overlay, or a custom overlay with llamastackoperator: Managed
     oc apply -k components/instances/rhoai-instance/overlays/full/
 
-    # 2. Create the namespace and secrets
+    # 3. Create the namespace and secrets
     oc new-project llamastack
     oc create secret generic postgres-secret --from-literal=password=<your-password> -n llamastack
     oc create secret generic llama-stack-secret \
@@ -106,8 +114,8 @@ The `llamastackoperator` DSC component must be set to `Managed`. This is include
       --from-literal=VLLM_MAX_TOKENS=4096 \
       -n llamastack
 
-    # 3. Deploy the LlamaStack instance
-    oc apply -k usecases/llamastack/profiles/tier1-minimal/
+    # 4. Deploy the LlamaStack instance
+    oc apply -k usecases/services/llamastack/profiles/tier1-minimal/
     ```
 
 ## Verify
@@ -150,7 +158,7 @@ The LlamaStack server exposes these APIs:
 
 ## Customization
 
-To change the inference backend, edit the `llamastack-custom-config` ConfigMap in `usecases/llamastack/manifests/instance/llamastack-custom-config.yaml`. The `vllm-inference` provider section controls the model endpoint:
+To change the inference backend, edit the `llamastack-custom-config` ConfigMap in `usecases/services/llamastack/manifests/instance/llamastack-custom-config.yaml`. The `vllm-inference` provider section controls the model endpoint:
 
 ```yaml
 providers:

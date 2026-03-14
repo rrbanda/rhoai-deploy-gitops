@@ -23,6 +23,7 @@ graph TD
   CertMgr -->|"required"| KueueInst["Kueue Instance + ClusterQueue"]
   CertMgr -->|"required"| Training["Training"]
   CertMgr -->|"required"| LlamaStackOp["LlamaStack Operator"]
+  ServiceMesh["ServiceMesh Operator"] -->|"required"| LlamaStackOp
   NFD["NFD Operator"] --> GPU["GPU Operator"]
   KueueOp["Kueue Operator"] --> KueueInst
   JobSetOp["JobSet Operator"] --> JobSetInst["JobSet Instance"]
@@ -54,6 +55,7 @@ graph TD
 - Kueue is required for training workloads that need GPU quota management
 - **JobSet** is required for distributed training (TrainJob depends on it)
 - cert-manager is required for KServe (TLS via Knative), Kueue-based workloads (training), distributed inference (llm-d), and LlamaStack
+- ServiceMesh Operator 3.x is required for LlamaStack
 - Model Registry requires an external MySQL database (5.x+) and S3-compatible object storage
 - Capabilities without GPU needs (Pipelines, Workbenches, Registry) can run on CPU-only clusters
 
@@ -124,13 +126,14 @@ making profiles fully composable without duplication.
 
 ## Manual Installation Order
 
-When deploying without ArgoCD, install in this order. Each step must complete
-before moving to the next.
+When deploying without ArgoCD, install in this order. The four phases must be
+completed sequentially -- each phase depends on the previous one.
 
-### 1. Operators (install all you need)
+### Phase 1 -- Pre-RHOAI Operators
 
 ```bash
 oc apply -k components/operators/cert-manager/       # Required for KServe, training, Kueue, LlamaStack
+oc apply -k components/operators/servicemesh/         # Required for LlamaStack
 oc apply -k components/operators/nfd/                 # Required for GPU
 oc apply -k components/operators/gpu-operator/        # Required for GPU
 oc apply -k components/operators/kueue-operator/      # Required for training
@@ -138,30 +141,47 @@ oc apply -k components/operators/jobset-operator/     # Required for training
 oc apply -k components/operators/rhoai-operator/      # Always required
 
 # Wait for all CSVs to reach Succeeded (re-run until all show Succeeded)
-watch "oc get csv -A | grep -E 'cert-manager|nfd|gpu-operator|kueue|jobset|rhods'"
+watch "oc get csv -A | grep -E 'cert-manager|servicemesh|nfd|gpu-operator|kueue|jobset|rhods'"
 
 # IMPORTANT: Do NOT proceed until every CSV shows "Succeeded".
 ```
 
-### 2. Instances (order matters)
+### Phase 2 -- Pre-DSC Instances (order matters)
 
 ```bash
 oc apply -k components/instances/nfd-instance/        # NFD first (GPU depends on it)
 oc apply -k components/instances/gpu-instance/         # GPU ClusterPolicy
-oc apply -k components/instances/gpu-workers/          # GPU MachineSets
+oc apply -k components/instances/gpu-workers/examples/aws/  # GPU MachineSets (cloud-specific)
 oc apply -k components/instances/cluster-autoscaler/   # Auto-scaling
 oc apply -k components/instances/kueue-instance/       # Kueue
 oc apply -k components/instances/kueue-config/         # GPU ResourceFlavors + ClusterQueue
 oc apply -k components/instances/jobset-instance/      # JobSet
-
-# RHOAI DSC -- pick your overlay
-oc apply -k components/instances/rhoai-instance/overlays/serving/
 ```
 
-### 3. Use cases
+### Phase 3 -- DSC + Post-DSC Instances
 
 ```bash
-oc apply -k usecases/toolorchestra/profiles/tier1-minimal/
+# RHOAI DSC -- pick your overlay
+oc apply -k components/instances/rhoai-instance/overlays/serving/
+
+# Wait for DSC to be Ready before applying post-DSC instances
+oc wait --for=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'=True \
+  datasciencecluster/default-dsc --timeout=600s
+
+# Post-DSC instances (target the redhat-ods-applications namespace created by DSC)
+oc apply -k components/instances/dashboard-config/     # Enables GenAI Studio in dashboard
+oc apply -k components/instances/mcp-servers/           # Registers MCP servers in dashboard
+```
+
+### Phase 4 -- Use Cases (models before services)
+
+```bash
+# Deploy models first
+oc apply -k usecases/models/orchestrator-8b/profiles/tier1-minimal/
+oc apply -k usecases/models/qwen-math-7b/profiles/tier1-minimal/
+
+# Deploy services (depend on model endpoints being reachable)
+oc apply -k usecases/services/toolorchestra-app/profiles/tier1-minimal/
 ```
 
 ## Minimal Installs by Goal

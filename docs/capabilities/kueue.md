@@ -63,35 +63,27 @@ oc get resourceflavors
 
 ### ResourceFlavors
 
-ResourceFlavors map to GPU hardware types via node labels:
+The default configuration uses a generic `default-gpu` ResourceFlavor that works with any NVIDIA GPU:
 
 ```yaml
 apiVersion: kueue.x-k8s.io/v1beta1
 kind: ResourceFlavor
 metadata:
-  name: gpu-l4
-spec:
-  nodeLabels:
-    nvidia.com/gpu.product: NVIDIA-L4
----
-apiVersion: kueue.x-k8s.io/v1beta1
-kind: ResourceFlavor
-metadata:
-  name: gpu-l40s
-spec:
-  nodeLabels:
-    nvidia.com/gpu.product: NVIDIA-L40S
+  name: default-gpu
+spec: {}
 ```
+
+For GPU-type-specific scheduling, see `components/instances/kueue-config/examples/resource-flavors-nvidia.yaml` for flavors that target specific GPU products (L4, L40S) via node labels.
 
 ### ClusterQueue
 
-The ClusterQueue defines resource quotas per flavor:
+The ClusterQueue defines resource quotas:
 
-| Resource | L40S Quota | L4 Quota |
-|----------|-----------|----------|
-| CPU | 16 | 32 |
-| Memory | 64Gi | 128Gi |
-| nvidia.com/gpu | 1 | 4 |
+| Resource | Quota |
+|----------|-------|
+| CPU | 48 |
+| Memory | 192Gi |
+| nvidia.com/gpu | 8 |
 
 Preemption is enabled: `LowerPriority` within the queue, `Any` within the
 cohort.
@@ -134,9 +126,9 @@ Supported workload types (configured in Kueue instance):
 Edit `components/instances/kueue-config/cluster-queue.yaml` to change quota
 limits, add new flavors, or adjust preemption policies.
 
-To add a new GPU type (e.g., A100):
+To use GPU-type-specific flavors instead of the generic `default-gpu`:
 
-1. Add a `ResourceFlavor` in `resource-flavor.yaml`:
+1. Replace `resource-flavor.yaml` with per-GPU-type flavors (see `examples/resource-flavors-nvidia.yaml`):
    ```yaml
    apiVersion: kueue.x-k8s.io/v1beta1
    kind: ResourceFlavor

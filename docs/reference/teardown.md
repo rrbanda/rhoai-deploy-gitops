@@ -8,9 +8,13 @@ Complete removal of Red Hat OpenShift AI (RHOAI) and all managed operators. Run 
 ## Procedure
 
 ```bash
-# 1. Delete use case namespaces
+# 1. Delete model and service namespaces
 oc delete namespace orchestrator-rhoai --wait=true --timeout=300s
+oc delete namespace orchestrator-8b --wait=true --timeout=300s 2>/dev/null || true
+oc delete namespace qwen-math-7b --wait=true --timeout=300s 2>/dev/null || true
+oc delete namespace gpt-oss-120b --wait=true --timeout=300s 2>/dev/null || true
 oc delete namespace llamastack --wait=true --timeout=300s 2>/dev/null || true
+oc delete namespace genai-toolbox --wait=true --timeout=300s 2>/dev/null || true
 
 # 2. Delete DataScienceCluster and DSCInitialization
 oc delete datasciencecluster default-dsc --wait=true --timeout=300s

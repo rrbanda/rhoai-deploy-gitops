@@ -145,7 +145,7 @@ Key fields:
 - `storageUri: "pvc://..."` -- loads model weights from a PVC
 - `opendatahub.io/dashboard: "true"` -- makes the model visible in the RHOAI Dashboard
 
-For a complete working example, see `usecases/toolorchestra/manifests/serving/`.
+For complete working examples, see `usecases/models/orchestrator-8b/manifests/` and `usecases/models/gpt-oss-120b/manifests/`.
 
 ## Disable It
 

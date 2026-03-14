@@ -14,13 +14,11 @@ NVIDIA ToolOrchestra is a multi-model orchestrator that coordinates specialized 
 
 | Profile | Models | Training | Use Case |
 |---------|--------|----------|----------|
-| `tier1-minimal` | orchestrator-8b, qwen-math-7b | Infra only | Development, demos |
-| `tier2-standard` | orchestrator-8b, qwen-math-7b, qwen3-32b | Infra only | Staging |
-| `tier3-full` | orchestrator-8b, qwen-math-7b, qwen3-32b | Infra only | Production |
+| `tier1-minimal` | orchestrator-8b, qwen-math-7b | Not included | Development, demos |
 | `training` | orchestrator-8b, qwen-math-7b | Full (infra + workloads) | Training runs |
 
-!!! note "tier2 vs tier3"
-    `tier2-standard` and `tier3-full` currently deploy the same models. They differ only by a `tier` label ("2" vs "3") for environment separation. Extend `tier3-full` with additional models as your cluster scales.
+!!! tip "Adding profiles"
+    Create additional profiles (e.g. `tier2-standard` with more models) by adding a new directory under `profiles/`. See [CONTRIBUTING.md](https://github.com/rrbanda/rhoai-deploy-gitops/blob/main/CONTRIBUTING.md) for conventions.
 
 ## Prerequisites
 
@@ -34,55 +32,70 @@ ToolOrchestra deploys InferenceServices that require a fully configured RHOAI pl
 | Kueue + JobSet (for training only) | Training workloads need GPU quota management | [Training](../capabilities/training.md) |
 
 !!! warning "GPU MachineSet customization"
-    The `gpu-workers` manifests contain cluster-specific values (AMI ID, subnet, instance type). Edit them to match your cluster before deploying. See [GPU Infrastructure](../capabilities/gpu-infrastructure.md).
+    GPU worker provisioning is cloud-specific. Example manifests for AWS are in `components/instances/gpu-workers/examples/aws/`. Customize them for your cluster or create your own. See [GPU Infrastructure](../capabilities/gpu-infrastructure.md).
 
 ## Deploy
 
+!!! warning "Model dependencies required"
+    ToolOrchestra requires **orchestrator-8b** and **qwen-math-7b** models to be deployed and Ready. The ToolOrchestra UI connects to these model endpoints at runtime. Without them, the UI will load but inference calls will fail.
+
 === "GitOps"
 
-    ToolOrchestra is auto-deployed by the `cluster-usecases` ApplicationSet when using the `tier1-minimal` profile.
+    ToolOrchestra is auto-deployed by the `cluster-services` ApplicationSet when using the `tier1-minimal` profile.
 
-    After bootstrapping the cluster, the `usecase-toolorchestra` Application is created automatically.
+    After bootstrapping the cluster, the `service-toolorchestra-app` Application is created automatically. Model dependencies (orchestrator-8b, qwen-math-7b) are deployed separately by the `cluster-models` ApplicationSet.
 
 === "Manual"
 
     ```bash
-    oc apply -k usecases/toolorchestra/profiles/tier1-minimal/
+    # Deploy models first (services depend on these endpoints)
+    oc apply -k usecases/models/orchestrator-8b/profiles/tier1-minimal/
+    oc apply -k usecases/models/qwen-math-7b/profiles/tier1-minimal/
 
     # Wait for models to download and become Ready
     oc wait --for=condition=Ready inferenceservice/orchestrator-8b \
-      -n orchestrator-rhoai --timeout=1800s
+      -n orchestrator-8b --timeout=1800s
     oc wait --for=condition=Ready inferenceservice/qwen-math-7b \
-      -n orchestrator-rhoai --timeout=1800s
+      -n qwen-math-7b --timeout=1800s
+
+    # Deploy the ToolOrchestra service
+    oc apply -k usecases/services/toolorchestra-app/profiles/tier1-minimal/
     ```
 
 ## Sync Wave Ordering
 
-Within the `usecase-toolorchestra` app, sync waves ensure correct resource ordering:
+Sync waves ensure correct resource ordering across the related ArgoCD Applications:
+
+**`model-orchestrator-8b` and `model-qwen-math-7b` apps:**
 
 | Wave | Resources | Purpose |
 |------|-----------|---------|
-| -1 (default) | Namespace, RBAC, ConfigMaps, PVCs, ServingRuntimes, Service, Route, NetworkPolicy, LocalQueue | Infrastructure created first |
+| -1 (default) | Namespace, PVCs, ServingRuntimes, Service, Route | Infrastructure created first |
 | 0 | `download-orchestrator-8b`, `download-qwen-math-7b` Jobs | Model downloads run before predictors start |
 | 1 | `orchestrator-8b`, `qwen-math-7b` InferenceServices | Predictors created after models are downloaded |
 
 Download jobs are idempotent (check for `.download_complete` marker) and have no TTL, so completed jobs persist as Synced/Healthy in ArgoCD.
 
+**`service-toolorchestra-app` app:** Deploys Namespace, RBAC, ConfigMaps, NetworkPolicy, and the ToolOrchestra UI Deployment at the default wave. No sync wave ordering is needed since it contains no download jobs or InferenceServices.
+
 ## Training Pipeline
 
 The repository includes a GRPO training pipeline using **KubeRay** for distributed training and **Kueue** for GPU quota management.
 
-### Training Infrastructure (always deployed)
+### Training Infrastructure (deploy separately)
 
-Deployed automatically by `tier1-minimal`:
+Training infrastructure lives in `usecases/services/toolorchestra-app/manifests/training/infra/` and must be deployed before running training workloads:
 
 - **LocalQueue** (`training-queue`) -- namespaced queue pointing to `training-cluster-queue`
 - **PVC** (`training-checkpoints`, 100Gi) -- stores base model, dataset, and checkpoints
 - **ConfigMap** (`grpo-training-config`) -- GRPO hyperparameters adapted for L4 GPUs
 
+!!! warning "Not included in tier1-minimal"
+    The `tier1-minimal` profile deploys only the ToolOrchestra UI. Training infrastructure and workloads require separate deployment.
+
 ### Training Workloads (on-demand)
 
-Managed by `usecase-toolorchestra-training` with **manual sync**:
+Managed by `usecase-toolorchestra-training` (explicit Application in `clusters/overlays/dev/`) with **manual sync**:
 
 - **Download Jobs** (sync-wave 0):
     - `download-qwen3-8b` -- downloads Qwen/Qwen3-8B base model
@@ -108,7 +121,8 @@ Managed by `usecase-toolorchestra-training` with **manual sync**:
 === "Manual"
 
     ```bash
-    oc apply -k usecases/toolorchestra/manifests/training/workloads/
+    # Deploys both training infra (LocalQueue, PVC, ConfigMap) and workloads (download jobs, RayJob)
+    oc apply -k usecases/services/toolorchestra-app/manifests/training/
     ```
 
 ### Monitor Training
@@ -120,12 +134,12 @@ oc logs -f -l app.kubernetes.io/name=grpo-head -n orchestrator-rhoai
 
 ## GPU Worker Node Scaling
 
-GPU worker nodes are fully GitOps-managed.
+GPU worker nodes can be managed via Git (cloud-specific, see `components/instances/gpu-workers/examples/aws/`).
 
 ### Manual Scaling via Git
 
 ```bash
-# Edit components/instances/gpu-workers/gpu-machineset-l4.yaml
+# Edit components/instances/gpu-workers/examples/aws/gpu-machineset-l4.yaml
 #   spec.replicas: 5
 git commit -am "Scale L4 GPU workers to 5" && git push
 ```

@@ -23,6 +23,21 @@ spec:
         path: '{{ .path.path }}'
       destination:
         server: https://kubernetes.default.svc
+      ignoreDifferences:
+        - group: serving.kserve.io
+          kind: InferenceService
+          jsonPointers:
+            - /status
+            - /metadata/annotations
+        - group: serving.kserve.io
+          kind: ServingRuntime
+          jsonPointers:
+            - /status
+        - group: route.openshift.io
+          kind: Route
+          jsonPointers:
+            - /spec/host
+            - /status
       syncPolicy:
         automated:
           selfHeal: true
@@ -31,6 +46,7 @@ spec:
           - ServerSideApply=true
           - SkipDryRunOnMissingResource=true
           - CreateNamespace=true
+          - RespectIgnoreDifferences=true
         retry:
           limit: 10
           backoff:

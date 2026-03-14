@@ -13,6 +13,8 @@ spec:
           - path: components/instances/*
           - path: components/instances/rhoai-instance
             exclude: true
+          - path: components/instances/gpu-workers
+            exclude: true
   template:
     metadata:
       name: 'instance-{{ .path.basename }}'
@@ -25,6 +27,15 @@ spec:
         path: '{{ .path.path }}'
       destination:
         server: https://kubernetes.default.svc
+      ignoreDifferences:
+        - group: nvidia.com
+          kind: ClusterPolicy
+          jsonPointers:
+            - /status
+        - group: nfd.openshift.io
+          kind: NodeFeatureDiscovery
+          jsonPointers:
+            - /status
       syncPolicy:
         automated:
           selfHeal: true
@@ -32,6 +43,7 @@ spec:
         syncOptions:
           - ServerSideApply=true
           - SkipDryRunOnMissingResource=true
+          - RespectIgnoreDifferences=true
         retry:
           limit: 10
           backoff:

@@ -76,7 +76,7 @@ multi-pod job orchestration.
     # 2. Install GPU infrastructure
     oc apply -k components/instances/nfd-instance/
     oc apply -k components/instances/gpu-instance/
-    oc apply -k components/instances/gpu-workers/
+    oc apply -k components/instances/gpu-workers/examples/aws/  # cloud-specific
 
     # 3. Install Kueue and JobSet instances
     oc apply -k components/instances/kueue-instance/
@@ -112,8 +112,8 @@ This repo includes a complete GRPO training pipeline. To run it:
 # Via ArgoCD
 argocd app sync usecase-toolorchestra-training
 
-# Or manually
-oc apply -k usecases/toolorchestra/manifests/training/workloads/
+# Or manually (deploys both training infra and workloads)
+oc apply -k usecases/services/toolorchestra-app/manifests/training/
 ```
 
 The training pipeline uses sync waves:
@@ -129,11 +129,17 @@ oc logs -f -l app.kubernetes.io/name=grpo-head -n orchestrator-rhoai
 
 ### Training infrastructure resources
 
-The `tier1-minimal` profile automatically deploys training infrastructure:
+Training infrastructure must be deployed separately before running training workloads. These resources live in `usecases/services/toolorchestra-app/manifests/training/infra/`:
 
 - **LocalQueue** (`training-queue`) -- namespaced Kueue queue
 - **PVC** (`training-checkpoints`, 100Gi) -- model + dataset + checkpoint storage
 - **ConfigMap** (`grpo-training-config`) -- GRPO hyperparameters
+
+Deploy infra and workloads together:
+
+```bash
+oc apply -k usecases/services/toolorchestra-app/manifests/training/
+```
 
 ## Example: Minimal RayJob
 

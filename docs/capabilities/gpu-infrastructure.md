@@ -17,7 +17,7 @@ NFD must be installed and running before the GPU Operator, as the GPU Operator
 relies on NFD node labels to identify GPU hardware.
 
 !!! warning "Cluster-specific configuration required"
-    The GPU MachineSet manifests in `components/instances/gpu-workers/` contain cluster-specific values (AMI ID, infrastructure ID, subnets, security groups). You must update these for your cluster before deploying. See [Customizing for your cluster](#customizing-for-your-cluster) below.
+    GPU worker provisioning is cloud-specific. Example MachineSet manifests are provided in `components/instances/gpu-workers/examples/aws/`. Copy and customize them for your cluster. See [Customizing for your cluster](#customizing-for-your-cluster) below.
 
 ## Deploy
 
@@ -27,7 +27,7 @@ relies on NFD node labels to identify GPU hardware.
 
     - `instance-nfd-instance` -- NFD NodeFeatureDiscovery CR
     - `instance-gpu-instance` -- GPU ClusterPolicy CR
-    - `instance-gpu-workers` -- GPU MachineSets + MachineAutoscalers
+    - GPU MachineSets + MachineAutoscalers (cloud-specific, not auto-deployed; see examples)
     - `instance-cluster-autoscaler` -- ClusterAutoscaler
 
     The operators (`operator-nfd`, `operator-gpu-operator`) are also auto-discovered.
@@ -53,8 +53,8 @@ relies on NFD node labels to identify GPU hardware.
     oc wait --for=jsonpath='{.status.state}'=ready \
       clusterpolicy/gpu-cluster-policy --timeout=600s
 
-    # 5. Create GPU worker MachineSets (AWS-specific)
-    oc apply -k components/instances/gpu-workers/
+    # 5. Create GPU worker MachineSets (cloud-specific, use your cloud's example)
+    oc apply -k components/instances/gpu-workers/examples/aws/
 
     # 6. (Optional) Create ClusterAutoscaler for auto-scaling
     oc apply -k components/instances/cluster-autoscaler/
@@ -88,7 +88,7 @@ This repo provisions two types of GPU MachineSets on AWS:
 ### Customizing for your cluster
 
 The MachineSet manifests contain cluster-specific values. Update these fields
-in `components/instances/gpu-workers/gpu-machineset-*.yaml`:
+in `components/instances/gpu-workers/examples/aws/gpu-machineset-*.yaml`:
 
 - `metadata.name` -- replace `ocp-2qkbk` with your cluster's infra ID
 - `spec.template.spec.providerSpec.value.ami.id` -- your RHCOS AMI
@@ -100,7 +100,7 @@ in `components/instances/gpu-workers/gpu-machineset-*.yaml`:
 **Manual scaling via Git:**
 
 ```bash
-# Edit gpu-machineset-l4.yaml, set spec.replicas: 5
+# Edit components/instances/gpu-workers/examples/aws/gpu-machineset-l4.yaml, set spec.replicas: 5
 git commit -am "Scale L4 GPU workers to 5" && git push
 ```
 
@@ -118,7 +118,7 @@ Remove GPU workers and instances in reverse order:
 
 ```bash
 oc delete -k components/instances/cluster-autoscaler/
-oc delete -k components/instances/gpu-workers/
+oc delete -k components/instances/gpu-workers/examples/aws/
 oc delete clusterpolicy gpu-cluster-policy
 oc delete nodefeaturediscovery nfd-instance -n openshift-nfd
 oc delete sub gpu-operator-certified -n nvidia-gpu-operator

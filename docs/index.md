@@ -13,10 +13,11 @@ This repository provides production-ready Kustomize manifests for deploying Red 
 
 **What gets deployed:**
 
-- 6 operators (cert-manager, NFD, GPU Operator, Kueue, JobSet, RHOAI)
-- GPU infrastructure with auto-scaling MachineSets
+- 7 operators (cert-manager, ServiceMesh, NFD, GPU Operator, Kueue, JobSet, RHOAI)
+- GPU infrastructure (cloud-specific examples provided for AWS)
 - A composable DataScienceCluster (DSC) with 10+ AI capabilities
-- Pre-built AI use cases (ToolOrchestra, LlamaStack)
+- 3 models (orchestrator-8b, qwen-math-7b, gpt-oss-120b) independently deployable via GitOps
+- 3 services (ToolOrchestra, LlamaStack, GenAI Toolbox) auto-discovered by ArgoCD
 
 ## What's Inside
 
@@ -50,7 +51,7 @@ This repository provides production-ready Kustomize manifests for deploying Red 
 
     ---
 
-    Pre-built AI applications: NVIDIA ToolOrchestra and Meta LlamaStack.
+    Pre-built AI applications: NVIDIA ToolOrchestra, Meta LlamaStack, and GenAI Toolbox.
 
     [:octicons-arrow-right-24: Use Cases](usecases/index.md)
 

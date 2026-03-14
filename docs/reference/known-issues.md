@@ -2,7 +2,7 @@
 
 ## 1. PVC Zone Affinity
 
-With `WaitForFirstConsumer` StorageClass, model download jobs must schedule on GPU nodes (via `nodeSelector: nvidia.com/gpu.present: "true"`) to ensure PVCs are provisioned in the same zone as GPU nodes.
+With `WaitForFirstConsumer` StorageClass, PVCs are provisioned in the zone of the first pod that binds them. If download jobs run on non-GPU nodes in a different zone, the PVC may not be accessible by GPU-node InferenceService pods. If this occurs, add a `nodeSelector` to download jobs to schedule them in the GPU node zone, or use a StorageClass with `Immediate` binding mode.
 
 ## 2. RWO PVC and Download Jobs
 

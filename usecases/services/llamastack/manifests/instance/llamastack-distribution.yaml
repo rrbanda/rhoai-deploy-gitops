@@ -9,7 +9,7 @@ spec:
   server:
     distribution:
       # Patched 0.5.2 with Bug 1+2 fix (Gemini type leak + OpenAI strict:null).
-      # Dockerfile: usecases/llamastack/build/Dockerfile
+      # Dockerfile: usecases/services/llamastack/build/Dockerfile
       # To upgrade: rebuild with new FROM tag, push, update image ref here.
       # When upstream 0.5.3+ ships both fixes, switch to:
       #   image: docker.io/llamastack/distribution-starter:0.5.3
