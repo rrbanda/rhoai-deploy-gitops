@@ -28,19 +28,20 @@ spec:
       storageUri: oci://registry.redhat.io/rhelai1/modelcar-gpt-oss-120b:1.5
       args:
         - --dtype=auto
-        - --max-model-len=8192
-        - --gpu-memory-utilization=0.95
+        - --max-model-len=16384
+        - --gpu-memory-utilization=0.92
+        - --tensor-parallel-size=2
         - --enforce-eager
         - --trust-remote-code
       resources:
         requests:
-          cpu: "2"
-          memory: "24Gi"
-          nvidia.com/gpu: "1"
-        limits:
-          cpu: "8"
+          cpu: "4"
           memory: "48Gi"
-          nvidia.com/gpu: "1"
+          nvidia.com/gpu: "2"
+        limits:
+          cpu: "12"
+          memory: "96Gi"
+          nvidia.com/gpu: "2"
     nodeSelector:
       gpu-type: l40s
     tolerations:
