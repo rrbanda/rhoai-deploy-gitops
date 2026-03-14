@@ -1,6 +1,6 @@
 # ArgoCD Applications
 
-After bootstrap, ArgoCD manages **18 Applications** across three layers.
+After bootstrap, ArgoCD manages **24 Applications** across four layers.
 
 ## Application Table
 
@@ -13,21 +13,27 @@ After bootstrap, ArgoCD manages **18 Applications** across three layers.
 | `operator-kueue-operator` | `components/operators/kueue-operator/` | Auto (selfHeal) | Red Hat Build of Kueue |
 | `operator-jobset-operator` | `components/operators/jobset-operator/` | Auto (selfHeal) | JobSet Operator |
 | `operator-rhoai-operator` | `components/operators/rhoai-operator/` | Auto (selfHeal) | Red Hat OpenShift AI operator |
+| `operator-servicemesh` | `components/operators/servicemesh/` | Auto (selfHeal) | Red Hat OpenShift Service Mesh 3 operator (required for LlamaStack) |
 | `instance-nfd-instance` | `components/instances/nfd-instance/` | Auto (selfHeal) | NFD NodeFeatureDiscovery CR |
 | `instance-gpu-instance` | `components/instances/gpu-instance/` | Auto (selfHeal) | GPU ClusterPolicy CR |
 | `instance-kueue-instance` | `components/instances/kueue-instance/` | Auto (selfHeal) | Kueue operator instance |
-| `instance-gpu-workers` | `components/instances/gpu-workers/` | Auto (selfHeal) | GPU MachineSets (L4, L40S) + MachineAutoscalers |
 | `instance-cluster-autoscaler` | `components/instances/cluster-autoscaler/` | Auto (selfHeal) | ClusterAutoscaler for GPU node auto-scaling |
 | `instance-kueue-config` | `components/instances/kueue-config/` | Auto (selfHeal) | GPU ResourceFlavors + ClusterQueue |
 | `instance-jobset-instance` | `components/instances/jobset-instance/` | Auto (selfHeal) | JobSet operator instance |
 | `instance-rhoai` | `components/instances/rhoai-instance/overlays/dev/` | Auto (selfHeal, no prune) | DataScienceCluster with ignoreDifferences |
-| `usecase-toolorchestra` | `usecases/toolorchestra/profiles/tier1-minimal/` | Auto (selfHeal, prune) | Serving (2 models), UI, training infra |
-| `usecase-llamastack` | `usecases/llamastack/profiles/tier1-minimal/` | Auto (selfHeal, prune) | LlamaStack Distribution + PostgreSQL |
-| `usecase-toolorchestra-training` | `usecases/toolorchestra/manifests/training/workloads/` | **Manual only** | Download jobs + RayJob (on-demand) |
+| `instance-dashboard-config` | `components/instances/dashboard-config/` | Auto (selfHeal) | Enables genAiStudio in the RHOAI dashboard |
+| `instance-mcp-servers` | `components/instances/mcp-servers/` | Auto (selfHeal) | Registers GenAI Toolbox as an MCP server in the RHOAI dashboard |
+| `model-orchestrator-8b` | `usecases/models/orchestrator-8b/profiles/tier1-minimal/` | Auto (selfHeal, prune) | Nemotron-Orchestrator-8B model serving |
+| `model-qwen-math-7b` | `usecases/models/qwen-math-7b/profiles/tier1-minimal/` | Auto (selfHeal, prune) | Qwen2.5-Math-7B-Instruct model serving |
+| `model-gpt-oss-120b` | `usecases/models/gpt-oss-120b/profiles/tier1-minimal/` | Auto (selfHeal, prune) | GPT-OSS-120B model serving (ModelCar) |
+| `service-toolorchestra-app` | `usecases/services/toolorchestra-app/profiles/tier1-minimal/` | Auto (selfHeal, prune) | ToolOrchestra UI + training infra |
+| `service-llamastack` | `usecases/services/llamastack/profiles/tier1-minimal/` | Auto (selfHeal, prune) | LlamaStack Distribution + PostgreSQL |
+| `service-genai-toolbox` | `usecases/services/genai-toolbox/profiles/tier1-minimal/` | Auto (selfHeal, prune) | GenAI Toolbox MCP Server |
+| `usecase-toolorchestra-training` | `usecases/services/toolorchestra-app/manifests/training/workloads/` | **Manual only** | Download jobs + RayJob (on-demand) |
 
 ## Sync Wave Ordering
 
-Within the `usecase-toolorchestra` app, sync waves ensure correct resource ordering:
+Within the `service-toolorchestra-app` and `model-*` apps, sync waves ensure correct resource ordering:
 
 | Wave | Resources | Purpose |
 |------|-----------|---------|
@@ -43,7 +49,7 @@ The `cluster-bootstrap` Application watches `clusters/overlays/dev/` and auto-sy
 
 - Adding a new `Application` YAML to `clusters/overlays/dev/` and pushing to Git automatically creates the new ArgoCD Application
 - Adding a new operator directory to `components/operators/` automatically creates a new operator Application via the `cluster-operators` ApplicationSet
-- Same for `components/instances/*` and `usecases/*/profiles/tier1-minimal`
+- Same for `components/instances/*`, `usecases/models/*/profiles/tier1-minimal`, and `usecases/services/*/profiles/tier1-minimal`
 
 The only manual `oc apply` ever needed is the initial bootstrap.
 

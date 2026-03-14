@@ -6,6 +6,8 @@ metadata:
     app.kubernetes.io/name: qwen-model-weights
     app.kubernetes.io/component: storage
     app.kubernetes.io/part-of: qwen-math-7b
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   accessModes:
     - ReadWriteOnce

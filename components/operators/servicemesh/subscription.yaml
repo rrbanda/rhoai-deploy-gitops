@@ -10,4 +10,4 @@ spec:
   name: servicemeshoperator3
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  installPlanApproval: Manual
+  installPlanApproval: Automatic

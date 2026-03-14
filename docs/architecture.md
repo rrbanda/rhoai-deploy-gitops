@@ -18,10 +18,12 @@ rhoai-deploy-gitops/
 │   │   ├── apps/
 │   │   │   ├── cluster-operators-appset.yaml
 │   │   │   ├── cluster-instances-appset.yaml
-│   │   │   └── cluster-usecases-appset.yaml
+│   │   │   ├── cluster-models-appset.yaml
+│   │   │   └── cluster-services-appset.yaml
 │   │   └── projects/
 │   ├── operators/                    # OLM operator subscriptions
 │   │   ├── cert-manager/
+│   │   ├── servicemesh/
 │   │   ├── nfd/
 │   │   ├── gpu-operator/
 │   │   ├── kueue-operator/
@@ -35,16 +37,24 @@ rhoai-deploy-gitops/
 │       ├── kueue-instance/
 │       ├── kueue-config/             # ResourceFlavors + ClusterQueue
 │       ├── jobset-instance/
+│       ├── dashboard-config/         # Enables GenAI Studio in RHOAI dashboard
+│       ├── mcp-servers/              # Registers MCP servers in RHOAI dashboard
 │       └── rhoai-instance/           # DataScienceCluster (DSC) with composable overlays
 │           ├── base/                 # Minimal DSC (Dashboard only)
 │           └── overlays/             # dev, minimal, serving, training, full
 └── usecases/
-    ├── toolorchestra/                # NVIDIA ToolOrchestra
-    └── llamastack/                   # Meta LlamaStack Distribution
+    ├── models/                       # Model deployments (one dir per model)
+    │   ├── orchestrator-8b/
+    │   ├── qwen-math-7b/
+    │   └── gpt-oss-120b/
+    └── services/                     # Application services
+        ├── toolorchestra-app/        # NVIDIA ToolOrchestra UI
+        ├── llamastack/               # Meta LlamaStack Distribution
+        └── genai-toolbox/            # GenAI Toolbox MCP Server
 ```
 
 !!! warning "Using a fork? Update the repo URL"
-    All ArgoCD manifests reference `https://github.com/rrbanda/rhoai-deploy-gitops.git`. If you forked this repo, update `repoURL` in 8 files before bootstrapping: the 3 files in `clusters/overlays/dev/`, the 3 ApplicationSets in `components/argocd/apps/`, and the 2 projects in `components/argocd/projects/base/`. See the [Quick Start](quickstart.md) for the full list.
+    All ArgoCD manifests reference `https://github.com/rrbanda/rhoai-deploy-gitops.git`. If you forked this repo, run `./setup.sh --repo <your-repo-url>` to update all `repoURL` references, or manually update them in the files listed in `clusters/overlays/dev/`, `components/argocd/apps/`, and `components/argocd/projects/base/`. See the [Quick Start](quickstart.md).
 
 ## App-of-Apps Pattern
 
@@ -61,13 +71,15 @@ graph TD
     Human2["oc apply -k clusters/overlays/dev/"] --> BootstrapApp["cluster-bootstrap App"]
     BootstrapApp --> OperatorsAppSet["cluster-operators AppSet"]
     BootstrapApp --> InstancesAppSet["cluster-instances AppSet"]
-    BootstrapApp --> UsecasesAppSet["cluster-usecases AppSet"]
+    BootstrapApp --> ModelsAppSet["cluster-models AppSet"]
+    BootstrapApp --> ServicesAppSet["cluster-services AppSet"]
     BootstrapApp --> RhoaiApp["instance-rhoai App"]
     BootstrapApp --> TrainingApp["training-workloads App"]
   end
 
   subgraph operators ["Phase 3: Operators"]
     OperatorsAppSet --> CertMgr["cert-manager"]
+    OperatorsAppSet --> ServiceMesh["ServiceMesh"]
     OperatorsAppSet --> NFDOp["NFD"]
     OperatorsAppSet --> GPUOp["GPU Operator"]
     OperatorsAppSet --> KueueOp["Kueue"]
@@ -78,11 +90,12 @@ graph TD
   subgraph instances ["Phase 4: Instances"]
     InstancesAppSet --> NFDInst["NFD Instance"]
     InstancesAppSet --> GPUInst["GPU ClusterPolicy"]
-    InstancesAppSet --> GPUWorkers["GPU MachineSets"]
     InstancesAppSet --> ClusterAS["ClusterAutoscaler"]
     InstancesAppSet --> KueueInst["Kueue Instance"]
     InstancesAppSet --> KueueCfg["Kueue Config"]
     InstancesAppSet --> JobSetInst["JobSet Instance"]
+    InstancesAppSet --> DashConfig["Dashboard Config"]
+    InstancesAppSet --> McpServers["MCP Servers"]
     RhoaiApp --> DSC["DataScienceCluster"]
   end
 
@@ -99,10 +112,16 @@ graph TD
     DSC --> LlamaStack["LlamaStack"]
   end
 
-  subgraph usecases ["Phase 6: Use Cases"]
-    UsecasesAppSet --> ToolOrch["ToolOrchestra"]
-    UsecasesAppSet --> LlamaStackUC["LlamaStack"]
-    ToolOrch --> Models["Model Serving"]
+  subgraph models ["Phase 6a: Models"]
+    ModelsAppSet --> Orch8b["orchestrator-8b"]
+    ModelsAppSet --> QwenMath["qwen-math-7b"]
+    ModelsAppSet --> GptOss["gpt-oss-120b"]
+  end
+
+  subgraph services ["Phase 6b: Services"]
+    ServicesAppSet --> ToolOrch["ToolOrchestra App"]
+    ServicesAppSet --> LlamaStackUC["LlamaStack"]
+    ServicesAppSet --> GenAIToolbox["GenAI Toolbox"]
     ToolOrch --> UI["Orchestrator UI"]
     ToolOrch --> TrainInfra["Training Infra"]
     TrainingApp --> TrainWorkloads["Training Workloads"]
@@ -113,13 +132,14 @@ graph TD
 
 ## ApplicationSet Auto-Discovery
 
-Three `ApplicationSet` resources use **Git directory generators** to auto-discover content:
+Four `ApplicationSet` resources use **Git directory generators** to auto-discover content:
 
 | ApplicationSet | Discovers | Naming Pattern |
 |---------------|-----------|---------------|
 | `cluster-operators` | `components/operators/*` | `operator-<dirname>` |
-| `cluster-instances` | `components/instances/*` (excludes `rhoai-instance`) | `instance-<dirname>` |
-| `cluster-usecases` | `usecases/*/profiles/tier1-minimal` | `usecase-<dirname>` |
+| `cluster-instances` | `components/instances/*` (excludes `rhoai-instance`, `gpu-workers`) | `instance-<dirname>` |
+| `cluster-models` | `usecases/models/*/profiles/tier1-minimal` | `model-<dirname>` |
+| `cluster-services` | `usecases/services/*/profiles/tier1-minimal` | `service-<dirname>` |
 
 Adding a new directory and pushing to Git automatically creates a new ArgoCD Application.
 
@@ -128,6 +148,7 @@ Adding a new directory and pushing to Git automatically creates a new ArgoCD App
 ```mermaid
 graph LR
   CertMgr["cert-manager"] --> KServe["KServe"]
+  ServiceMesh["ServiceMesh"] --> LlamaStackOp["LlamaStack Operator"]
   NFD["NFD Instance"] --> GPU["GPU ClusterPolicy"]
   GPU --> GPUWorkers["GPU MachineSets"]
   GPUWorkers --> ModelServing["Model Serving"]
@@ -135,6 +156,7 @@ graph LR
   DSC --> KServe
   DSC --> ModelMesh["ModelMesh"]
   DSC --> Ray["Ray"]
+  DSC --> LlamaStackOp
   KueueOp["Kueue Operator"] --> KueueInst["Kueue Instance"]
   KueueInst --> KueueCfg["ResourceFlavors + ClusterQueue"]
   KueueCfg --> Training["Training Workloads"]
@@ -161,11 +183,12 @@ The `rhoai-instance` is **excluded** from the `cluster-instances` ApplicationSet
 
 ## Operators
 
-Six operators are installed via OLM Subscriptions:
+Seven operators are installed via OLM Subscriptions:
 
 | Operator | Source | Channel | Purpose |
 |----------|--------|---------|---------|
 | cert-manager | redhat-cop catalog | `stable-v1` | TLS for KServe/Knative |
+| ServiceMesh | Red Hat catalog | `stable` | Required for LlamaStack |
 | NFD | redhat-cop catalog | `stable` | GPU node feature labels |
 | GPU Operator | redhat-cop catalog | `stable` | NVIDIA drivers + toolkit |
 | Kueue | Custom subscription | `stable-v1.2` | GPU quota management |

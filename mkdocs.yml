@@ -75,6 +75,7 @@ nav:
     - usecases/index.md
     - ToolOrchestra: usecases/toolorchestra.md
     - LlamaStack: usecases/llamastack.md
+    - GenAI Toolbox: usecases/genai-toolbox.md
   - Reference:
     - reference/index.md
     - ArgoCD Applications: reference/argocd-apps.md

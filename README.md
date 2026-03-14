@@ -1,5 +1,10 @@
 # Deploying OpenShift AI
 
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-GitHub_Pages-blue)](https://rrbanda.github.io/rhoai-deploy-gitops/)
+[![RHOAI](https://img.shields.io/badge/RHOAI-3.3-red)](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.3)
+[![OpenShift](https://img.shields.io/badge/OpenShift-4.19_|_4.20-red)](https://docs.openshift.com/)
+
 Production-ready Kustomize manifests for deploying **Red Hat OpenShift AI 3.3** and AI use cases on OpenShift -- using ArgoCD (GitOps) or plain `oc apply -k` (manual).
 
 Composable overlays let you deploy the full stack or pick individual capabilities (model serving, training, pipelines, workbenches) without modifying the base manifests.
@@ -18,6 +23,7 @@ rhoai-deploy-gitops/
 │   ├── argocd/                       # ArgoCD projects and ApplicationSets
 │   ├── operators/                    # OLM operator subscriptions
 │   │   ├── cert-manager/
+│   │   ├── servicemesh/
 │   │   ├── nfd/
 │   │   ├── gpu-operator/
 │   │   ├── kueue-operator/
@@ -31,6 +37,8 @@ rhoai-deploy-gitops/
 │       ├── kueue-instance/
 │       ├── kueue-config/             # ResourceFlavors + ClusterQueue
 │       ├── jobset-instance/
+│       ├── dashboard-config/         # Enables GenAI Studio in RHOAI dashboard
+│       ├── mcp-servers/              # Registers MCP servers in RHOAI dashboard
 │       └── rhoai-instance/           # DataScienceCluster with composable overlays
 │           ├── base/                 # Minimal DSC (Dashboard only)
 │           └── overlays/             # dev, minimal, serving, training, full
@@ -89,24 +97,37 @@ After the second `oc apply`, the `cluster-bootstrap` app-of-apps takes over. Any
 ### Option B: Manual (no ArgoCD)
 
 ```bash
-# 1. Install operators
+# Phase 1 -- Pre-RHOAI Operators (wait for all CSVs before proceeding)
 oc apply -k components/operators/cert-manager/
+oc apply -k components/operators/servicemesh/           # Required for LlamaStack
 oc apply -k components/operators/nfd/
 oc apply -k components/operators/gpu-operator/
 oc apply -k components/operators/kueue-operator/
 oc apply -k components/operators/jobset-operator/
 oc apply -k components/operators/rhoai-operator/
 
-# 2. Create instances (order matters)
+watch "oc get csv -A | grep -E 'cert-manager|servicemesh|nfd|gpu-operator|kueue|jobset|rhods'"
+
+# Phase 2 -- Pre-DSC Instances (order matters)
 oc apply -k components/instances/nfd-instance/
 oc apply -k components/instances/gpu-instance/
+oc apply -k components/instances/gpu-workers/examples/aws/  # Cloud-specific, see examples/
+oc apply -k components/instances/cluster-autoscaler/
 oc apply -k components/instances/kueue-instance/
 oc apply -k components/instances/kueue-config/
 oc apply -k components/instances/jobset-instance/
-oc apply -k components/instances/rhoai-instance/overlays/dev/
 
-# 3. Deploy a model
-oc apply -k usecases/models/gpt-oss-120b/profiles/tier1-minimal/
+# Phase 3 -- DSC + Post-DSC Instances
+oc apply -k components/instances/rhoai-instance/overlays/dev/
+oc wait --for=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'=True \
+  datasciencecluster/default-dsc --timeout=600s
+oc apply -k components/instances/dashboard-config/      # Optional: enables GenAI Studio
+oc apply -k components/instances/mcp-servers/            # Optional: registers MCP servers
+
+# Phase 4 -- Use Cases (models first, then services)
+oc apply -k usecases/models/orchestrator-8b/profiles/tier1-minimal/
+oc apply -k usecases/models/qwen-math-7b/profiles/tier1-minimal/
+oc apply -k usecases/services/toolorchestra-app/profiles/tier1-minimal/
 ```
 
 See the [Quick Start Guide](https://rrbanda.github.io/rhoai-deploy-gitops/quickstart/) for detailed instructions with wait commands and verification steps.
@@ -160,7 +181,7 @@ The full documentation site covers:
 - [Architecture and GitOps Patterns](https://rrbanda.github.io/rhoai-deploy-gitops/architecture/) -- app-of-apps, ApplicationSets, dependency chain
 - [Quick Start Guide](https://rrbanda.github.io/rhoai-deploy-gitops/quickstart/) -- GitOps and manual deployment paths
 - [Capabilities Guide](https://rrbanda.github.io/rhoai-deploy-gitops/capabilities/) -- per-capability deployment with composable DSC overlays
-- [ArgoCD Applications](https://rrbanda.github.io/rhoai-deploy-gitops/reference/argocd-apps/) -- all 18 managed applications
+- [ArgoCD Applications](https://rrbanda.github.io/rhoai-deploy-gitops/reference/argocd-apps/) -- all 24 managed applications
 - [Sync Configuration](https://rrbanda.github.io/rhoai-deploy-gitops/reference/sync-config/) -- production-grade ArgoCD settings
 - [Teardown](https://rrbanda.github.io/rhoai-deploy-gitops/reference/teardown/) -- complete removal procedure
 - [Known Issues](https://rrbanda.github.io/rhoai-deploy-gitops/reference/known-issues/) -- gotchas and workarounds

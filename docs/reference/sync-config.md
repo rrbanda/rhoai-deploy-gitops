@@ -24,6 +24,40 @@ ignoreDifferences:
       - /status
 ```
 
+**InferenceService, ServingRuntime, Route** (model and service ApplicationSets) -- Prevents drift from KServe controllers and OpenShift router:
+
+```yaml
+ignoreDifferences:
+  - group: serving.kserve.io
+    kind: InferenceService
+    jsonPointers:
+      - /status
+      - /metadata/annotations
+  - group: serving.kserve.io
+    kind: ServingRuntime
+    jsonPointers:
+      - /status
+  - group: route.openshift.io
+    kind: Route
+    jsonPointers:
+      - /spec/host
+      - /status
+```
+
+**ClusterPolicy, NodeFeatureDiscovery** (instances ApplicationSet) -- Prevents drift from operator-managed status:
+
+```yaml
+ignoreDifferences:
+  - group: nvidia.com
+    kind: ClusterPolicy
+    jsonPointers:
+      - /status
+  - group: nfd.openshift.io
+    kind: NodeFeatureDiscovery
+    jsonPointers:
+      - /status
+```
+
 **DataScienceCluster** -- Prevents drift on `/status` and operator-managed component fields:
 
 ```yaml
@@ -50,7 +84,8 @@ ignoreDifferences:
 |-------|------------|---------|-------------|
 | Operators | 5 | 30s (factor 2) | 5 min |
 | Instances | 10 | 60s (factor 2) | 10 min |
-| Use cases | 10 | 60s (factor 2) | 10 min |
+| Models | 10 | 60s (factor 2) | 10 min |
+| Services | 10 | 60s (factor 2) | 10 min |
 
 The higher retry count for instances and use cases gives operators time to install their CRDs before ArgoCD attempts to apply instance resources.
 
