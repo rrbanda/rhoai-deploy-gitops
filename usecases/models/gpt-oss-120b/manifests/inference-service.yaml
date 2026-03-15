@@ -28,8 +28,8 @@ spec:
       storageUri: oci://registry.redhat.io/rhelai1/modelcar-gpt-oss-120b:1.5
       args:
         - --dtype=auto
-        - --max-model-len=16384
-        - --gpu-memory-utilization=0.90
+        - --max-model-len=65536
+        - --gpu-memory-utilization=0.95
         - --tensor-parallel-size=4
         - --enforce-eager
         - --trust-remote-code
