@@ -65,6 +65,11 @@ spec:
             secretKeyRef:
               name: llama-stack-secret
               key: VLLM_MAX_TOKENS
+        - name: GEMINI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: gemini-secret
+              key: api_key
         - name: ENABLE_FAISS
           value: faiss
         - name: ENABLE_SENTENCE_TRANSFORMERS
