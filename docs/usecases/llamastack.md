@@ -209,6 +209,18 @@ providers:
 
 To enable content safety filtering, deploy a Llama Guard model and set the `SAFETY_MODEL` environment variable in the `LlamaStackDistribution` CR. Without this, the safety provider is registered but non-functional.
 
-### Re-enabling Gemini or OpenAI Providers
+### Gemini Provider
 
-Gemini and OpenAI inference providers were removed from the default config. To re-enable them, add the provider blocks back to `llamastack-custom-config.yaml` and create the corresponding secrets (`gemini-secret` with key `api_key`, or set `OPENAI_API_KEY` env var).
+The Gemini inference provider is included in the default config but activates conditionally -- only when `GEMINI_API_KEY` is set (via `gemini-secret`). After deploying, patch the secret with your real API key:
+
+```bash
+oc patch secret gemini-secret -n llamastack \
+  -p '{"stringData":{"api_key":"<your-gemini-api-key>"}}'
+oc rollout restart deployment/llamastack -n llamastack
+```
+
+Gemini models (up to 1M token context) are auto-discovered and appear in `/v1/models` once the provider is active.
+
+### Adding OpenAI Provider
+
+To add OpenAI as an inference provider, add the provider block to `llamastack-custom-config.yaml`, create an `openai-secret`, and add the `OPENAI_API_KEY` env var to the Distribution CR.
