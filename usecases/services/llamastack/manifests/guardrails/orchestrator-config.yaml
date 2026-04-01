@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fms-orchestr8-config-nlp
+  labels:
+    app.kubernetes.io/name: guardrails-orchestrator
+    app.kubernetes.io/component: config
+data:
+  config.yaml: |
+    detectors:
+      regex:
+        type: text_contents
+        service:
+          hostname: "127.0.0.1"
+          port: 8080
+        chunker_id: whole_doc_chunker
+        default_threshold: 0.5

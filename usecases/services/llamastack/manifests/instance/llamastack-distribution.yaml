@@ -91,7 +91,7 @@ spec:
               name: llama-stack-secret
               key: VLLM_EMBEDDING_MAX_TOKENS
         - name: FMS_ORCHESTRATOR_URL
-          value: http://localhost
+          value: http://guardrails-orchestrator.llamastack.svc.cluster.local:8033
     storage:
       size: 5Gi
   network:
