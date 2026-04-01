@@ -12,4 +12,5 @@ resources:
   - ../../manifests/base
   - ../../manifests/infra
   - ../../manifests/embedding
+  - ../../manifests/guardrails
   - ../../manifests/instance
