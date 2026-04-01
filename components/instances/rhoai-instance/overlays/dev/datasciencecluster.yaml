@@ -16,20 +16,34 @@ spec:
       managementState: Removed
     kserve:
       managementState: Managed
+      modelsAsService:
+        managementState: Removed
+      nim:
+        airGapped: false
+        managementState: Managed
+      rawDeploymentServiceConfig: Headless
     kueue:
       defaultClusterQueueName: default
       defaultLocalQueueName: default
       managementState: Unmanaged
     llamastackoperator:
       managementState: Managed
+    mlflowoperator:
+      managementState: Removed
     modelregistry:
       managementState: Managed
       registriesNamespace: rhoai-model-registries
     ray:
       managementState: Managed
+    trainer:
+      managementState: Removed
     trainingoperator:
       managementState: Managed
     trustyai:
+      eval:
+        lmeval:
+          permitCodeExecution: deny
+          permitOnline: deny
       managementState: Managed
     workbenches:
       managementState: Managed

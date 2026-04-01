@@ -13,23 +13,37 @@ spec:
     dashboard:
       managementState: Managed
     feastoperator:
-      managementState: Removed
+      managementState: Managed
     kserve:
       managementState: Managed
+      modelsAsService:
+        managementState: Managed
+      nim:
+        airGapped: false
+        managementState: Managed
+      rawDeploymentServiceConfig: Headless
     kueue:
       defaultClusterQueueName: default
       defaultLocalQueueName: default
-      managementState: Unmanaged
+      managementState: Managed
     llamastackoperator:
+      managementState: Managed
+    mlflowoperator:
       managementState: Managed
     modelregistry:
       managementState: Managed
       registriesNamespace: rhoai-model-registries
     ray:
       managementState: Managed
+    trainer:
+      managementState: Managed
     trainingoperator:
       managementState: Managed
     trustyai:
+      eval:
+        lmeval:
+          permitCodeExecution: deny
+          permitOnline: deny
       managementState: Managed
     workbenches:
       managementState: Managed
