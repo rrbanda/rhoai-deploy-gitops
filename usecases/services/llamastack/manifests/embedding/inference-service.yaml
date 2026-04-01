@@ -1,0 +1,33 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: nomic-embed-text-v1-5
+  labels:
+    app.kubernetes.io/name: nomic-embed-text-v1-5
+    app.kubernetes.io/component: inference-service
+    opendatahub.io/dashboard: "true"
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+    opendatahub.io/model-type: embedding
+    openshift.io/display-name: Nomic Embed Text v1.5
+    openshift.io/description: "Nomic AI nomic-embed-text-v1.5 embedding model (Red Hat validated)"
+    security.opendatahub.io/enable-auth: "false"
+    serving.kserve.io/deploymentMode: RawDeployment
+spec:
+  predictor:
+    automountServiceAccountToken: false
+    maxReplicas: 1
+    minReplicas: 1
+    model:
+      modelFormat:
+        name: vLLM
+      name: ""
+      runtime: nomic-embed-text-v1-5
+      storageUri: oci://registry.redhat.io/rhelai1/modelcar-nomic-embed-text-v1-5:1.5
+      resources:
+        requests:
+          cpu: "2"
+          memory: "4Gi"
+        limits:
+          cpu: "4"
+          memory: "8Gi"

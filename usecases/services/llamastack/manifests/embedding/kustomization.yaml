@@ -4,6 +4,5 @@ kind: Kustomization
 namespace: llamastack
 
 resources:
-  - llama-stack-secret.yaml
-  - gemini-secret.yaml
-  - llamastack-distribution.yaml
+  - serving-runtime.yaml
+  - inference-service.yaml
