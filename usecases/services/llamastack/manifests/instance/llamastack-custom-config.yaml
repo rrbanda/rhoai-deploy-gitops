@@ -62,7 +62,7 @@ data:
       - provider_id: ${env.MILVUS_URL:+milvus}
         provider_type: inline::milvus
         config:
-          db_path: ${env.MILVUS_DB_PATH:=~/.llama/distributions/rh-dev}/milvus.db
+          db_path: ${env.MILVUS_DB_PATH:=~/.llama/distributions/rh}/milvus.db
           persistence:
             namespace: vector_io::milvus
             backend: kv_default
@@ -70,7 +70,7 @@ data:
       - provider_id: meta-reference-files
         provider_type: inline::localfs
         config:
-          storage_dir: ${env.FILES_STORAGE_DIR:=~/.llama/distributions/rh-dev/files}
+          storage_dir: ${env.FILES_STORAGE_DIR:=~/.llama/distributions/rh/files}
           metadata_store:
             table_name: files_metadata
             backend: sql_default
