@@ -16,16 +16,6 @@ spec:
       kind: DataScienceCluster
       jsonPointers:
         - /status
-        - /spec/components/dashboard
-        - /spec/components/kserve
-        - /spec/components/ray
-        - /spec/components/trainingoperator
-        - /spec/components/modelmeshserving
-        - /spec/components/codeflare
-        - /spec/components/datasciencepipelines
-        - /spec/components/workbenches
-        - /spec/components/modelregistry
-        - /spec/components/trustyai
   syncPolicy:
     automated:
       selfHeal: true

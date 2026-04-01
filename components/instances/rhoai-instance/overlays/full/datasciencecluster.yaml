@@ -9,26 +9,26 @@ spec:
     dashboard:
       managementState: Managed
     workbenches:
-      managementState: Removed
+      managementState: Managed
     kserve:
-      managementState: Removed
+      managementState: Managed
     ray:
-      managementState: Removed
+      managementState: Managed
     trainingoperator:
-      managementState: Removed
+      managementState: Managed
     kueue:
       managementState: Unmanaged
     modelregistry:
-      managementState: Removed
+      managementState: Managed
     trustyai:
-      managementState: Removed
+      managementState: Managed
     datasciencepipelines:
-      managementState: Removed
+      managementState: Managed
     modelmeshserving:
-      managementState: Removed
+      managementState: Managed
     codeflare:
-      managementState: Removed
+      managementState: Managed
     feastoperator:
       managementState: Removed
     llamastackoperator:
-      managementState: Removed
+      managementState: Managed

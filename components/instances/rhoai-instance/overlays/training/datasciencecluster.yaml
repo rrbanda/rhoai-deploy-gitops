@@ -13,9 +13,9 @@ spec:
     kserve:
       managementState: Removed
     ray:
-      managementState: Removed
+      managementState: Managed
     trainingoperator:
-      managementState: Removed
+      managementState: Managed
     kueue:
       managementState: Unmanaged
     modelregistry:
