@@ -8,7 +8,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "0"
 spec:
-  disableOrchestrator: true
+  orchestratorConfig: "fms-orchestr8-config-nlp"
   enableBuiltInDetectors: true
   enableGuardrailsGateway: false
   replicas: 1
