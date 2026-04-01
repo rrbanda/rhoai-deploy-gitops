@@ -6,29 +6,29 @@ metadata:
     argocd.argoproj.io/sync-wave: "4"
 spec:
   components:
+    aipipelines:
+      managementState: Removed
     dashboard:
       managementState: Managed
-    workbenches:
+    feastoperator:
       managementState: Removed
     kserve:
       managementState: Removed
+    kueue:
+      managementState: Unmanaged
+    llamastackoperator:
+      managementState: Removed
+    mlflowoperator:
+      managementState: Removed
+    modelregistry:
+      managementState: Removed
     ray:
+      managementState: Removed
+    trainer:
       managementState: Removed
     trainingoperator:
       managementState: Removed
-    kueue:
-      managementState: Unmanaged
-    modelregistry:
-      managementState: Removed
     trustyai:
       managementState: Removed
-    datasciencepipelines:
-      managementState: Removed
-    modelmeshserving:
-      managementState: Removed
-    codeflare:
-      managementState: Removed
-    feastoperator:
-      managementState: Removed
-    llamastackoperator:
+    workbenches:
       managementState: Removed
