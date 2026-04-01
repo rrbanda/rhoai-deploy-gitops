@@ -7,7 +7,7 @@ metadata:
 data:
   config.yaml: |
     version: 2
-    distro_name: starter
+    image_name: rh-dev
     apis:
     - agents
     - batches
@@ -43,8 +43,15 @@ data:
         provider_type: remote::gemini
         config:
           api_key: ${env.GEMINI_API_KEY:=}
-      - provider_id: sentence-transformers
-        provider_type: inline::sentence-transformers
+      - provider_id: vllm-embedding
+        provider_type: remote::vllm
+        config:
+          base_url: ${env.VLLM_EMBEDDING_URL}
+          max_tokens: ${env.VLLM_EMBEDDING_MAX_TOKENS:=8192}
+          api_token: ${env.VLLM_EMBEDDING_API_TOKEN:=fake}
+          network:
+            tls:
+              verify: ${env.VLLM_EMBEDDING_TLS_VERIFY:=false}
       vector_io:
       - provider_id: faiss
         provider_type: inline::faiss
@@ -55,7 +62,7 @@ data:
       - provider_id: ${env.MILVUS_URL:+milvus}
         provider_type: inline::milvus
         config:
-          db_path: ${env.MILVUS_DB_PATH:=~/.llama/distributions/starter}/milvus.db
+          db_path: ${env.MILVUS_DB_PATH:=~/.llama/distributions/rh-dev}/milvus.db
           persistence:
             namespace: vector_io::milvus
             backend: kv_default
@@ -63,7 +70,7 @@ data:
       - provider_id: meta-reference-files
         provider_type: inline::localfs
         config:
-          storage_dir: ${env.FILES_STORAGE_DIR:=~/.llama/distributions/starter/files}
+          storage_dir: ${env.FILES_STORAGE_DIR:=~/.llama/distributions/rh-dev/files}
           metadata_store:
             table_name: files_metadata
             backend: sql_default
@@ -179,8 +186,8 @@ data:
         model_type: llm
       - metadata:
           embedding_dimension: 768
-        model_id: ${env.EMBEDDING_MODEL:=nomic-ai/nomic-embed-text-v1.5}
-        provider_id: sentence-transformers
+        model_id: ${env.EMBEDDING_MODEL:=nomic-embed-text-v1-5}
+        provider_id: vllm-embedding
         model_type: embedding
       shields: []
       vector_dbs: []
@@ -197,5 +204,5 @@ data:
     vector_stores:
       default_provider_id: faiss
       default_embedding_model:
-        provider_id: sentence-transformers
-        model_id: nomic-ai/nomic-embed-text-v1.5
+        provider_id: vllm-embedding
+        model_id: nomic-embed-text-v1-5
