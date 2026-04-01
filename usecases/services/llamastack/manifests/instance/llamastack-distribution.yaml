@@ -92,6 +92,8 @@ spec:
               key: VLLM_EMBEDDING_MAX_TOKENS
         - name: FMS_ORCHESTRATOR_URL
           value: https://guardrails-orchestrator-service.llamastack.svc.cluster.local:8032
+        - name: FMS_VERIFY_SSL
+          value: "false"
     storage:
       size: 5Gi
   network:
