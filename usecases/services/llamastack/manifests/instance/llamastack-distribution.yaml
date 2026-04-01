@@ -8,14 +8,7 @@ spec:
   replicas: 1
   server:
     distribution:
-      # Patched 0.5.2 with Bug 1+2 fix (Gemini type leak + OpenAI strict:null).
-      # Dockerfile: usecases/services/llamastack/build/Dockerfile
-      # To upgrade: rebuild with new FROM tag, push, update image ref here.
-      # When upstream 0.5.3+ ships both fixes, switch to:
-      #   image: docker.io/llamastack/distribution-starter:0.5.3
-      # To revert to RHOAI-managed version, replace 'image' with:
-      #   name: rh-dev
-      image: quay.io/rbrhssa/llamastack-custom:0.5.2-patched
+      name: rh-dev
     containerSpec:
       name: llama-stack
       port: 8321
@@ -65,23 +58,41 @@ spec:
             secretKeyRef:
               name: llama-stack-secret
               key: VLLM_MAX_TOKENS
-        - name: GEMINI_API_KEY
+        - name: ENABLE_FAISS
+          value: "faiss"
+        - name: EMBEDDING_MODEL
           valueFrom:
             secretKeyRef:
-              name: gemini-secret
-              key: api_key
-        - name: ENABLE_FAISS
-          value: faiss
-        - name: ENABLE_SENTENCE_TRANSFORMERS
-          value: "true"
-        - name: EMBEDDING_PROVIDER
-          value: sentence-transformers
+              name: llama-stack-secret
+              key: EMBEDDING_MODEL
+        - name: EMBEDDING_PROVIDER_MODEL_ID
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-secret
+              key: EMBEDDING_PROVIDER_MODEL_ID
+        - name: VLLM_EMBEDDING_URL
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-secret
+              key: VLLM_EMBEDDING_URL
+        - name: VLLM_EMBEDDING_TLS_VERIFY
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-secret
+              key: VLLM_EMBEDDING_TLS_VERIFY
+        - name: VLLM_EMBEDDING_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-secret
+              key: VLLM_EMBEDDING_API_TOKEN
+        - name: VLLM_EMBEDDING_MAX_TOKENS
+          valueFrom:
+            secretKeyRef:
+              name: llama-stack-secret
+              key: VLLM_EMBEDDING_MAX_TOKENS
         - name: FMS_ORCHESTRATOR_URL
           value: http://localhost
     storage:
       size: 5Gi
-    userConfig:
-      configMapName: llamastack-custom-config
-      configMapNamespace: llamastack
   network:
     exposeRoute: true

@@ -11,4 +11,5 @@ labels:
 resources:
   - ../../manifests/base
   - ../../manifests/infra
+  - ../../manifests/embedding
   - ../../manifests/instance
