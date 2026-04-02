@@ -9,6 +9,7 @@ spec:
   server:
     distribution:
       name: rh-dev
+      image: quay.io/rbrhssa/llamastack-custom:0.5.2-patched
     userConfig:
       configMapName: llamastack-custom-config
     containerSpec:
