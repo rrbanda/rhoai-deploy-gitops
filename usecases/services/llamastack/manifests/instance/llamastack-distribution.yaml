@@ -94,11 +94,6 @@ spec:
           value: https://guardrails-orchestrator-service.llamastack.svc.cluster.local:8032
         - name: FMS_VERIFY_SSL
           value: "false"
-        - name: GEMINI_API_KEY
-          valueFrom:
-            secretKeyRef:
-              name: gemini-secret
-              key: api_key
     storage:
       size: 5Gi
   network:
