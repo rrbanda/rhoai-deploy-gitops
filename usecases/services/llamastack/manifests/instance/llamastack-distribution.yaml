@@ -8,7 +8,7 @@ spec:
   replicas: 1
   server:
     distribution:
-      image: quay.io/rbrhssa/llamastack-custom:0.5.2-patched
+      name: rh-dev
     userConfig:
       configMapName: llamastack-custom-config
     containerSpec:
