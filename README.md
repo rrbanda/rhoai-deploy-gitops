@@ -39,6 +39,7 @@ rhoai-deploy-gitops/
 │       ├── jobset-instance/
 │       ├── dashboard-config/         # Enables GenAI Studio in RHOAI dashboard
 │       ├── mcp-servers/              # Registers MCP servers in RHOAI dashboard
+│       ├── mlflow-instance/          # MLflow tracking server instance
 │       └── rhoai-instance/           # DataScienceCluster with composable overlays
 │           ├── base/                 # Minimal DSC (Dashboard only)
 │           └── overlays/             # dev, minimal, serving, training, full
@@ -153,6 +154,7 @@ Red Hat OpenShift AI is modular -- deploy only what you need. Each capability ha
 | Data Science Pipelines | `datasciencepipelines` | [Pipelines](https://rrbanda.github.io/rhoai-deploy-gitops/capabilities/pipelines/) |
 | Workbenches | `workbenches` | [Workbenches](https://rrbanda.github.io/rhoai-deploy-gitops/capabilities/workbenches/) |
 | Model Registry | `modelregistry` | [Model Registry](https://rrbanda.github.io/rhoai-deploy-gitops/capabilities/model-registry/) |
+| MLflow | `mlflowoperator` | [MLflow](https://rrbanda.github.io/rhoai-deploy-gitops/capabilities/mlflow/) |
 | GPU Infrastructure | N/A (operators) | [GPU Infrastructure](https://rrbanda.github.io/rhoai-deploy-gitops/capabilities/gpu-infrastructure/) |
 | Kueue (GPU Quotas) | `kueue` (Unmanaged) | [Kueue](https://rrbanda.github.io/rhoai-deploy-gitops/capabilities/kueue/) |
 
