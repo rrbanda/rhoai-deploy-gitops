@@ -71,6 +71,7 @@ nav:
     - Model Registry: capabilities/model-registry.md
     - GPU Infrastructure: capabilities/gpu-infrastructure.md
     - Kueue: capabilities/kueue.md
+    - MLflow: capabilities/mlflow.md
   - Use Cases:
     - usecases/index.md
     - ToolOrchestra: usecases/toolorchestra.md

@@ -1,0 +1,24 @@
+# Bind the mlflow-integration ClusterRole (shipped in RHOAI 3.4 EA2+) to a
+# service account in a specific data-science-project namespace.  Interactive
+# users already have access through the OpenShift admin/edit/view roles.
+#
+# Usage:
+#   oc apply -f mlflow-rolebinding.yaml
+#
+# Or via CLI:
+#   oc -n <namespace> create rolebinding my-component-mlflow \
+#     --clusterrole=mlflow-integration \
+#     --serviceaccount=<namespace>:<service-account-name>
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mlflow-integration-binding
+  namespace: <data-science-project-namespace>
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: mlflow-integration
+subjects:
+  - kind: ServiceAccount
+    name: <service-account-name>
+    namespace: <data-science-project-namespace>

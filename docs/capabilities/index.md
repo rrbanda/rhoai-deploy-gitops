@@ -12,6 +12,7 @@ Red Hat OpenShift AI (RHOAI) is modular. Pick the capabilities you need, underst
 | Data Science Pipelines | `datasciencepipelines` | rhoai-operator | rhoai-instance | [pipelines.md](pipelines.md) |
 | Workbenches | `workbenches` | rhoai-operator | rhoai-instance | [workbenches.md](workbenches.md) |
 | Model Registry | `modelregistry` | rhoai-operator | rhoai-instance, external MySQL 5.x+, S3 storage | [model-registry.md](model-registry.md) |
+| MLflow | `mlflowoperator` | rhoai-operator | rhoai-instance, mlflow-instance | [mlflow.md](mlflow.md) |
 | GPU Infrastructure | N/A | nfd, gpu-operator | nfd-instance, gpu-instance, gpu-workers | [gpu-infrastructure.md](gpu-infrastructure.md) |
 | Kueue (GPU Quotas) | `kueue` (Unmanaged) | kueue-operator, cert-manager | kueue-instance, kueue-config | [kueue.md](kueue.md) |
 
@@ -36,6 +37,8 @@ graph TD
   DSC --> Registry["Registry"]
   DSC --> TrustyAI["TrustyAI"]
   DSC --> CodeFlare["CodeFlare"]
+  DSC --> MLflow["MLflow Operator"]
+  MLflow --> MLflowInst["MLflow Instance"]
   DSC --> LlamaStackOp
   GPUWorkers --> ModelServing["Model Serving"]
   KServe --> ModelServing
@@ -171,6 +174,7 @@ oc wait --for=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'=True \
 # Post-DSC instances (target the redhat-ods-applications namespace created by DSC)
 oc apply -k components/instances/dashboard-config/     # Enables GenAI Studio (Tech Preview, not enabled by default)
 oc apply -k components/instances/mcp-servers/           # Registers MCP servers in GenAI Studio
+oc apply -k components/instances/mlflow-instance/       # MLflow tracking server
 ```
 
 ### Phase 4 -- Use Cases (models before services)
