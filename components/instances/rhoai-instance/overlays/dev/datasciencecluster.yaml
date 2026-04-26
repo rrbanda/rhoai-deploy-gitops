@@ -8,7 +8,7 @@ spec:
   components:
     aipipelines:
       argoWorkflowsControllers:
-        managementState: Removed
+        managementState: Managed
       managementState: Managed
     dashboard:
       managementState: Managed
