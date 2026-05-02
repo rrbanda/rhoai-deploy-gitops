@@ -8,7 +8,7 @@ spec:
     reclaimWithinCohort: Any
     withinClusterQueue: LowerPriority
   resourceGroups:
-    - coveredResources: ["cpu", "memory", "nvidia.com/gpu"]
+    - coveredResources: ["cpu", "memory"]
       flavors:
         - name: default-gpu
           resources:
@@ -16,5 +16,3 @@ spec:
               nominalQuota: 48
             - name: "memory"
               nominalQuota: "192Gi"
-            - name: "nvidia.com/gpu"
-              nominalQuota: 8

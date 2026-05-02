@@ -18,6 +18,8 @@ spec:
             exclude: true
           - path: usecases/models/qwen-math-7b/profiles/tier1-minimal
             exclude: true
+          - path: usecases/models/gpt-oss-120b/profiles/tier1-minimal
+            exclude: true
   template:
     metadata:
       name: 'model-{{ index .path.segments 2 }}'
