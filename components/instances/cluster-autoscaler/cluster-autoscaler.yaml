@@ -10,10 +10,6 @@ spec:
   podPriorityThreshold: -10
   resourceLimits:
     maxNodesTotal: 20
-    gpus:
-      - type: nvidia.com/gpu
-        min: 0
-        max: 8
   scaleDown:
     enabled: true
     delayAfterAdd: 10m

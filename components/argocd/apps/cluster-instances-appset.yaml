@@ -17,6 +17,8 @@ spec:
             exclude: true
           - path: components/instances/gpu-workers
             exclude: true
+          - path: components/instances/gpu-instance
+            exclude: true
   template:
     metadata:
       name: 'instance-{{ .path.basename }}'
