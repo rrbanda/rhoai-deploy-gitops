@@ -1,0 +1,14 @@
+apiVersion: rhdh.redhat.com/v1alpha3
+kind: Backstage
+metadata:
+  name: developer-hub
+  namespace: rhdh
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  application:
+    replicas: 1
+    route:
+      enabled: true
+  database:
+    enableLocalDb: true

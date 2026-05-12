@@ -10,7 +10,7 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
-        revision: main
+        revision: rhoai-3.4-ea2
         directories:
           - path: components/operators/*
           - path: components/operators/gpu-operator
