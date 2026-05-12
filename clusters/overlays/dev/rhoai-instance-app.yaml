@@ -7,7 +7,7 @@ spec:
   project: platform
   source:
     repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
-    targetRevision: main
+    targetRevision: rhoai-3.4-ea2
     path: components/instances/rhoai-instance/overlays/dev
   destination:
     server: https://kubernetes.default.svc
