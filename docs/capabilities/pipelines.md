@@ -82,7 +82,7 @@ oc get pods -n redhat-ods-applications -l app=ds-pipeline-api-server
 ```
 
 !!! info "Argo Workflows controller option (DSC v2)"
-    The RHOAI 3.3 DSC v2 API introduces an `aipipelines.argoWorkflowsControllers.managementState` field that lets you configure whether RHOAI manages its own Argo Workflows controller or uses an existing one. This is relevant if you already have Argo Workflows installed and want to avoid conflicts. Note: Argo Workflows (pipeline orchestration) is distinct from ArgoCD (GitOps). This repository uses the v1 DSC API (`datasciencepipelines`), where RHOAI manages the controller automatically. See [Known Issues #3](../reference/known-issues.md) for details on v1 vs v2.
+    The DSC v2 API includes an `aipipelines.argoWorkflowsControllers.managementState` field that lets you configure whether RHOAI manages its own Argo Workflows controller or uses an existing one. This is relevant if you already have Argo Workflows installed and want to avoid conflicts. Note: Argo Workflows (pipeline orchestration) is distinct from ArgoCD (GitOps). This repository uses the v2 DSC API (`aipipelines`), where the Argo Workflows controller is separately configurable. See [Known Issues #3](../reference/known-issues.md) for details.
 
 ## Example: Create a Pipeline Server
 

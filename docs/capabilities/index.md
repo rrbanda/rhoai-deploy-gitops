@@ -62,8 +62,8 @@ graph TD
 - Model Registry requires an external MySQL database (5.x+) and S3-compatible object storage
 - Capabilities without GPU needs (Pipelines, Workbenches, Registry) can run on CPU-only clusters
 
-!!! note "Additional RHOAI 3.3 capabilities not covered in this repo"
-    The official RHOAI 3.3 documentation lists additional DSC components that this repository does not deploy or document in detail:
+!!! note "Additional RHOAI 3.4 capabilities not covered in this repo"
+    The official RHOAI 3.4 documentation lists additional DSC components that this repository does not deploy or document in detail:
 
     - **`advancedkserve` (Distributed Inference with llm-d)** -- enables distributed model inference using the llm-d framework. Requires cert-manager, Red Hat Connectivity Link Operator, Red Hat Leader Worker Set Operator, and OpenShift 4.20+. Not included in this repo's manifests.
     - **`feastoperator` (Feature Store)** -- present in our base DSC as `Removed`. The Feast Operator provides a feature store for ML workloads. Enable it by setting `feastoperator.managementState: Managed` if needed.

@@ -1,6 +1,6 @@
 # Architecture and GitOps Patterns
 
-The repository implements a fully declarative, GitOps-driven installation of Red Hat OpenShift AI (RHOAI) 3.3 on OpenShift. The entire platform -- from GPU drivers to AI model serving -- is expressed as Kubernetes manifests managed by ArgoCD via an **app-of-apps pattern**.
+The repository implements a fully declarative, GitOps-driven installation of Red Hat OpenShift AI (RHOAI) 3.4 (Early Access) on OpenShift. The entire platform -- from GPU drivers to AI model serving -- is expressed as Kubernetes manifests managed by ArgoCD via an **app-of-apps pattern**.
 
 ## Repository Structure
 
@@ -194,6 +194,6 @@ Seven operators are installed via OLM Subscriptions:
 | GPU Operator | redhat-cop catalog | `stable` | NVIDIA drivers + toolkit |
 | Kueue | Custom subscription | `stable-v1.2` | GPU quota management |
 | JobSet | Custom subscription | (default) | Kubeflow Trainer v2 dependency |
-| **RHOAI** | redhat-cop catalog + patch | **`fast-3.x`** | The core AI platform |
+| **RHOAI** | redhat-cop catalog + patch | **`beta`** | The core AI platform (3.4 EA) |
 
-The RHOAI operator uses a Kustomize patch (`components/operators/rhoai-operator/patch-channel.yaml`) to override the channel to `fast-3.x`, required for RHOAI 3.3.
+The RHOAI operator uses a Kustomize patch (`components/operators/rhoai-operator/patch-channel.yaml`) to override the channel to `beta`, which delivers RHOAI 3.4 Early Access releases.

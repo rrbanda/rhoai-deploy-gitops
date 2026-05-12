@@ -2,10 +2,10 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-GitHub_Pages-blue)](https://rrbanda.github.io/rhoai-deploy-gitops/)
-[![RHOAI](https://img.shields.io/badge/RHOAI-3.3-red)](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.3)
+[![RHOAI](https://img.shields.io/badge/RHOAI-3.4_EA2-red)](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.4)
 [![OpenShift](https://img.shields.io/badge/OpenShift-4.19_|_4.20-red)](https://docs.openshift.com/)
 
-Production-ready Kustomize manifests for deploying **Red Hat OpenShift AI 3.3** and AI use cases on OpenShift -- using ArgoCD (GitOps) or plain `oc apply -k` (manual).
+Production-ready Kustomize manifests for deploying **Red Hat OpenShift AI 3.4 (Early Access)** and AI use cases on OpenShift -- using ArgoCD (GitOps) or plain `oc apply -k` (manual).
 
 Composable overlays let you deploy the full stack or pick individual capabilities (model serving, training, pipelines, workbenches) without modifying the base manifests.
 
@@ -64,7 +64,7 @@ rhoai-deploy-gitops/
 - **Identity provider configured** -- `kubeadmin` is not sufficient for RHOAI
 - `oc` CLI authenticated as cluster-admin
 - **Open Data Hub must NOT be installed** on the same cluster
-- **No upgrade path from RHOAI 2.x (as of 3.3)** -- 3.0 requires a fresh installation; upgrade support is planned for a later release
+- **No upgrade path from RHOAI 2.x** -- 3.0 requires a fresh installation; upgrade support is planned for a later release
 - GPU nodes available (any NVIDIA GPU supported by the GPU Operator) for model serving and training
 - At least 50Gi storage per model in the GPU node availability zone
 
@@ -202,8 +202,8 @@ The full documentation site covers:
 
 ## References
 
-- [RHOAI 3.3 Install Docs](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.3/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install)
-- [RHOAI 3.3 Distributed Workloads](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.3/html/installing_and_uninstalling_openshift_ai_self-managed/installing-the-distributed-workloads-components_install)
+- [RHOAI 3.4 Install Docs](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.4/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install)
+- [RHOAI 3.4 Release Notes](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.4/html/release_notes)
 - [redhat-cop/gitops-catalog](https://github.com/redhat-cop/gitops-catalog) -- Kustomize bases for operators
 - [ToolOrchestra Paper](https://arxiv.org/abs/2503.02495) -- NVIDIA's multi-model orchestration approach
 - [verl Framework](https://github.com/volcengine/verl) -- Reinforcement learning training framework
