@@ -17,7 +17,7 @@ spec:
     kserve:
       managementState: Managed
       modelsAsService:
-        managementState: Removed
+        managementState: Managed
       nim:
         airGapped: false
         managementState: Managed
@@ -36,7 +36,7 @@ spec:
     ray:
       managementState: Managed
     trainer:
-      managementState: Removed
+      managementState: Managed
     trainingoperator:
       managementState: Managed
     trustyai:
