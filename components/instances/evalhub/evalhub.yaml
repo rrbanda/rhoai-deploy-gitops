@@ -1,0 +1,10 @@
+apiVersion: trustyai.opendatahub.io/v1alpha1
+kind: EvalHub
+metadata:
+  name: evalhub
+  namespace: redhat-ods-applications
+spec:
+  replicas: 1
+  env:
+    - name: MLFLOW_TRACKING_URI
+      value: "http://mlflow-tracking.redhat-ods-applications.svc.cluster.local:5000"
