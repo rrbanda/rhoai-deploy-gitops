@@ -1,11 +1,11 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: gemma4-e4b
+namespace: gemma2-9b-fp8
 
 labels:
   - pairs:
-      app.kubernetes.io/part-of: gemma4-e4b
+      app.kubernetes.io/part-of: gemma2-9b-fp8
       tier: "1"
 
 resources:

@@ -1,16 +1,16 @@
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: gemma4-e4b
+  name: gemma2-9b-fp8
   labels:
-    app.kubernetes.io/name: gemma4-e4b
+    app.kubernetes.io/name: gemma2-9b-fp8
     app.kubernetes.io/component: route
   annotations:
     argocd.argoproj.io/sync-wave: "2"
 spec:
   to:
     kind: Service
-    name: gemma4-e4b-route-svc
+    name: gemma2-9b-fp8-route-svc
     weight: 100
   port:
     targetPort: 8080
