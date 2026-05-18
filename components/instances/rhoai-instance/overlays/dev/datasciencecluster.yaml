@@ -27,7 +27,7 @@ spec:
     kueue:
       defaultClusterQueueName: default
       defaultLocalQueueName: default
-      managementState: Managed
+      managementState: Unmanaged
     llamastackoperator:
       managementState: Managed
     mlflowoperator:
