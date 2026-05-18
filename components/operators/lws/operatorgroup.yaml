@@ -4,4 +4,6 @@ metadata:
   name: lws
   namespace: openshift-lws
 spec:
+  targetNamespaces:
+    - openshift-lws
   upgradeStrategy: Default
