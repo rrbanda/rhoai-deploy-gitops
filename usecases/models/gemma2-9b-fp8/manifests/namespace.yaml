@@ -5,3 +5,5 @@ metadata:
   labels:
     kubernetes.io/metadata.name: models-as-a-service
     opendatahub.io/dashboard: "true"
+    opendatahub.io/generated-namespace: "true"
+    app.kubernetes.io/managed-by: maas-controller

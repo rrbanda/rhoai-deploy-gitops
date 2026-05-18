@@ -15,4 +15,5 @@ resources:
   - llm-inference-service.yaml
   - maas-model-ref.yaml
   - maas-subscription.yaml
+  - maas-auth-policy.yaml
   - llamastack-distribution.yaml
