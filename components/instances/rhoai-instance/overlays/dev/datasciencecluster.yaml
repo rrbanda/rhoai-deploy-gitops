@@ -13,7 +13,7 @@ spec:
     dashboard:
       managementState: Managed
     feastoperator:
-      managementState: Removed
+      managementState: Managed
     kserve:
       managementState: Managed
       modelsAsService:
@@ -22,10 +22,12 @@ spec:
         airGapped: false
         managementState: Managed
       rawDeploymentServiceConfig: Headless
+      wva:
+        managementState: Managed
     kueue:
       defaultClusterQueueName: default
       defaultLocalQueueName: default
-      managementState: Unmanaged
+      managementState: Managed
     llamastackoperator:
       managementState: Managed
     mlflowoperator:
@@ -34,6 +36,8 @@ spec:
       managementState: Managed
       registriesNamespace: rhoai-model-registries
     ray:
+      managementState: Managed
+    sparkoperator:
       managementState: Managed
     trainer:
       managementState: Managed
@@ -45,6 +49,7 @@ spec:
           permitCodeExecution: allow
           permitOnline: allow
       managementState: Managed
+      mcpGuardrailsMode: true
     workbenches:
       managementState: Managed
       workbenchNamespace: rhods-notebooks
