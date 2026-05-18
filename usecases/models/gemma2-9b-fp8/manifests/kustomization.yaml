@@ -1,7 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: gemma2-9b-fp8
+namespace: models-as-a-service
 
 labels:
   - pairs:
@@ -9,7 +9,10 @@ labels:
 
 resources:
   - namespace.yaml
-  - serving-runtime.yaml
-  - inference-service.yaml
-  - service.yaml
-  - route.yaml
+  - chat-template-configmap.yaml
+  - llama-stack-config.yaml
+  - playground-rbac.yaml
+  - llm-inference-service.yaml
+  - maas-model-ref.yaml
+  - maas-subscription.yaml
+  - llamastack-distribution.yaml

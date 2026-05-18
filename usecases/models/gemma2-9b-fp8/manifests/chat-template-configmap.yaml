@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gemma2-chat-template
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+data:
+  template.jinja: |
+    {%- set ns = namespace(system_message='') -%}
+    {%- for message in messages -%}
+    {%- if message['role'] == 'system' -%}
+    {%- set ns.system_message = message['content'] -%}
+    {%- endif -%}
+    {%- endfor -%}
+    {{ bos_token }}
+    {%- for message in messages -%}
+    {%- if message['role'] == 'user' -%}
+    <start_of_turn>user
+    {%- if ns.system_message %}
+    {{ ns.system_message + '\n\n' }}
+    {%- set ns.system_message = '' -%}
+    {%- endif %}
+    {{ message['content'] }}<end_of_turn>
+    {%- elif message['role'] == 'assistant' -%}
+    <start_of_turn>model
+    {{ message['content'] }}<end_of_turn>
+    {% endif -%}
+    {%- endfor -%}
+    <start_of_turn>model

@@ -1,0 +1,18 @@
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSSubscription
+metadata:
+  name: admin-subscription
+  labels:
+    app.kubernetes.io/name: gemma2-9b-fp8
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  owner:
+    users:
+      - admin
+  modelRefs:
+    - name: gemma2-9b-fp8
+      namespace: models-as-a-service
+      tokenRateLimits:
+        - limit: 1000000000
+          window: "24h"

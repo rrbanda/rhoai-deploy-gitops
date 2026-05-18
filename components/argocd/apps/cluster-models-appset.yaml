@@ -39,7 +39,27 @@ spec:
             - /status
             - /metadata/annotations
         - group: serving.kserve.io
+          kind: LLMInferenceService
+          jsonPointers:
+            - /status
+            - /metadata/annotations
+            - /metadata/finalizers
+        - group: serving.kserve.io
           kind: ServingRuntime
+          jsonPointers:
+            - /status
+        - group: llamastack.io
+          kind: LlamaStackDistribution
+          jsonPointers:
+            - /status
+            - /metadata/annotations
+        - group: maas.opendatahub.io
+          kind: MaaSModelRef
+          jsonPointers:
+            - /status
+            - /metadata/finalizers
+        - group: maas.opendatahub.io
+          kind: MaaSSubscription
           jsonPointers:
             - /status
         - group: route.openshift.io
