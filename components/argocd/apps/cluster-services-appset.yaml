@@ -16,6 +16,13 @@ spec:
           # Exclude services not currently deployed (re-enable by removing exclude)
           - path: usecases/services/toolorchestra-app/profiles/tier1-minimal
             exclude: true
+          # MaaS services managed by rrbanda/maas-demo via dedicated ArgoCD Application
+          - path: usecases/services/ai-gateway/profiles/tier1-minimal
+            exclude: true
+          - path: usecases/services/guardrails-gateway/profiles/tier1-minimal
+            exclude: true
+          - path: usecases/services/llm-d-epp/profiles/tier1-minimal
+            exclude: true
   template:
     metadata:
       name: 'service-{{ index .path.segments 2 }}'

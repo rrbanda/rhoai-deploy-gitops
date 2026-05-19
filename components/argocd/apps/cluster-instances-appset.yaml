@@ -19,6 +19,23 @@ spec:
             exclude: true
           - path: components/instances/gpu-instance
             exclude: true
+          # MaaS resources managed by rrbanda/maas-demo via dedicated ArgoCD Application
+          - path: components/instances/maas-postgres
+            exclude: true
+          - path: components/instances/maas-gateway
+            exclude: true
+          - path: components/instances/maas-dns-patch
+            exclude: true
+          - path: components/instances/observability
+            exclude: true
+          - path: components/instances/oidc-integration
+            exclude: true
+          - path: components/instances/monitoring-config
+            exclude: true
+          - path: components/instances/vault-dev
+            exclude: true
+          - path: components/instances/rhcl-instance
+            exclude: true
   template:
     metadata:
       name: 'instance-{{ .path.basename }}'
