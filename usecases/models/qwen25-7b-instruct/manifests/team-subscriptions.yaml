@@ -1,0 +1,74 @@
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSSubscription
+metadata:
+  name: premium-analytics
+  namespace: models-as-a-service
+  labels:
+    app.kubernetes.io/name: qwen25-7b-instruct
+    app.kubernetes.io/component: governance
+    tier: premium
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  owner:
+    users:
+      - premium-user
+    groups:
+      - name: "analytics-team"
+  modelRefs:
+    - name: qwen25-7b-instruct
+      namespace: llm-inference
+      tokenRateLimits:
+        - limit: 500000
+          window: "1h"
+  priority: 1
+---
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSSubscription
+metadata:
+  name: standard-engineering
+  namespace: models-as-a-service
+  labels:
+    app.kubernetes.io/name: qwen25-7b-instruct
+    app.kubernetes.io/component: governance
+    tier: standard
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  owner:
+    users:
+      - standard-user
+    groups:
+      - name: "engineering-team"
+  modelRefs:
+    - name: qwen25-7b-instruct
+      namespace: llm-inference
+      tokenRateLimits:
+        - limit: 100000
+          window: "1h"
+  priority: 5
+---
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSSubscription
+metadata:
+  name: basic-developers
+  namespace: models-as-a-service
+  labels:
+    app.kubernetes.io/name: qwen25-7b-instruct
+    app.kubernetes.io/component: governance
+    tier: basic
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  owner:
+    users:
+      - basic-user
+    groups:
+      - name: "dev-team"
+  modelRefs:
+    - name: qwen25-7b-instruct
+      namespace: llm-inference
+      tokenRateLimits:
+        - limit: 50000
+          window: "1h"
+  priority: 10

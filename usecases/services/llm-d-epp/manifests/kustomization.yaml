@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: llm-inference
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: llm-d-epp
+
+resources:
+  - rbac.yaml
+  - deployment.yaml
+  - service.yaml
+  - inference-pool.yaml
+  - inference-model.yaml

@@ -1,0 +1,25 @@
+apiVersion: authorino.kuadrant.io/v1beta3
+kind: AuthConfig
+metadata:
+  name: maas-gateway-oidc
+  namespace: openshift-ingress
+  labels:
+    security.opendatahub.io/authorization-group: default
+    app.kubernetes.io/part-of: ai-bridge-oidc
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  hosts:
+    - aed794ce602fc4585aff1f0ab80130b1-1131672273.us-east-2.elb.amazonaws.com
+  authentication:
+    oidc-jwt:
+      jwt:
+        issuerUrl: https://keycloak-keycloak.apps.cluster-6crhb.6crhb.sandbox1011.opentlc.com/realms/ai-bridge
+      credentials:
+        authorizationHeader:
+          prefix: "Bearer"
+  authorization:
+    role-check:
+      patternMatching:
+        patterns:
+          - predicate: 'auth.identity.realm_access.roles.exists(r, r == "ai-admin" || r == "ai-engineer")'

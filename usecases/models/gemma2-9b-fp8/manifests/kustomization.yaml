@@ -16,4 +16,5 @@ resources:
   - maas-model-ref.yaml
   - maas-subscription.yaml
   - maas-auth-policy.yaml
+  - team-subscriptions.yaml
   - llamastack-distribution.yaml

@@ -1,0 +1,23 @@
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSSubscription
+metadata:
+  name: admin-subscription
+  namespace: models-as-a-service
+  labels:
+    app.kubernetes.io/name: qwen25-7b-instruct
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  owner:
+    users:
+      - admin
+    groups:
+      - name: "system:authenticated:oauth"
+      - name: "system:authenticated"
+      - name: "system:cluster-admins"
+  modelRefs:
+    - name: qwen25-7b-instruct
+      namespace: llm-inference
+      tokenRateLimits:
+        - limit: 1000000000
+          window: "24h"

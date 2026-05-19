@@ -1,0 +1,17 @@
+apiVersion: kuadrant.io/v1
+kind: AuthPolicy
+metadata:
+  name: ai-gateway-oidc-auth
+  namespace: ai-gateway
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: multi-cluster-inference
+  rules:
+    authentication:
+      keycloak-jwt:
+        jwt:
+          issuerUrl: https://keycloak-keycloak.apps.cluster-6crhb.6crhb.sandbox1011.opentlc.com/realms/ai-bridge

@@ -1,0 +1,71 @@
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSSubscription
+metadata:
+  name: team-a-ml-engineering
+  labels:
+    app.kubernetes.io/name: gemma2-9b-fp8
+    app.kubernetes.io/component: governance
+    tier: premium
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  owner:
+    users:
+      - team-a-lead
+    groups:
+      - name: "team-a"
+  modelRefs:
+    - name: gemma2-9b-fp8
+      namespace: models-as-a-service
+      tokenRateLimits:
+        - limit: 500000
+          window: "1h"
+  priority: 1
+---
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSSubscription
+metadata:
+  name: team-b-data-science
+  labels:
+    app.kubernetes.io/name: gemma2-9b-fp8
+    app.kubernetes.io/component: governance
+    tier: standard
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  owner:
+    users:
+      - team-b-lead
+    groups:
+      - name: "team-b"
+  modelRefs:
+    - name: gemma2-9b-fp8
+      namespace: models-as-a-service
+      tokenRateLimits:
+        - limit: 100000
+          window: "1h"
+  priority: 5
+---
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSSubscription
+metadata:
+  name: team-c-app-developers
+  labels:
+    app.kubernetes.io/name: gemma2-9b-fp8
+    app.kubernetes.io/component: governance
+    tier: basic
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+spec:
+  owner:
+    users:
+      - team-c-lead
+    groups:
+      - name: "team-c"
+  modelRefs:
+    - name: gemma2-9b-fp8
+      namespace: models-as-a-service
+      tokenRateLimits:
+        - limit: 50000
+          window: "1h"
+  priority: 10
