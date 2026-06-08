@@ -1,6 +1,6 @@
 # LlamaStack
 
-LlamaStack is Meta's open framework for building AI applications with agents, RAG, tool use, and safety. RHOAI 3.3 includes a **Llama Stack Operator** as a DSC component (`llamastackoperator`) that installs the operator and its `LlamaStackDistribution` CRD. This use case deploys a **specific LlamaStack instance** on top of that operator.
+LlamaStack is Meta's open framework for building AI applications with agents, RAG, tool use, and safety. RHOAI 3.4 includes a **Llama Stack Operator** as a DSC component (`llamastackoperator`) that installs the operator and its `LlamaStackDistribution` CRD. This use case deploys a **specific LlamaStack instance** on top of that operator.
 
 ## How It Works -- Two Layers
 
@@ -54,10 +54,10 @@ The `llamastackoperator` DSC component must be set to `Managed`. This is include
   value: Managed
 ```
 
-### 2. Official Dependencies (per RHOAI 3.3 Installation Guide)
+### 2. Official Dependencies (per RHOAI 3.4 Installation Guide)
 
 !!! warning "Required before enabling `llamastackoperator` in the DSC"
-    The [official RHOAI 3.3 documentation](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.3/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install) (Section 3.1.2) lists these requirements:
+    The [official RHOAI 3.4 documentation](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.4/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install) (Section 3.1.2) lists these requirements:
 
     - **Red Hat OpenShift Service Mesh Operator 3.x**
     - **cert-manager Operator**

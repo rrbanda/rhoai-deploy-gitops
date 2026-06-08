@@ -9,6 +9,7 @@ MLflow provides experiment tracking, model registry, dataset management, and tra
     | 3.2 / 3.3 | 3.6.0 | Developer Preview |
     | 3.4 EA1 | 3.10.0 (prerelease) | Developer Preview |
     | 3.4 EA2 | 3.10.1 | Technical Preview |
+    | 3.4 GA | 3.11+ | General Availability |
 
     For questions, contact Matt Prahl or Humair Khan in `#wg-openshift-ai-mlflow-integration`.
 
@@ -87,10 +88,10 @@ After deployment the MLflow UI appears in the **Applications** drop-down in the 
 
 ### Install the SDK
 
-=== "RHOAI 3.2 / 3.3 (Red Hat fork)"
+=== "RHOAI 3.4 (Red Hat fork)"
 
     ```bash
-    pip install "git+https://github.com/red-hat-data-services/mlflow@rhoai-3.3"
+    pip install "git+https://github.com/red-hat-data-services/mlflow@rhoai-3.4"
     ```
 
 === "RHOAI 3.4 EA1 (Red Hat fork)"
@@ -122,7 +123,7 @@ export MLFLOW_TRACKING_INSECURE_TLS=true
 
 ### Authentication
 
-=== "Manual Token (RHOAI 3.2/3.3 or upstream SDK 3.10+)"
+=== "Manual Token (RHOAI 3.4 or upstream SDK 3.10+)"
 
     ```bash
     export MLFLOW_TRACKING_TOKEN=$(oc whoami --show-token)

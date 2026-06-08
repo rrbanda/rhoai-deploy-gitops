@@ -25,7 +25,7 @@ spec:
     kueue:
       defaultClusterQueueName: default
       defaultLocalQueueName: default
-      managementState: Managed
+      managementState: Unmanaged
     llamastackoperator:
       managementState: Managed
     mlflowoperator:
@@ -34,6 +34,8 @@ spec:
       managementState: Managed
       registriesNamespace: rhoai-model-registries
     ray:
+      managementState: Managed
+    sparkoperator:
       managementState: Managed
     trainer:
       managementState: Managed

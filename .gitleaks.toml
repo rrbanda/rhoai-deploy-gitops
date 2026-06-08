@@ -1,0 +1,20 @@
+title = "rhoai-deploy-gitops gitleaks config"
+
+[allowlist]
+  description = "Allow known placeholder values and Kustomize remote URLs"
+  regexTarget = "match"
+  regexes = [
+    '''CHANGE_ME''',
+    '''fake''',
+    '''placeholder''',
+    '''example\.com''',
+    '''github\.com/redhat-cop/gitops-catalog''',
+  ]
+  paths = [
+    '''.gitleaks\.toml''',
+    '''.secrets\.baseline''',
+    '''.pre-commit-config\.yaml''',
+    '''docs/''',
+    '''\.md$''',
+    '''LICENSE''',
+  ]

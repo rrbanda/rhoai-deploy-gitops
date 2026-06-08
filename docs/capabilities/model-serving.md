@@ -98,7 +98,7 @@ spec:
   multiModel: false
   containers:
     - name: kserve-container
-      image: registry.redhat.io/rhaiis/vllm-cuda-rhel9:3.3.0
+      image: registry.redhat.io/rhaiis/vllm-cuda-rhel9:3.4.0
       command: ["python", "-m", "vllm.entrypoints.openai.api_server"]
       args:
         - --port=8080

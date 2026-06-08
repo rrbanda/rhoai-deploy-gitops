@@ -1,6 +1,6 @@
 # Architecture and GitOps Patterns
 
-The repository implements a fully declarative, GitOps-driven installation of Red Hat OpenShift AI (RHOAI) 3.3 on OpenShift. The entire platform -- from GPU drivers to AI model serving -- is expressed as Kubernetes manifests managed by ArgoCD via an **app-of-apps pattern**.
+The repository implements a fully declarative, GitOps-driven installation of Red Hat OpenShift AI (RHOAI) 3.4 on OpenShift. The entire platform -- from GPU drivers to AI model serving -- is expressed as Kubernetes manifests managed by ArgoCD via an **app-of-apps pattern**.
 
 ## Repository Structure
 
@@ -184,7 +184,7 @@ The `rhoai-instance` is **excluded** from the `cluster-instances` ApplicationSet
 
 ## Operators
 
-Seven operators are installed via OLM Subscriptions:
+Ten operators are installed via OLM Subscriptions:
 
 | Operator | Source | Channel | Purpose |
 |----------|--------|---------|---------|
@@ -193,7 +193,10 @@ Seven operators are installed via OLM Subscriptions:
 | NFD | redhat-cop catalog | `stable` | GPU node feature labels |
 | GPU Operator | redhat-cop catalog | `stable` | NVIDIA drivers + toolkit |
 | Kueue | Custom subscription | `stable-v1.2` | GPU quota management |
-| JobSet | Custom subscription | (default) | Kubeflow Trainer v2 dependency |
+| JobSet | Custom subscription | `stable-v1.0` | Kubeflow Trainer v2 dependency |
+| Leader Worker Set | Red Hat catalog | `stable` | llm-d / distributed inference |
+| OpenTelemetry | Red Hat catalog | `stable` | Distributed tracing (Tech Preview) |
+| Tempo | Red Hat catalog | `stable` | Trace storage backend (Tech Preview) |
 | **RHOAI** | redhat-cop catalog + patch | **`fast-3.x`** | The core AI platform |
 
-The RHOAI operator uses a Kustomize patch (`components/operators/rhoai-operator/patch-channel.yaml`) to override the channel to `fast-3.x`, required for RHOAI 3.3.
+The RHOAI operator uses a Kustomize patch (`components/operators/rhoai-operator/patch-channel.yaml`) to override the channel to `fast-3.x`, required for RHOAI 3.4.

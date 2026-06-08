@@ -89,12 +89,12 @@ ignoreDifferences:
 
 The higher retry count for instances and use cases gives operators time to install their CRDs before ArgoCD attempts to apply instance resources.
 
-## RHOAI 3.3 Specifics
+## RHOAI 3.4 Specifics
 
 | Setting | Value | Notes |
 |---------|-------|-------|
 | RHOAI channel | `fast-3.x` | Required for 3.x releases |
-| DSC API | `datasciencecluster.opendatahub.io/v1` | Stable API for 3.3 |
+| DSC API | `datasciencecluster.opendatahub.io/v2` | Stable API for 3.4 |
 | Kueue | `Unmanaged` in DSC | Red Hat Build of Kueue Operator manages it separately |
 | JobSet | Standalone operator | Required for Kubeflow Trainer v2 |
 | GPU Operator | Requires `spec.daemonsets` and `spec.dcgm` | Validated with v25.x |

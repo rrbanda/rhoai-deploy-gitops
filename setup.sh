@@ -41,15 +41,11 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 FILES=(
-  "components/argocd/apps/cluster-models-appset.yaml"
-  "components/argocd/apps/cluster-services-appset.yaml"
   "components/argocd/apps/cluster-operators-appset.yaml"
   "components/argocd/apps/cluster-instances-appset.yaml"
   "components/argocd/projects/base/platform-project.yaml"
-  "components/argocd/projects/base/usecases-project.yaml"
   "clusters/overlays/dev/bootstrap-app.yaml"
   "clusters/overlays/dev/rhoai-instance-app.yaml"
-  "clusters/overlays/dev/training-workloads-app.yaml"
 )
 
 echo "Replacing repo URL:"

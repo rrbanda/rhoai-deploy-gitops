@@ -1,6 +1,6 @@
 # Deploying OpenShift AI
 
-Deploy **Red Hat OpenShift AI (RHOAI) 3.3** on OpenShift -- from a full GitOps-managed platform to individual capabilities applied manually.
+Deploy **Red Hat OpenShift AI (RHOAI) 3.4** on OpenShift -- from a full GitOps-managed platform to individual capabilities applied manually.
 
 ## What This Project Does
 
@@ -60,7 +60,7 @@ This repository provides production-ready Kustomize manifests for deploying Red 
 ## Prerequisites
 
 !!! warning "Review before installing"
-    These requirements come from the [official RHOAI 3.3 Installation Guide](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.3/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install). Verify them before deploying.
+    These requirements come from the [official RHOAI 3.4 Installation Guide](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.4/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install). Verify them before deploying.
 
 - **OpenShift Container Platform 4.19 or 4.20** (other versions are not supported)
 - **Minimum 2 worker nodes** with 8 CPUs and 32 GiB RAM each
@@ -68,7 +68,7 @@ This repository provides production-ready Kustomize manifests for deploying Red 
 - **Identity provider configured** -- `kubeadmin` is not sufficient for RHOAI
 - `oc` CLI authenticated as cluster-admin
 - **Open Data Hub must NOT be installed** -- RHOAI and ODH cannot coexist on the same cluster
-- **No upgrade path from RHOAI 2.x (as of 3.3)** -- 3.0 requires a fresh installation; upgrade support from 2.25 to a stable 3.x is planned for a later release (see [Known Issues #4](reference/known-issues.md))
+- **No upgrade path from RHOAI 2.x (as of 3.4)** -- 3.0 requires a fresh installation; upgrade support from 2.25 to a stable 3.x is planned for a later release (see [Known Issues #4](reference/known-issues.md))
 - **Internet access** to `cdn.redhat.com`, `registry.redhat.io`, `quay.io`, and related Red Hat domains (or a disconnected mirror)
 - GPU nodes available (NVIDIA L4, L40S, A100, or H100) -- required for model serving and training workloads
 - At least 50Gi storage per model in the GPU node availability zone
@@ -89,8 +89,8 @@ See [Composing a Custom Profile](capabilities/index.md#composing-a-custom-profil
 
 ## References
 
-- [RHOAI 3.3 Install Docs](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.3/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install)
-- [RHOAI 3.3 Distributed Workloads](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.3/html/installing_and_uninstalling_openshift_ai_self-managed/installing-the-distributed-workloads-components_install)
+- [RHOAI 3.4 Install Docs](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.4/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install)
+- [RHOAI 3.4 Distributed Workloads](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.4/html/installing_and_uninstalling_openshift_ai_self-managed/installing-the-distributed-workloads-components_install)
 - [redhat-cop/gitops-catalog](https://github.com/redhat-cop/gitops-catalog) -- Kustomize bases for operators
 - [ToolOrchestra Paper](https://arxiv.org/abs/2503.02495) -- NVIDIA's multi-model orchestration approach
 - [verl Framework](https://github.com/volcengine/verl) -- Reinforcement learning training framework

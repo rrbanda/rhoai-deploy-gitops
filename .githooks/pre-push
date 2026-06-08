@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Secondary defense: scan for secrets before pushing.
+# Install: git config core.hooksPath .githooks
+set -euo pipefail
+
+if command -v gitleaks &>/dev/null; then
+  echo "[pre-push] Running gitleaks scan..."
+  gitleaks detect --source . --verbose --config .gitleaks.toml
+  echo "[pre-push] No secrets detected."
+else
+  echo "[pre-push] WARNING: gitleaks not installed. Install with: brew install gitleaks"
+  echo "[pre-push] Skipping secret scan."
+fi

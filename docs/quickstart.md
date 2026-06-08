@@ -3,7 +3,7 @@
 Two paths to deploy the full Red Hat OpenShift AI (RHOAI) stack. Both use the same manifests.
 
 !!! warning "Prerequisites"
-    Before deploying, verify your cluster meets the [official RHOAI 3.3 requirements](index.md):
+    Before deploying, verify your cluster meets the [official RHOAI 3.4 requirements](index.md):
 
     - OpenShift 4.19 or 4.20 with at least 2 worker nodes (8 CPUs, 32 GiB RAM each)
     - Default storage class with dynamic provisioning

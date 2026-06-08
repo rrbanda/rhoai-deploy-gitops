@@ -1,1 +1,18 @@
 site/
+
+# Secrets -- NEVER commit real credentials
+*.pem
+*.key
+*.p12
+*.pfx
+*.env
+*.env.*
+!*.env.example
+credentials.json
+kubeconfig
+secrets/
+.secrets.baseline
+
+# OS artifacts
+.DS_Store
+Thumbs.db
