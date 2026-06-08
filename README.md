@@ -33,6 +33,9 @@ rhoai-deploy-gitops/
 │   │   ├── leader-worker-set/
 │   │   ├── opentelemetry/
 │   │   ├── tempo/
+│   │   ├── cluster-observability-operator/
+│   │   ├── custom-metrics-autoscaler/
+│   │   ├── rhcl-operator/
 │   │   └── rhoai-operator/
 │   └── instances/                    # Operator instance CRs
 │       ├── nfd-instance/
@@ -106,9 +109,12 @@ oc apply -k components/operators/jobset-operator/
 oc apply -k components/operators/leader-worker-set/
 oc apply -k components/operators/opentelemetry/
 oc apply -k components/operators/tempo/
+oc apply -k components/operators/cluster-observability-operator/
+oc apply -k components/operators/custom-metrics-autoscaler/
+oc apply -k components/operators/rhcl-operator/
 oc apply -k components/operators/rhoai-operator/
 
-watch "oc get csv -A | grep -E 'cert-manager|servicemesh|nfd|gpu-operator|kueue|jobset|leader|opentelemetry|tempo|rhods'"
+watch "oc get csv -A | grep -E 'cert-manager|servicemesh|nfd|gpu-operator|kueue|jobset|leader|opentelemetry|tempo|observability|autoscaler|rhcl|rhods'"
 
 # Phase 2 -- Pre-DSC Instances (order matters)
 oc apply -k components/instances/nfd-instance/

@@ -28,6 +28,9 @@ rhoai-deploy-gitops/
 │   │   ├── leader-worker-set/
 │   │   ├── opentelemetry/
 │   │   ├── tempo/
+│   │   ├── cluster-observability-operator/
+│   │   ├── custom-metrics-autoscaler/
+│   │   ├── rhcl-operator/
 │   │   └── rhoai-operator/
 │   └── instances/                    # Operator instance CRs
 │       ├── nfd-instance/
@@ -158,7 +161,7 @@ The `rhoai-instance` is **excluded** from the `cluster-instances` ApplicationSet
 
 ## Operators
 
-Ten operators are installed via OLM Subscriptions:
+Thirteen operators are installed via OLM Subscriptions:
 
 | Operator | Source | Channel | Purpose |
 |----------|--------|---------|---------|
@@ -171,6 +174,9 @@ Ten operators are installed via OLM Subscriptions:
 | Leader Worker Set | Red Hat catalog | `stable` | llm-d / distributed inference |
 | OpenTelemetry | Red Hat catalog | `stable` | Distributed tracing (Tech Preview) |
 | Tempo | Red Hat catalog | `stable` | Trace storage backend (Tech Preview) |
+| Cluster Observability Operator | Red Hat catalog | `stable` | Metrics, alerting, dashboards (Tech Preview) |
+| Custom Metrics Autoscaler | Red Hat catalog | `stable` | KEDA-based HPA autoscaling (Tech Preview) |
+| Red Hat Connectivity Link | Red Hat catalog | `stable` | Gateway API for llm-d (Tech Preview) |
 | **RHOAI** | redhat-cop catalog + patch | **`fast-3.x`** | The core AI platform |
 
 The RHOAI operator uses a Kustomize patch (`components/operators/rhoai-operator/patch-channel.yaml`) to override the channel to `fast-3.x`, required for RHOAI 3.4.
