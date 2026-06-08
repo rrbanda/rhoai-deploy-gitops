@@ -12,7 +12,7 @@ The Model Registry provides a central catalog for tracking ML model versions, me
 | S3-compatible object storage | External service | Provisioned outside the cluster |
 
 !!! warning "External database and storage required"
-    The official RHOAI 3.3 documentation requires an external MySQL database (version 5.x or later, 8.x recommended) and S3-compatible object storage for Model Registry. These are **not** provisioned by the RHOAI Operator -- you must set them up before enabling this component. Model Registry does not require GPU infrastructure.
+    The official RHOAI 3.4 documentation requires an external MySQL database (version 5.x or later, 8.x recommended) and S3-compatible object storage for Model Registry. These are **not** provisioned by the RHOAI Operator -- you must set them up before enabling this component. Model Registry does not require GPU infrastructure.
 
 ## Enable It
 
@@ -66,7 +66,7 @@ After enabling Model Registry in the DSC, configure the external MySQL database 
 2. **S3 storage** -- configure an S3-compatible bucket for model artifacts. Note the endpoint, bucket name, region, and credentials.
 3. **Create a Model Registry instance** via the RHOAI Dashboard or CLI, providing the MySQL and S3 connection details.
 
-For detailed configuration steps, see the [official RHOAI documentation on creating a model registry](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.3/html/managing_models/managing-model-registry).
+For detailed configuration steps, see the [official RHOAI documentation on creating a model registry](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.4/html/managing_models/managing-model-registry).
 
 ## Usage
 

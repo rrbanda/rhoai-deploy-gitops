@@ -8,8 +8,9 @@ Complete removal of Red Hat OpenShift AI (RHOAI) and all managed operators. Run 
 ## Procedure
 
 ```bash
-# 1. Delete model and service namespaces
-oc delete namespace orchestrator-rhoai --wait=true --timeout=300s
+# 1. Delete use-case namespaces (only if deployed from rhoai-usecases companion repo)
+# Skip this step if you never deployed use cases from rhoai-usecases.
+oc delete namespace orchestrator-rhoai --wait=true --timeout=300s 2>/dev/null || true
 oc delete namespace orchestrator-8b --wait=true --timeout=300s 2>/dev/null || true
 oc delete namespace qwen-math-7b --wait=true --timeout=300s 2>/dev/null || true
 oc delete namespace gpt-oss-120b --wait=true --timeout=300s 2>/dev/null || true
@@ -43,6 +44,9 @@ oc delete sub openshift-cert-manager-operator -n cert-manager-operator
 oc delete sub authorino-operator -n openshift-operators 2>/dev/null || true
 oc delete sub servicemeshoperator3 -n openshift-operators 2>/dev/null || true
 oc delete sub serverless-operator -n openshift-serverless 2>/dev/null || true
+oc delete sub leader-worker-set -n openshift-operators 2>/dev/null || true
+oc delete sub opentelemetry-product -n openshift-operators 2>/dev/null || true
+oc delete sub tempo-product -n openshift-operators 2>/dev/null || true
 
 # 7. Delete CSVs from all namespaces
 for ns in redhat-ods-operator openshift-kueue-operator openshift-jobset-operator \

@@ -25,7 +25,7 @@ multi-pod job orchestration.
 | GPU Infrastructure | Operator + Instance | See [gpu-infrastructure.md](gpu-infrastructure.md) |
 
 !!! info "cert-manager is required"
-    The official RHOAI 3.3 documentation lists cert-manager as a dependency for Kueue-based workloads (training, Ray). Install the cert-manager Operator before deploying training workloads.
+    The official RHOAI 3.4 documentation lists cert-manager as a dependency for Kueue-based workloads (training, Ray). Install the cert-manager Operator before deploying training workloads.
 
 ## Enable It
 
@@ -106,40 +106,7 @@ oc get pods -n redhat-ods-applications -l control-plane=kubeflow-training-operat
 
 ## Example: RayJob for GRPO Training
 
-This repo includes a complete GRPO training pipeline. To run it:
-
-```bash
-# Via ArgoCD
-argocd app sync usecase-toolorchestra-training
-
-# Or manually (deploys both training infra and workloads)
-oc apply -k usecases/services/toolorchestra-app/manifests/training/
-```
-
-The training pipeline uses sync waves:
-- **Wave 0**: Download jobs fetch the base model and dataset
-- **Wave 1**: RayJob starts GRPO training (1 head + 3 GPU workers)
-
-Monitor progress:
-
-```bash
-oc get rayjob grpo-training -n orchestrator-rhoai -w
-oc logs -f -l app.kubernetes.io/name=grpo-head -n orchestrator-rhoai
-```
-
-### Training infrastructure resources
-
-Training infrastructure must be deployed separately before running training workloads. These resources live in `usecases/services/toolorchestra-app/manifests/training/infra/`:
-
-- **LocalQueue** (`training-queue`) -- namespaced Kueue queue
-- **PVC** (`training-checkpoints`, 100Gi) -- model + dataset + checkpoint storage
-- **ConfigMap** (`grpo-training-config`) -- GRPO hyperparameters
-
-Deploy infra and workloads together:
-
-```bash
-oc apply -k usecases/services/toolorchestra-app/manifests/training/
-```
+Training workloads (including the GRPO pipeline) are managed in the **[rhoai-usecases](https://github.com/redhat-ai-services/rhoai-usecases)** companion repository. This repo provides only the platform prerequisites (Kueue, JobSet, Training Operator via the DSC).
 
 ## Example: Minimal RayJob
 

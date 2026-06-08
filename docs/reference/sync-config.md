@@ -8,7 +8,6 @@ The ArgoCD ApplicationSets use production-grade sync options validated through t
 |--------|---------|
 | `ServerSideApply=true` | Handles large CRDs (DSC, InferenceService, ClusterPolicy) and prevents annotation size limits |
 | `SkipDryRunOnMissingResource=true` | Allows retry-based convergence when CRDs don't exist yet |
-| `CreateNamespace=true` | ArgoCD manages namespace lifecycle for use cases |
 | `RespectIgnoreDifferences=true` | Honors configured `ignoreDifferences` rules |
 
 ## ignoreDifferences Rules
@@ -21,26 +20,6 @@ ignoreDifferences:
     kind: Subscription
     jsonPointers:
       - /spec/startingCSV
-      - /status
-```
-
-**InferenceService, ServingRuntime, Route** (model and service ApplicationSets) -- Prevents drift from KServe controllers and OpenShift router:
-
-```yaml
-ignoreDifferences:
-  - group: serving.kserve.io
-    kind: InferenceService
-    jsonPointers:
-      - /status
-      - /metadata/annotations
-  - group: serving.kserve.io
-    kind: ServingRuntime
-    jsonPointers:
-      - /status
-  - group: route.openshift.io
-    kind: Route
-    jsonPointers:
-      - /spec/host
       - /status
 ```
 
@@ -84,10 +63,8 @@ ignoreDifferences:
 |-------|------------|---------|-------------|
 | Operators | 5 | 30s (factor 2) | 5 min |
 | Instances | 10 | 60s (factor 2) | 10 min |
-| Models | 10 | 60s (factor 2) | 10 min |
-| Services | 10 | 60s (factor 2) | 10 min |
 
-The higher retry count for instances and use cases gives operators time to install their CRDs before ArgoCD attempts to apply instance resources.
+The higher retry count for instances gives operators time to install their CRDs before ArgoCD attempts to apply instance resources.
 
 ## RHOAI 3.4 Specifics
 

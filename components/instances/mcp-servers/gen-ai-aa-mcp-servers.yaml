@@ -5,6 +5,10 @@ metadata:
   namespace: redhat-ods-applications
   annotations:
     argocd.argoproj.io/sync-wave: "5"
+    description: >-
+      Registers MCP servers in the RHOAI GenAI Studio dashboard.
+      These services must be deployed from the companion repo:
+      https://github.com/rrbanda/rhoai-usecases
 data:
   GenAI-Toolbox-Database: |
     {

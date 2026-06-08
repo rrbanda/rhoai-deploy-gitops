@@ -1,5 +1,5 @@
 site_name: Deploying OpenShift AI
-site_description: Deploy Red Hat OpenShift AI 3.3 on OpenShift -- GitOps or manual, full stack or individual capabilities
+site_description: Deploy Red Hat OpenShift AI 3.4 on OpenShift -- GitOps or manual, full stack or individual capabilities
 site_url: https://rrbanda.github.io/rhoai-deploy-gitops/
 repo_url: https://github.com/rrbanda/rhoai-deploy-gitops
 repo_name: rrbanda/rhoai-deploy-gitops
@@ -72,12 +72,7 @@ nav:
     - GPU Infrastructure: capabilities/gpu-infrastructure.md
     - Kueue: capabilities/kueue.md
     - MLflow: capabilities/mlflow.md
-  - Use Cases:
-    - usecases/index.md
-    - ToolOrchestra: usecases/toolorchestra.md
-    - LlamaStack: usecases/llamastack.md
-    - GenAI Toolbox: usecases/genai-toolbox.md
-    - Red Hat OKP: usecases/rhokp.md
+  - Use Cases: usecases.md
   - Reference:
     - reference/index.md
     - ArgoCD Applications: reference/argocd-apps.md

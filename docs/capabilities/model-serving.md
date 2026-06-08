@@ -145,7 +145,7 @@ Key fields:
 - `storageUri: "pvc://..."` -- loads model weights from a PVC
 - `opendatahub.io/dashboard: "true"` -- makes the model visible in the RHOAI Dashboard
 
-For complete working examples, see `usecases/models/orchestrator-8b/manifests/` and `usecases/models/gpt-oss-120b/manifests/`.
+For complete working examples of model serving (InferenceService + ServingRuntime + download jobs), see the [rhoai-usecases](https://github.com/redhat-ai-services/rhoai-usecases) companion repository.
 
 ## Disable It
 

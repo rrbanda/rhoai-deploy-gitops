@@ -1,6 +1,6 @@
 # Architecture and GitOps Patterns
 
-The repository implements a fully declarative, GitOps-driven installation of Red Hat OpenShift AI (RHOAI) 3.4 on OpenShift. The entire platform -- from GPU drivers to AI model serving -- is expressed as Kubernetes manifests managed by ArgoCD via an **app-of-apps pattern**.
+The repository implements a fully declarative, GitOps-driven installation of Red Hat OpenShift AI (RHOAI) 3.4 on OpenShift. The entire platform -- from GPU drivers to the RHOAI DataScienceCluster -- is expressed as Kubernetes manifests managed by ArgoCD via an **app-of-apps pattern**. Models, services, and training workloads are managed separately in the [rhoai-usecases](https://github.com/rrbanda/rhoai-usecases) companion repository.
 
 ## Repository Structure
 
@@ -11,15 +11,12 @@ rhoai-deploy-gitops/
 │   ├── base/                         # Common: AppSets + ArgoCD projects
 │   └── overlays/dev/
 │       ├── bootstrap-app.yaml        # Self-managing app-of-apps
-│       ├── rhoai-instance-app.yaml   # DSC with ignoreDifferences
-│       └── training-workloads-app.yaml
+│       └── rhoai-instance-app.yaml   # DSC with ignoreDifferences
 ├── components/
 │   ├── argocd/                       # ArgoCD projects and ApplicationSets
 │   │   ├── apps/
 │   │   │   ├── cluster-operators-appset.yaml
-│   │   │   ├── cluster-instances-appset.yaml
-│   │   │   ├── cluster-models-appset.yaml
-│   │   │   └── cluster-services-appset.yaml
+│   │   │   └── cluster-instances-appset.yaml
 │   │   └── projects/
 │   ├── operators/                    # OLM operator subscriptions
 │   │   ├── cert-manager/
@@ -28,6 +25,9 @@ rhoai-deploy-gitops/
 │   │   ├── gpu-operator/
 │   │   ├── kueue-operator/
 │   │   ├── jobset-operator/
+│   │   ├── leader-worker-set/
+│   │   ├── opentelemetry/
+│   │   ├── tempo/
 │   │   └── rhoai-operator/
 │   └── instances/                    # Operator instance CRs
 │       ├── nfd-instance/
@@ -39,19 +39,10 @@ rhoai-deploy-gitops/
 │       ├── jobset-instance/
 │       ├── dashboard-config/         # Enables GenAI Studio in RHOAI dashboard
 │       ├── mcp-servers/              # Registers MCP servers in RHOAI dashboard
+│       ├── mlflow-instance/          # MLflow tracking server
 │       └── rhoai-instance/           # DataScienceCluster (DSC) with composable overlays
 │           ├── base/                 # Minimal DSC (Dashboard only)
 │           └── overlays/             # dev, minimal, serving, training, full
-└── usecases/
-    ├── models/                       # Model deployments (one dir per model)
-    │   ├── orchestrator-8b/
-    │   ├── qwen-math-7b/
-    │   └── gpt-oss-120b/
-    └── services/                     # Application services
-        ├── toolorchestra-app/        # NVIDIA ToolOrchestra UI
-        ├── llamastack/               # Meta LlamaStack Distribution
-        ├── genai-toolbox/            # GenAI Toolbox MCP Server
-        └── rhokp/                    # Red Hat OKP MCP Server
 ```
 
 !!! warning "Using a fork? Update the repo URL"
@@ -72,31 +63,31 @@ graph TD
     Human2["oc apply -k clusters/overlays/dev/"] --> BootstrapApp["cluster-bootstrap App"]
     BootstrapApp --> OperatorsAppSet["cluster-operators AppSet"]
     BootstrapApp --> InstancesAppSet["cluster-instances AppSet"]
-    BootstrapApp --> ModelsAppSet["cluster-models AppSet"]
-    BootstrapApp --> ServicesAppSet["cluster-services AppSet"]
     BootstrapApp --> RhoaiApp["instance-rhoai App"]
-    BootstrapApp --> TrainingApp["training-workloads App"]
   end
 
-  subgraph operators ["Phase 3: Operators"]
+  subgraph operators ["Phase 3: Operators (10)"]
     OperatorsAppSet --> CertMgr["cert-manager"]
     OperatorsAppSet --> ServiceMesh["ServiceMesh"]
-    OperatorsAppSet --> NFDOp["NFD"]
-    OperatorsAppSet --> GPUOp["GPU Operator"]
+    OperatorsAppSet --> NFDOp["NFD ¹"]
+    OperatorsAppSet --> GPUOp["GPU Operator ¹"]
     OperatorsAppSet --> KueueOp["Kueue"]
     OperatorsAppSet --> JobSetOp["JobSet"]
+    OperatorsAppSet --> LWSop["Leader Worker Set"]
+    OperatorsAppSet --> OTelOp["OpenTelemetry"]
+    OperatorsAppSet --> TempoOp["Tempo"]
     OperatorsAppSet --> RHOAIOp["RHOAI Operator"]
   end
 
   subgraph instances ["Phase 4: Instances"]
     InstancesAppSet --> NFDInst["NFD Instance"]
-    InstancesAppSet --> GPUInst["GPU ClusterPolicy"]
     InstancesAppSet --> ClusterAS["ClusterAutoscaler"]
     InstancesAppSet --> KueueInst["Kueue Instance"]
     InstancesAppSet --> KueueCfg["Kueue Config"]
     InstancesAppSet --> JobSetInst["JobSet Instance"]
     InstancesAppSet --> DashConfig["Dashboard Config"]
     InstancesAppSet --> McpServers["MCP Servers"]
+    InstancesAppSet --> MlflowInst["MLflow Instance"]
     RhoaiApp --> DSC["DataScienceCluster"]
   end
 
@@ -112,37 +103,24 @@ graph TD
     DSC --> CodeFlare["CodeFlare"]
     DSC --> LlamaStack["LlamaStack"]
   end
-
-  subgraph models ["Phase 6a: Models"]
-    ModelsAppSet --> Orch8b["orchestrator-8b"]
-    ModelsAppSet --> QwenMath["qwen-math-7b"]
-    ModelsAppSet --> GptOss["gpt-oss-120b"]
-  end
-
-  subgraph services ["Phase 6b: Services"]
-    ServicesAppSet --> ToolOrch["ToolOrchestra App"]
-    ServicesAppSet --> LlamaStackUC["LlamaStack"]
-    ServicesAppSet --> GenAIToolbox["GenAI Toolbox"]
-    ToolOrch --> UI["Orchestrator UI"]
-    ToolOrch --> TrainInfra["Training Infra"]
-    TrainingApp --> TrainWorkloads["Training Workloads"]
-    LlamaStackUC --> LlamaStackSvr["LlamaStack Server"]
-    LlamaStackUC --> Postgres["PostgreSQL"]
-  end
 ```
+
+!!! note "¹ NFD and GPU Operator"
+    NFD and GPU Operator are excluded from the `cluster-operators` ApplicationSet and managed via explicit Applications. Similarly, `gpu-instance` and `gpu-workers` are excluded from `cluster-instances`.
 
 ## ApplicationSet Auto-Discovery
 
-Four `ApplicationSet` resources use **Git directory generators** to auto-discover content:
+Two `ApplicationSet` resources use **Git directory generators** to auto-discover content:
 
-| ApplicationSet | Discovers | Naming Pattern |
-|---------------|-----------|---------------|
-| `cluster-operators` | `components/operators/*` | `operator-<dirname>` |
-| `cluster-instances` | `components/instances/*` (excludes `rhoai-instance`, `gpu-workers`) | `instance-<dirname>` |
-| `cluster-models` | `usecases/models/*/profiles/tier1-minimal` | `model-<dirname>` |
-| `cluster-services` | `usecases/services/*/profiles/tier1-minimal` | `service-<dirname>` |
+| ApplicationSet | Discovers | Excludes | Naming Pattern |
+|---------------|-----------|----------|---------------|
+| `cluster-operators` | `components/operators/*` | `nfd`, `gpu-operator` | `operator-<dirname>` |
+| `cluster-instances` | `components/instances/*` | `rhoai-instance`, `gpu-instance`, `gpu-workers` | `instance-<dirname>` |
 
-Adding a new directory and pushing to Git automatically creates a new ArgoCD Application.
+Adding a new directory under `components/operators/` or `components/instances/` and pushing to Git automatically creates a new ArgoCD Application.
+
+!!! info "Models and services"
+    Model and service ApplicationSets (`cluster-models`, `cluster-services`) have moved to the [rhoai-usecases](https://github.com/rrbanda/rhoai-usecases) companion repository.
 
 ## Dependency Chain
 
@@ -152,7 +130,6 @@ graph LR
   ServiceMesh["ServiceMesh"] --> LlamaStackOp["LlamaStack Operator"]
   NFD["NFD Instance"] --> GPU["GPU ClusterPolicy"]
   GPU --> GPUWorkers["GPU MachineSets"]
-  GPUWorkers --> ModelServing["Model Serving"]
   RHOAIOp["RHOAI Operator"] --> DSC["DataScienceCluster"]
   DSC --> KServe
   DSC --> ModelMesh["ModelMesh"]
@@ -160,11 +137,7 @@ graph LR
   DSC --> LlamaStackOp
   KueueOp["Kueue Operator"] --> KueueInst["Kueue Instance"]
   KueueInst --> KueueCfg["ResourceFlavors + ClusterQueue"]
-  KueueCfg --> Training["Training Workloads"]
   JobSetOp["JobSet Operator"] --> JobSetInst["JobSet Instance"]
-  JobSetInst --> Training
-  KServe --> ModelServing
-  Ray --> Training
 ```
 
 ## Why RHOAI Instance Is Handled Separately
@@ -181,6 +154,7 @@ The `rhoai-instance` is **excluded** from the `cluster-instances` ApplicationSet
 - **[redhat-cop/gitops-catalog](https://github.com/redhat-cop/gitops-catalog)** -- Kustomize bases for 4 operators (cert-manager, NFD, GPU, RHOAI). Referenced via HTTPS URLs in `kustomization.yaml` files.
 - **OLM (Operator Lifecycle Manager)** -- Built into OpenShift; handles operator installation from Subscriptions.
 - **RHOAI operator** -- When the DSC is created, the RHOAI operator installs ~10 sub-operators (KServe, Knative, Service Mesh, Authorino, etc.) internally. These are not declared in this repo.
+- **[rhoai-usecases](https://github.com/rrbanda/rhoai-usecases)** -- Companion repository for model deployments, application services, and training workloads. Has its own ArgoCD ApplicationSets and AppProject.
 
 ## Operators
 

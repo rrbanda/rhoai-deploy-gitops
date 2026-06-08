@@ -34,17 +34,13 @@ Two paths to deploy the full Red Hat OpenShift AI (RHOAI) stack. Both use the sa
     changes pushed to Git are auto-synced -- no further `oc apply` needed.
 
     !!! warning "Using a fork? Update the repo URL first"
-        The ArgoCD manifests reference `https://github.com/rrbanda/rhoai-deploy-gitops.git`. If you forked this repo, run `./setup.sh <your-repo-url>` to update all references automatically, or manually edit `repoURL` in these files:
+        The ArgoCD manifests reference `https://github.com/rrbanda/rhoai-deploy-gitops.git`. If you forked this repo, run `./setup.sh --repo <your-repo-url>` to update all references automatically, or manually edit `repoURL` in these files:
 
         - `clusters/overlays/dev/bootstrap-app.yaml`
         - `clusters/overlays/dev/rhoai-instance-app.yaml`
-        - `clusters/overlays/dev/training-workloads-app.yaml`
         - `components/argocd/apps/cluster-operators-appset.yaml`
         - `components/argocd/apps/cluster-instances-appset.yaml`
-        - `components/argocd/apps/cluster-models-appset.yaml`
-        - `components/argocd/apps/cluster-services-appset.yaml`
         - `components/argocd/projects/base/platform-project.yaml`
-        - `components/argocd/projects/base/usecases-project.yaml`
 
 === "Manual (no ArgoCD)"
 
@@ -52,15 +48,18 @@ Two paths to deploy the full Red Hat OpenShift AI (RHOAI) stack. Both use the sa
     # Phase 1 -- Pre-RHOAI Operators
     # Install all operators and wait for CSVs before proceeding.
     oc apply -k components/operators/cert-manager/
-    oc apply -k components/operators/servicemesh/           # Required for LlamaStack
+    oc apply -k components/operators/servicemesh/
     oc apply -k components/operators/nfd/
     oc apply -k components/operators/gpu-operator/
     oc apply -k components/operators/kueue-operator/
     oc apply -k components/operators/jobset-operator/
+    oc apply -k components/operators/leader-worker-set/
+    oc apply -k components/operators/opentelemetry/
+    oc apply -k components/operators/tempo/
     oc apply -k components/operators/rhoai-operator/
 
     # Verify all operator CSVs are Succeeded (re-run until all show Succeeded)
-    watch "oc get csv -A | grep -E 'cert-manager|servicemesh|nfd|gpu-operator|kueue|jobset|rhods'"
+    watch "oc get csv -A | grep -E 'cert-manager|servicemesh|nfd|gpu-operator|kueue|jobset|leader-worker|opentelemetry|tempo|rhods'"
     # IMPORTANT: Do NOT proceed until every CSV shows "Succeeded".
 
     # Phase 2 -- Pre-DSC Instances (order matters)
@@ -84,32 +83,23 @@ Two paths to deploy the full Red Hat OpenShift AI (RHOAI) stack. Both use the sa
     oc wait --for=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'=True \
       datasciencecluster/default-dsc --timeout=600s
 
-    oc apply -k components/instances/dashboard-config/      # Enables GenAI Studio (Tech Preview, not enabled by default)
-    oc apply -k components/instances/mcp-servers/            # Registers MCP servers in GenAI Studio
-
-    # Phase 4 -- Use Cases (deploy models first, then services)
-    oc apply -k usecases/models/orchestrator-8b/profiles/tier1-minimal/
-    oc apply -k usecases/models/qwen-math-7b/profiles/tier1-minimal/
-    oc apply -k usecases/services/toolorchestra-app/profiles/tier1-minimal/
-
-    # Wait for models to download and become Ready
-    oc wait --for=condition=Ready inferenceservice/orchestrator-8b \
-      -n orchestrator-8b --timeout=1800s
-    oc wait --for=condition=Ready inferenceservice/qwen-math-7b \
-      -n qwen-math-7b --timeout=1800s
+    oc apply -k components/instances/dashboard-config/
+    oc apply -k components/instances/mcp-servers/
+    oc apply -k components/instances/mlflow-instance/
     ```
 
 ## What Gets Deployed
 
-The full stack installs ArgoCD Applications across four layers:
+The full stack installs ~18 ArgoCD Applications across three layers:
 
-- **7 operators** -- cert-manager, ServiceMesh, NFD, GPU Operator, Kueue, JobSet, RHOAI
-- **9 instances** -- NFD, GPU ClusterPolicy, ClusterAutoscaler, Kueue, Kueue Config, JobSet, DataScienceCluster, Dashboard Config, MCP Servers
-- **3 models** -- orchestrator-8b, qwen-math-7b, gpt-oss-120b (auto-discovered by `cluster-models` AppSet)
-- **3 services** -- toolorchestra-app, llamastack, genai-toolbox (auto-discovered by `cluster-services` AppSet)
+- **10 operators** -- cert-manager, ServiceMesh, NFD, GPU Operator, Kueue, JobSet, Leader Worker Set, OpenTelemetry, Tempo, RHOAI
+- **~8 instances** -- NFD, ClusterAutoscaler, Kueue, Kueue Config, JobSet, Dashboard Config, MCP Servers, MLflow (plus DataScienceCluster via explicit App)
 - **1 bootstrap** -- self-managing app-of-apps
 
 See [ArgoCD Applications](reference/argocd-apps.md) for the complete list.
+
+!!! tip "Deploying models and services"
+    Models, services, and training workloads are managed in the **[rhoai-usecases](https://github.com/rrbanda/rhoai-usecases)** companion repository. Deploy them after the platform is healthy.
 
 ## Partial Installs
 

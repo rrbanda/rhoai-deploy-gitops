@@ -13,11 +13,9 @@ This repository provides production-ready Kustomize manifests for deploying Red 
 
 **What gets deployed:**
 
-- 7 operators (cert-manager, ServiceMesh, NFD, GPU Operator, Kueue, JobSet, RHOAI)
+- 10 operators (cert-manager, ServiceMesh, NFD, GPU Operator, Kueue, JobSet, Leader Worker Set, OpenTelemetry, Tempo, RHOAI)
 - GPU infrastructure (cloud-specific examples provided for AWS)
 - A composable DataScienceCluster (DSC) with 10+ AI capabilities
-- 3 models (orchestrator-8b, qwen-math-7b, gpt-oss-120b) independently deployable via GitOps
-- 4 services (ToolOrchestra, LlamaStack, GenAI Toolbox, Red Hat OKP) auto-discovered by ArgoCD
 
 ## What's Inside
 
@@ -51,9 +49,9 @@ This repository provides production-ready Kustomize manifests for deploying Red 
 
     ---
 
-    Pre-built AI applications: NVIDIA ToolOrchestra, Meta LlamaStack, and GenAI Toolbox.
+    Pre-built AI applications (ToolOrchestra, LlamaStack, GenAI Toolbox) are maintained in the companion repo.
 
-    [:octicons-arrow-right-24: Use Cases](usecases/index.md)
+    [:octicons-arrow-right-24: Use Cases](https://github.com/redhat-ai-services/rhoai-usecases)
 
 </div>
 
@@ -80,7 +78,7 @@ The base DataScienceCluster starts minimal (Dashboard only). Pick an overlay for
 | Overlay | Components | Command |
 |---------|-----------|---------|
 | `minimal` | Dashboard | `oc apply -k components/instances/rhoai-instance/overlays/minimal/` |
-| `serving` | Dashboard, KServe, ModelMesh | `oc apply -k components/instances/rhoai-instance/overlays/serving/` |
+| `serving` | Dashboard, KServe | `oc apply -k components/instances/rhoai-instance/overlays/serving/` |
 | `training` | Dashboard, Ray, Training Operator | `oc apply -k components/instances/rhoai-instance/overlays/training/` |
 | `full` | All 10 DSC components | `oc apply -k components/instances/rhoai-instance/overlays/full/` |
 | `dev` | All 10 DSC components (default) | `oc apply -k components/instances/rhoai-instance/overlays/dev/` |
@@ -92,5 +90,4 @@ See [Composing a Custom Profile](capabilities/index.md#composing-a-custom-profil
 - [RHOAI 3.4 Install Docs](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.4/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install)
 - [RHOAI 3.4 Distributed Workloads](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.4/html/installing_and_uninstalling_openshift_ai_self-managed/installing-the-distributed-workloads-components_install)
 - [redhat-cop/gitops-catalog](https://github.com/redhat-cop/gitops-catalog) -- Kustomize bases for operators
-- [ToolOrchestra Paper](https://arxiv.org/abs/2503.02495) -- NVIDIA's multi-model orchestration approach
-- [verl Framework](https://github.com/volcengine/verl) -- Reinforcement learning training framework
+- [rhoai-usecases](https://github.com/redhat-ai-services/rhoai-usecases) -- Companion repo with pre-built AI use cases (models, services, training)

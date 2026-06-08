@@ -2,33 +2,29 @@
 
 ModelMesh enables efficient multi-model serving by packing multiple models into shared serving pods. Use ModelMesh when you need to serve many smaller models cost-effectively with shared GPU resources, rather than dedicating a full pod per model as KServe does.
 
+!!! warning "v2 DSC API change"
+    In the RHOAI 3.4 v2 DSC API, ModelMesh has been replaced by `modelsAsService` under `kserve`. The serving overlay does **not** enable ModelMesh. If you need multi-model serving, configure `kserve.modelsAsService.managementState: Managed` in your DSC.
+
 ## Dependencies
 
 | Requirement | Type | Path |
 |-------------|------|------|
 | RHOAI Operator | Operator | `components/operators/rhoai-operator/` |
-| DSC `modelmeshserving: Managed` | DSC component | `components/instances/rhoai-instance/` |
+| DSC `kserve.modelsAsService: Managed` | DSC component | `components/instances/rhoai-instance/` |
 | GPU Infrastructure (optional) | Operator + Instance | See [gpu-infrastructure.md](gpu-infrastructure.md) |
 
 ModelMesh does not require cert-manager or Knative -- it uses its own routing.
 
 ## Enable It
 
-=== "Overlay"
-
-    Use the pre-built serving overlay (enables both KServe and ModelMesh):
-
-    ```bash
-    oc apply -k components/instances/rhoai-instance/overlays/serving/
-    ```
-
 === "DSC Patch"
 
     ```yaml
     spec:
       components:
-        modelmeshserving:
-          managementState: Managed
+        kserve:
+          modelsAsService:
+            managementState: Managed
     ```
 
 ## Deploy
@@ -93,4 +89,4 @@ dedicated pod.
 
 ## Disable It
 
-Set `modelmeshserving.managementState` to `Removed` in the DSC.
+Set `kserve.modelsAsService.managementState` to `Removed` in the DSC.

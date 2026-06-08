@@ -91,14 +91,14 @@ cohort.
 ### LocalQueue
 
 Workloads submit to a namespaced `LocalQueue` that points to the `ClusterQueue`.
-The ToolOrchestra use case creates one automatically:
+Create one in your training namespace:
 
 ```yaml
 apiVersion: kueue.x-k8s.io/v1beta1
 kind: LocalQueue
 metadata:
   name: training-queue
-  namespace: orchestrator-rhoai
+  namespace: my-training-namespace
 spec:
   clusterQueue: training-cluster-queue
 ```

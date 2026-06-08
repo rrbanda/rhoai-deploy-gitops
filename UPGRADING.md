@@ -14,17 +14,9 @@ components/operators/rhoai-operator/patch-channel.yaml
 
 Change the `value` field to the desired channel (e.g., `fast-3.x`, `stable-3.5`, `eus-3.6`).
 
-### 2. vLLM Serving Runtime Image (per-model kustomization)
+### 2. vLLM / Model Image Tags
 
-Each model's `manifests/kustomization.yaml` has an `images` transformer that pins the vLLM tag:
-
-```
-usecases/models/gpt-oss-120b/manifests/kustomization.yaml
-usecases/models/orchestrator-8b/manifests/kustomization.yaml
-usecases/models/qwen-math-7b/manifests/kustomization.yaml
-```
-
-Update the `newTag` field under `images` to match the new RHOAI vLLM image version.
+Model serving runtime image tags (e.g. vLLM) are managed in the **[rhoai-usecases](https://github.com/rrbanda/rhoai-usecases)** companion repository. See that repo's upgrading guide for model-specific version bumps.
 
 ### 3. DataScienceCluster Spec
 
@@ -62,7 +54,6 @@ Update the image tag to match the new OCP version if it changes.
 ## Upgrade Checklist
 
 - [ ] Update `patch-channel.yaml` channel value
-- [ ] Update vLLM `newTag` in each model's `kustomization.yaml`
 - [ ] Review DSC component changes in the new version's release notes
 - [ ] Update DSCInitialization if new fields are added
 - [ ] Update NFD image tag if OCP version changes

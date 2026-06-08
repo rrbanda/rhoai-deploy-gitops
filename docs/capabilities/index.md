@@ -7,9 +7,9 @@ Red Hat OpenShift AI (RHOAI) is modular. Pick the capabilities you need, underst
 | Capability | DataScienceCluster (DSC) Component | Required Operators | Required Instances | Guide |
 |------------|---------------|--------------------|--------------------|-------|
 | KServe Model Serving | `kserve` | rhoai-operator, cert-manager | rhoai-instance | [model-serving.md](model-serving.md) |
-| ModelMesh Serving | `modelmeshserving` | rhoai-operator | rhoai-instance | [modelmesh.md](modelmesh.md) |
+| Models as a Service | `modelsAsService` (under `kserve`) | rhoai-operator | rhoai-instance | [modelmesh.md](modelmesh.md) |
 | Distributed Training | `ray`, `trainingoperator` | rhoai-operator, cert-manager, kueue-operator, jobset-operator | rhoai-instance, kueue-instance, jobset-instance | [training.md](training.md) |
-| Data Science Pipelines | `datasciencepipelines` | rhoai-operator | rhoai-instance | [pipelines.md](pipelines.md) |
+| Data Science Pipelines | `aipipelines` | rhoai-operator | rhoai-instance | [pipelines.md](pipelines.md) |
 | Workbenches | `workbenches` | rhoai-operator | rhoai-instance | [workbenches.md](workbenches.md) |
 | Model Registry | `modelregistry` | rhoai-operator | rhoai-instance, external MySQL 5.x+, S3 storage | [model-registry.md](model-registry.md) |
 | MLflow | `mlflowoperator` | rhoai-operator | rhoai-instance, mlflow-instance | [mlflow.md](mlflow.md) |
@@ -36,7 +36,6 @@ graph TD
   DSC --> Workbenches["Workbenches"]
   DSC --> Registry["Registry"]
   DSC --> TrustyAI["TrustyAI"]
-  DSC --> CodeFlare["CodeFlare"]
   DSC --> MLflow["MLflow Operator"]
   MLflow --> MLflowInst["MLflow Instance"]
   DSC --> LlamaStackOp
@@ -62,8 +61,8 @@ graph TD
 - Model Registry requires an external MySQL database (5.x+) and S3-compatible object storage
 - Capabilities without GPU needs (Pipelines, Workbenches, Registry) can run on CPU-only clusters
 
-!!! note "Additional RHOAI 3.3 capabilities not covered in this repo"
-    The official RHOAI 3.3 documentation lists additional DSC components that this repository does not deploy or document in detail:
+!!! note "Additional RHOAI 3.4 capabilities not covered in this repo"
+    The official RHOAI 3.4 documentation lists additional DSC components that this repository does not deploy or document in detail:
 
     - **`advancedkserve` (Distributed Inference with llm-d)** -- enables distributed model inference using the llm-d framework. Requires cert-manager, Red Hat Connectivity Link Operator, Red Hat Leader Worker Set Operator, and OpenShift 4.20+. Not included in this repo's manifests.
     - **`feastoperator` (Feature Store)** -- present in our base DSC as `Removed`. The Feast Operator provides a feature store for ML workloads. Enable it by setting `feastoperator.managementState: Managed` if needed.
@@ -75,13 +74,13 @@ Instead of editing the DSC YAML directly, use a pre-built overlay:
 | Overlay | Components Enabled | Use Case |
 |---------|-------------------|----------|
 | `overlays/minimal/` | Dashboard only | Exploration, start here |
-| `overlays/serving/` | Dashboard, KServe, ModelMesh | Model serving only |
+| `overlays/serving/` | Dashboard, KServe | Model serving only |
 | `overlays/training/` | Dashboard, Ray, TrainingOperator | Distributed training only |
 | `overlays/full/` | All 10 DSC components (see below) | Full platform |
 | `overlays/dev/` | All 10 DSC components (same as full) | Development (current default) |
 
 !!! info "What 'All components' means"
-    The `full` and `dev` overlays enable: workbenches, kserve, ray, trainingoperator, modelregistry, trustyai, datasciencepipelines, modelmeshserving, codeflare, and llamastackoperator. The base DSC always keeps `dashboard` Managed and `kueue` Unmanaged (Red Hat Build of Kueue is deployed as a standalone operator).
+    The `dev` overlay enables most components with `argoWorkflows` Managed, and `feastoperator`/`sparkoperator`/`trainer` Removed. The `full` overlay enables all components with `argoWorkflows` Removed and everything else Managed. The base DSC always keeps `dashboard` Managed and `kueue` Unmanaged (Red Hat Build of Kueue is deployed as a standalone operator).
 
 ### Deploy with an overlay
 
@@ -108,9 +107,6 @@ resources:
   - ../../base
 
 patches:
-  - path: ../serving/patch-serving.yaml
-    target:
-      kind: DataScienceCluster
   - path: patch-pipelines.yaml
     target:
       kind: DataScienceCluster
@@ -120,7 +116,7 @@ And `patch-pipelines.yaml`:
 
 ```yaml
 - op: replace
-  path: /spec/components/datasciencepipelines/managementState
+  path: /spec/components/aipipelines/managementState
   value: Managed
 ```
 
@@ -175,17 +171,6 @@ oc wait --for=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'=True \
 oc apply -k components/instances/dashboard-config/     # Enables GenAI Studio (Tech Preview, not enabled by default)
 oc apply -k components/instances/mcp-servers/           # Registers MCP servers in GenAI Studio
 oc apply -k components/instances/mlflow-instance/       # MLflow tracking server
-```
-
-### Phase 4 -- Use Cases (models before services)
-
-```bash
-# Deploy models first
-oc apply -k usecases/models/orchestrator-8b/profiles/tier1-minimal/
-oc apply -k usecases/models/qwen-math-7b/profiles/tier1-minimal/
-
-# Deploy services (depend on model endpoints being reachable)
-oc apply -k usecases/services/toolorchestra-app/profiles/tier1-minimal/
 ```
 
 ## Minimal Installs by Goal

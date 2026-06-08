@@ -13,7 +13,6 @@ repos:
       - id: check-merge-conflict
       - id: check-yaml
         args: ['--allow-multiple-documents']
-        exclude: '^usecases/services/llamastack/manifests/instance/llamastack-custom-config\.yaml$'
       - id: trailing-whitespace
         args: ['--markdown-linebreak-ext=md']
       - id: end-of-file-fixer
