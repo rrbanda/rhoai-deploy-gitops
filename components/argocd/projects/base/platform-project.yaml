@@ -6,7 +6,7 @@ metadata:
 spec:
   description: RHOAI platform operators and instances
   sourceRepos:
-    - https://github.com/rrbanda/rhoai-deploy-gitops.git
+    - https://REPLACE_WITH_YOUR_REPO.git
     - https://github.com/redhat-cop/gitops-catalog.git
   destinations:
     - namespace: '*'

@@ -9,8 +9,8 @@ spec:
     applicationsSync: sync
   generators:
     - git:
-        repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
-        revision: main
+        repoURL: https://REPLACE_WITH_YOUR_REPO.git
+        revision: REPLACE_WITH_BRANCH
         directories:
           - path: components/operators/*
           - path: components/operators/gpu-operator
@@ -24,8 +24,8 @@ spec:
     spec:
       project: platform
       source:
-        repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
-        targetRevision: main
+        repoURL: https://REPLACE_WITH_YOUR_REPO.git
+        targetRevision: REPLACE_WITH_BRANCH
         path: '{{ .path.path }}'
       destination:
         server: https://kubernetes.default.svc

@@ -13,6 +13,23 @@ kubeconfig
 secrets/
 .secrets.baseline
 
+# IDE and editor files
+.cursor/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Tool artifacts
+__pycache__/
+*.pyc
+node_modules/
+.terraform/
+*.log
+*.tmp
+
 # OS artifacts
 .DS_Store
 Thumbs.db
+._*

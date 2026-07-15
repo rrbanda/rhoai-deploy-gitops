@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-gitops-config
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+data:
+  repoURL: "https://github.com/rrbanda/rhoai-deploy-gitops.git"
+  targetRevision: "main"
+  rhoaiOverlay: "dev"

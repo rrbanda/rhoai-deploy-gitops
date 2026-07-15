@@ -1,84 +1,110 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DEFAULT_REPO="https://github.com/rrbanda/rhoai-deploy-gitops.git"
-
 usage() {
   cat <<EOF
-Usage: $0 --repo <git-repo-url>
+Usage: $0 --repo <git-repo-url> [--branch <branch>] [--overlay <name>]
 
-Configure this repository for your fork/clone by replacing the default
-Git repo URL in all ArgoCD ApplicationSets and Applications.
+Configure a cluster overlay for your fork by updating the single
+cluster-config.yaml that drives all ArgoCD manifests via Kustomize replacements.
 
 Options:
-  --repo <url>   Your Git repository URL (must end with .git)
-  --dry-run      Show what would be changed without modifying files
-  --help         Show this help message
+  --repo <url>       Your Git repository URL (required)
+  --branch <branch>  Git branch to track (default: main)
+  --overlay <name>   Cluster overlay to configure (default: dev)
+  --new-overlay      Create a new overlay by copying from dev
+  --dry-run          Show what would be changed without modifying files
+  --help             Show this help message
 
-Example:
+Examples:
+  # Configure existing dev overlay for your fork
   $0 --repo https://github.com/myorg/rhoai-deploy-gitops.git
+
+  # Configure with a specific branch
+  $0 --repo https://github.com/myorg/rhoai-deploy-gitops.git --branch release/v1
+
+  # Create and configure a new prod overlay
+  $0 --repo https://github.com/myorg/rhoai-deploy-gitops.git --overlay prod --new-overlay
 EOF
   exit 0
 }
 
 REPO_URL=""
+BRANCH="main"
+OVERLAY="dev"
+NEW_OVERLAY=false
 DRY_RUN=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --repo)    REPO_URL="$2"; shift 2 ;;
-    --dry-run) DRY_RUN=true; shift ;;
-    --help)    usage ;;
-    *)         echo "Unknown option: $1"; usage ;;
+    --repo)        REPO_URL="$2"; shift 2 ;;
+    --branch)      BRANCH="$2"; shift 2 ;;
+    --overlay)     OVERLAY="$2"; shift 2 ;;
+    --new-overlay) NEW_OVERLAY=true; shift ;;
+    --dry-run)     DRY_RUN=true; shift ;;
+    --help)        usage ;;
+    *)             echo "Error: Unknown option: $1"; usage ;;
   esac
 done
 
 if [[ -z "$REPO_URL" ]]; then
   echo "Error: --repo is required"
+  echo ""
   usage
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+OVERLAY_DIR="$SCRIPT_DIR/clusters/overlays/$OVERLAY"
+CONFIG_FILE="$OVERLAY_DIR/cluster-config.yaml"
 
-FILES=(
-  "components/argocd/apps/cluster-operators-appset.yaml"
-  "components/argocd/apps/cluster-instances-appset.yaml"
-  "components/argocd/projects/base/platform-project.yaml"
-  "clusters/overlays/dev/bootstrap-app.yaml"
-  "clusters/overlays/dev/rhoai-instance-app.yaml"
-)
-
-echo "Replacing repo URL:"
-echo "  From: $DEFAULT_REPO"
-echo "  To:   $REPO_URL"
-echo ""
-
-changed=0
-for f in "${FILES[@]}"; do
-  filepath="$SCRIPT_DIR/$f"
-  if [[ ! -f "$filepath" ]]; then
-    echo "  SKIP (not found): $f"
-    continue
-  fi
-  if grep -q "$DEFAULT_REPO" "$filepath"; then
-    if $DRY_RUN; then
-      echo "  WOULD UPDATE: $f"
-    else
-      if [[ "$(uname)" == "Darwin" ]]; then
-        sed -i '' "s|$DEFAULT_REPO|$REPO_URL|g" "$filepath"
-      else
-        sed -i "s|$DEFAULT_REPO|$REPO_URL|g" "$filepath"
-      fi
-      echo "  UPDATED: $f"
-    fi
-    changed=$((changed + 1))
+if $NEW_OVERLAY && [[ ! -d "$OVERLAY_DIR" ]]; then
+  SOURCE_DIR="$SCRIPT_DIR/clusters/overlays/dev"
+  if $DRY_RUN; then
+    echo "[dry-run] Would create new overlay: $OVERLAY_DIR (copied from dev)"
   else
-    echo "  OK (already set): $f"
+    echo "Creating new overlay '$OVERLAY' from dev..."
+    cp -r "$SOURCE_DIR" "$OVERLAY_DIR"
+    echo "  Created: clusters/overlays/$OVERLAY/"
   fi
-done
-
-echo ""
-echo "Done. $changed file(s) updated."
-if $DRY_RUN; then
-  echo "(dry-run mode -- no files were modified)"
 fi
+
+if [[ ! -f "$CONFIG_FILE" ]]; then
+  echo "Error: Config file not found: $CONFIG_FILE"
+  echo "  Run with --new-overlay to create the overlay first."
+  exit 1
+fi
+
+echo "Configuring cluster overlay: clusters/overlays/$OVERLAY/"
+echo "  Repository: $REPO_URL"
+echo "  Branch:     $BRANCH"
+echo ""
+
+if $DRY_RUN; then
+  echo "[dry-run] Would update: clusters/overlays/$OVERLAY/cluster-config.yaml"
+  echo ""
+  echo "  repoURL: \"$REPO_URL\""
+  echo "  targetRevision: \"$BRANCH\""
+  echo "  rhoaiOverlay: \"$OVERLAY\""
+  echo ""
+  echo "(dry-run mode -- no files were modified)"
+  exit 0
+fi
+
+cat > "$CONFIG_FILE" <<EOF
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-gitops-config
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+data:
+  repoURL: "$REPO_URL"
+  targetRevision: "$BRANCH"
+  rhoaiOverlay: "$OVERLAY"
+EOF
+
+echo "  Updated: clusters/overlays/$OVERLAY/cluster-config.yaml"
+echo ""
+echo "Done. Validate with:"
+echo "  kubectl kustomize clusters/overlays/$OVERLAY/"
