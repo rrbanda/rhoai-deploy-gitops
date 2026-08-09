@@ -8,7 +8,7 @@ spec:
   components:
     aigateway:
       batchGateway:
-        managementState: Removed
+        managementState: Managed
       managementState: Managed
     aipipelines:
       argoWorkflowsControllers:
