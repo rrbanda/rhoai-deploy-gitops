@@ -10,7 +10,7 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
-        revision: rhoai-3.4-ea2
+        revision: rhoai-3.5
         directories:
           - path: components/operators/*
           - path: components/operators/gpu-operator
@@ -25,7 +25,7 @@ spec:
       project: platform
       source:
         repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
-        targetRevision: rhoai-3.4-ea2
+        targetRevision: rhoai-3.5
         path: '{{ .path.path }}'
       destination:
         server: https://kubernetes.default.svc

@@ -10,7 +10,7 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
-        revision: rhoai-3.4-ea2
+        revision: rhoai-3.5
         directories:
           - path: usecases/services/*/profiles/tier1-minimal
           # Exclude services not currently deployed (re-enable by removing exclude)
@@ -31,7 +31,7 @@ spec:
       project: usecases
       source:
         repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
-        targetRevision: rhoai-3.4-ea2
+        targetRevision: rhoai-3.5
         path: '{{ .path.path }}'
       destination:
         server: https://kubernetes.default.svc
