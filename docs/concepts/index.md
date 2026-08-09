@@ -1,42 +1,75 @@
 # Concepts
 
-Before deploying anything, take a few minutes to understand the foundational ideas that make this project work. These concepts will help you troubleshoot issues, customize your deployment, and explain the architecture to others.
+Before deploying, invest 30 minutes understanding the foundations. These concepts will transform you from someone running commands into someone who truly understands their AI platform.
 
-## Why This Section Exists
+---
 
-Most deployment guides tell you *what commands to run*. This section explains *why* those commands work and *what happens* when you run them. If you understand the concepts here, you will:
+## Why This Matters
 
-- Know exactly what is happening at each stage of deployment
-- Be able to diagnose issues without guessing
-- Confidently customize the deployment for your organization's needs
-- Explain the architecture to stakeholders who need to approve it
+Most deployment guides tell you *what commands to run*. This section explains *why* those commands work and *what happens* when you run them.
 
-## Reading Order
+After reading these pages, you will:
 
-If you are new to any of these topics, read them in order:
+- **Diagnose issues** without guessing — you will know exactly what each component does
+- **Customize confidently** — compose your own profiles, add operators, change configurations
+- **Explain the architecture** to stakeholders who need to approve the deployment
+- **Operate the platform** knowing what self-healing and drift detection actually mean
 
-| Page | You will learn | Time |
-|------|---------------|------|
-| [What is GitOps?](gitops-fundamentals.md) | Why Git drives your infrastructure, how ArgoCD keeps things in sync, and what "self-healing" actually means | 8 min |
-| [App-of-Apps Pattern](app-of-apps.md) | How one ArgoCD Application bootstraps an entire platform, and why ApplicationSets auto-discover new content | 6 min |
-| [Kustomize and Overlays](kustomize-overlays.md) | How this repo composes manifests from bases and overlays without templating, and how to build your own profiles | 7 min |
-| [GPU Scheduling](gpu-scheduling.md) | How GPUs become schedulable in Kubernetes, how Kueue manages quotas, and the lifecycle of a GPU job from submission to completion | 10 min |
-| [RHOAI Architecture](rhoai-architecture.md) | What Red Hat OpenShift AI actually installs, the operator hierarchy, the DataScienceCluster as control plane, and what this repo manages vs. what RHOAI manages internally | 8 min |
+---
+
+## The Learning Path
+
+Read these in order. Each builds on the previous:
+
+<div class="journey-grid" markdown>
+
+<a href="gitops-fundamentals/" class="journey-card">
+<span class="card-icon">:material-source-branch:</span>
+<h3>1. What is GitOps?</h3>
+<p>Why Git drives infrastructure. How ArgoCD keeps clusters in sync. What "self-healing" actually means. Imperative vs declarative.</p>
+<span class="card-tag tag-beginner">8 min read</span>
+</a>
+
+<a href="app-of-apps/" class="journey-card">
+<span class="card-icon">:material-apps:</span>
+<h3>2. App-of-Apps Pattern</h3>
+<p>How one ArgoCD Application bootstraps an entire platform. Why ApplicationSets auto-discover new content from Git directories.</p>
+<span class="card-tag tag-beginner">6 min read</span>
+</a>
+
+<a href="kustomize-overlays/" class="journey-card">
+<span class="card-icon">:material-layers:</span>
+<h3>3. Kustomize and Overlays</h3>
+<p>How this repo composes manifests without templating. Bases, patches, replacements. Building your own custom profiles.</p>
+<span class="card-tag tag-intermediate">7 min read</span>
+</a>
+
+<a href="gpu-scheduling/" class="journey-card">
+<span class="card-icon">:material-chip:</span>
+<h3>4. GPU Scheduling</h3>
+<p>The full lifecycle: NFD labels nodes → GPU Operator installs drivers → Kueue manages quotas → job runs on GPU. End to end.</p>
+<span class="card-tag tag-intermediate">10 min read</span>
+</a>
+
+<a href="rhoai-architecture/" class="journey-card">
+<span class="card-icon">:material-cube-outline:</span>
+<h3>5. RHOAI Architecture</h3>
+<p>Operators all the way down. The DSC as control plane. What RHOAI installs internally vs what this repo declares.</p>
+<span class="card-tag tag-advanced">8 min read</span>
+</a>
+
+</div>
+
+---
 
 ## How These Concepts Connect
 
 ```mermaid
-graph TD
-  GitOps["GitOps Fundamentals"] -->|"drives"| AppOfApps["App-of-Apps Pattern"]
-  AppOfApps -->|"uses"| Kustomize["Kustomize Overlays"]
-  Kustomize -->|"composes"| RHOAI["RHOAI Architecture"]
-  RHOAI -->|"schedules on"| GPU["GPU Scheduling"]
-  
-  GitOps -->|"ensures"| Drift["No configuration drift"]
-  AppOfApps -->|"enables"| AutoDiscover["Auto-discovery of new components"]
-  Kustomize -->|"provides"| Composable["Composable profiles"]
-  RHOAI -->|"manages"| AIStack["Full AI/ML stack"]
-  GPU -->|"controls"| FairShare["Fair GPU sharing across teams"]
+graph LR
+  GitOps["1. GitOps"] -->|"drives"| AppOfApps["2. App-of-Apps"]
+  AppOfApps -->|"uses"| Kustomize["3. Kustomize"]
+  Kustomize -->|"composes"| RHOAI["5. RHOAI Architecture"]
+  RHOAI -->|"schedules on"| GPU["4. GPU Scheduling"]
 ```
 
-Once you understand these five concepts, the [Quick Start](../quickstart.md) will make complete sense -- every command maps to a concept you already know.
+Once you understand all five, the [Quick Start](../quickstart.md) will make complete sense — every command maps to a concept you already know.

@@ -1,116 +1,222 @@
-# RHOAI GitOps Deploy
+---
+hide:
+  - navigation
+  - toc
+---
 
-Deploy **Red Hat OpenShift AI (RHOAI) 3.5** on OpenShift using a fully declarative, GitOps-driven approach. This repository provides production-ready Kustomize manifests that are composable, portable, and educational -- designed so you understand *what* you are deploying and *why*.
+<div class="hero" markdown>
 
-## What This Project Does
+# GPU-as-a-Service on OpenShift
 
-This repository gives you everything needed to deploy RHOAI on any OpenShift 4.19+ cluster:
+<p class="subtitle">
+Deploy Red Hat OpenShift AI using GitOps. A complete, production-ready platform 
+for model serving, distributed training, and GPU quota management — 
+managed entirely through Git.
+</p>
 
-- **Operators** -- All required operators installed via OLM Subscriptions
-- **GPU Infrastructure** -- NFD, GPU Operator, auto-scaling, and Kueue quota management
-- **DataScienceCluster** -- Composable profiles (serving-only, training-only, or full platform)
-- **AI Workloads** -- Model serving, distributed inference, and training jobs
-- **GitOps Management** -- ArgoCD app-of-apps pattern with self-healing and auto-discovery
-
-Two deployment methods use the same manifests:
-
-- **GitOps (ArgoCD):** Two commands bootstrap a self-managing platform. Push to Git, everything syncs.
-- **Manual (Kustomize):** Apply manifests directly with `oc apply -k`. Full control, no ArgoCD needed.
-
-## Who This Is For
-
-- **Platform engineers** deploying RHOAI for their organization
-- **ML engineers** who need a reproducible, version-controlled AI platform
-- **Architects** evaluating how RHOAI components fit together
-- **Anyone learning** GitOps patterns for AI/ML infrastructure
-
-## What Gets Deployed
-
-The full stack includes:
-
-| Layer | Components |
-|-------|-----------|
-| **Operators** | cert-manager, ServiceMesh, NFD, GPU Operator, Kueue, JobSet, LeaderWorkerSet, CMA/KEDA, AI Gateway, RHCL, RHOAI |
-| **GPU Infrastructure** | Node labeling, driver installation, device plugin, cluster autoscaling |
-| **AI Platform** | Dashboard, KServe, ModelMesh, Ray, Training Operator, Pipelines, Workbenches, Model Registry, MLflow, TrustyAI |
-| **Advanced Inference** | Batch Gateway (llm-d), AI Gateway, distributed inference, hardware profiles |
-| **Workloads** | Model deployments, training jobs, AI applications |
-
-## Start Here
-
-<div class="grid cards" markdown>
-
--   **New to GitOps?**
-
-    ---
-
-    Start with the Concepts section. Learn why GitOps matters for AI platforms, how ArgoCD works, and how this repository is structured.
-
-    [:octicons-arrow-right-24: Concepts](concepts/index.md)
-
--   **Ready to Deploy?**
-
-    ---
-
-    Follow the guided Quick Start. Every step includes an explanation of what is happening and why.
-
-    [:octicons-arrow-right-24: Quick Start](quickstart.md)
-
--   **Pick Your Profile**
-
-    ---
-
-    Deploy only what you need. Choose from serving-only, training-only, or the full platform with all capabilities.
-
-    [:octicons-arrow-right-24: Capabilities](capabilities/index.md)
-
--   **Understand the Architecture**
-
-    ---
-
-    See how the repo is structured, how applications are auto-discovered, and how dependencies flow.
-
-    [:octicons-arrow-right-24: Architecture](architecture.md)
+<div class="cta-group">
+<a href="quickstart/" class="cta-primary">Deploy in 5 Minutes</a>
+<a href="concepts/" class="cta-secondary">Learn the Concepts</a>
+</div>
 
 </div>
 
-## DSC Profiles
+<div class="stats-bar" markdown>
+<div class="stat-item">
+<span class="stat-number">11</span>
+<span class="stat-label">Operators Managed</span>
+</div>
+<div class="stat-item">
+<span class="stat-number">12+</span>
+<span class="stat-label">AI Capabilities</span>
+</div>
+<div class="stat-item">
+<span class="stat-number">2</span>
+<span class="stat-label">Commands to Deploy</span>
+</div>
+<div class="stat-item">
+<span class="stat-number">0</span>
+<span class="stat-label">Manual Steps After</span>
+</div>
+</div>
 
-The DataScienceCluster (DSC) controls which RHOAI capabilities are active. Choose a pre-built profile or compose your own:
+---
 
-| Profile | What It Enables | Use Case |
-|---------|----------------|----------|
-| `minimal` | Dashboard only | Exploration, start here |
-| `serving` | Dashboard, KServe, ModelMesh | Model serving without training overhead |
-| `training` | Dashboard, Ray, Training Operator | Distributed training without serving |
-| `full` | All components (12+) | Complete AI platform |
-| Custom | Your choice | [Compose your own](concepts/kustomize-overlays.md#composing-a-custom-profile) |
+<div class="journey-section" markdown>
+
+## Choose Your Journey
+
+<p class="journey-subtitle">
+Whether you are evaluating the platform, deploying for production, or building on top of it — start here.
+</p>
+
+<div class="journey-grid" markdown>
+
+<a href="concepts/" class="journey-card">
+<span class="card-icon">:material-school:</span>
+<h3>I'm New to GitOps</h3>
+<p>Understand why Git drives infrastructure, how ArgoCD works, and how this repo is structured — before running a single command.</p>
+<span class="card-tag tag-beginner">Beginner · 30 min</span>
+</a>
+
+<a href="quickstart/" class="journey-card">
+<span class="card-icon">:material-rocket-launch:</span>
+<h3>I Want to Deploy Now</h3>
+<p>Two commands bootstrap a self-healing AI platform. Fork, configure, deploy. Every step explained.</p>
+<span class="card-tag tag-intermediate">Intermediate · 15 min</span>
+</a>
+
+<a href="capabilities/" class="journey-card">
+<span class="card-icon">:material-puzzle:</span>
+<h3>I Need Specific Capabilities</h3>
+<p>Pick exactly what you need: serving, training, batch inference, MaaS. Deploy only what matters for your use case.</p>
+<span class="card-tag tag-intermediate">Intermediate · 10 min</span>
+</a>
+
+<a href="architecture/" class="journey-card">
+<span class="card-icon">:material-layers-triple:</span>
+<h3>I'm Evaluating Architecture</h3>
+<p>See how 11 operators, 4 ApplicationSets, and composable overlays create a self-managing AI platform.</p>
+<span class="card-tag tag-advanced">Advanced · 20 min</span>
+</a>
+
+</div>
+</div>
+
+---
+
+## The Story
+
+Most organizations deploying AI on Kubernetes face the same challenges:
+
+<div class="journey-grid" markdown>
+
+<div class="journey-card" style="border-left: 3px solid var(--rhoai-red);">
+<h3>The Problem</h3>
+<p>Teams run manual installs, forget steps, create snowflake clusters, and cannot reproduce their AI platform. GPU resources are wasted. Nobody knows what changed or when.</p>
+</div>
+
+<div class="journey-card" style="border-left: 3px solid var(--rhoai-accent-blue);">
+<h3>The Solution</h3>
+<p>Declare your entire AI platform in Git. Push a change, ArgoCD syncs it. Self-healing, auditable, reproducible. Same manifests work on any cluster.</p>
+</div>
+
+<div class="journey-card" style="border-left: 3px solid var(--rhoai-accent-green);">
+<h3>The Result</h3>
+<p>A fully managed GPU-as-a-Service platform. Teams get models, training capacity, and quotas — all governed by Git with zero manual intervention.</p>
+</div>
+
+</div>
+
+---
+
+## What Gets Deployed
+
+A single `git push` manages the complete stack:
+
+```mermaid
+graph LR
+  subgraph operators ["Operators"]
+    direction TB
+    O1["cert-manager"]
+    O2["NFD"]
+    O3["GPU Operator"]
+    O4["Kueue"]
+    O5["RHOAI"]
+    O6["+ 6 more"]
+  end
+
+  subgraph platform ["AI Platform"]
+    direction TB
+    P1["KServe"]
+    P2["Batch Gateway"]
+    P3["Training"]
+    P4["Pipelines"]
+    P5["Workbenches"]
+    P6["Model Registry"]
+  end
+
+  subgraph infra ["GPU Infrastructure"]
+    direction TB
+    I1["Node Detection"]
+    I2["Driver Install"]
+    I3["Quota Management"]
+    I4["Auto-Scaling"]
+  end
+
+  operators --> platform
+  operators --> infra
+  platform --> Workloads["AI Workloads"]
+  infra --> Workloads
+```
+
+| Layer | What You Get |
+|-------|-------------|
+| **Operators** | cert-manager, ServiceMesh, NFD, GPU, Kueue, JobSet, LWS, CMA, AI Gateway, RHCL, RHOAI |
+| **Platform** | Dashboard, KServe, ModelMesh, Ray, Training, Pipelines, Workbenches, Registry, MLflow, TrustyAI |
+| **Advanced** | Batch Gateway (llm-d), Distributed Inference, Hardware Profiles, MaaS |
+| **Infrastructure** | GPU node detection, driver installation, quota management, auto-scaling |
+
+---
+
+## How It Works
+
+<div class="journey-grid" markdown>
+
+<div class="journey-card">
+<span class="card-icon">:material-numeric-1-circle:</span>
+<h3>Declare</h3>
+<p>Define your desired state in YAML. Choose your profile: serving-only, training-only, or full platform. Commit to Git.</p>
+</div>
+
+<div class="journey-card">
+<span class="card-icon">:material-numeric-2-circle:</span>
+<h3>Bootstrap</h3>
+<p>Run two commands. ArgoCD installs and begins watching your Git repository for changes.</p>
+</div>
+
+<div class="journey-card">
+<span class="card-icon">:material-numeric-3-circle:</span>
+<h3>Converge</h3>
+<p>ArgoCD auto-discovers operators, instances, and workloads. The platform self-assembles in 15-30 minutes.</p>
+</div>
+
+<div class="journey-card">
+<span class="card-icon">:material-numeric-4-circle:</span>
+<h3>Operate</h3>
+<p>From this point, Git is your interface. Push changes → ArgoCD syncs → cluster updates. Self-healing, auditable, reproducible.</p>
+</div>
+
+</div>
+
+---
 
 ## Prerequisites
 
 !!! warning "Verify before deploying"
-    These requirements come from the [RHOAI 3.5 documentation](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3-latest/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install).
 
-- **OpenShift Container Platform 4.19 or later**
-- **Minimum 2 worker nodes** with 8 CPUs and 32 GiB RAM each
-- **Default StorageClass** with dynamic provisioning
-- **Identity provider configured** (kubeadmin is not sufficient)
-- `oc` CLI authenticated as cluster-admin
-- **Internet access** to registry.redhat.io, quay.io, cdn.redhat.com (or disconnected mirror)
-- **GPU nodes** (NVIDIA L4, L40S, A100, H100) for inference and training workloads
-- Open Data Hub must NOT be installed (RHOAI and ODH cannot coexist)
+    - **OpenShift 4.19+** with at least 2 worker nodes (8 CPU, 32 GiB each)
+    - **GPU nodes** available (NVIDIA L4, L40S, A100, or H100)
+    - `oc` CLI authenticated as cluster-admin
+    - Default StorageClass with dynamic provisioning
+    - Identity provider configured (kubeadmin is not sufficient)
+    - Internet access to registry.redhat.io, quay.io, cdn.redhat.com
+
+---
 
 ## Version Support
 
-| RHOAI Version | Branch/Tag | OCP Versions | Channel |
-|--------------|-----------|--------------|---------|
-| 3.5 EA2 | `main` / `v3.5.0-ea2` | 4.19, 4.20 | `beta` |
-| 3.4 (archived) | `archive/v3.4.0` | 4.19, 4.20 | `beta` |
+| Version | Tag | Status |
+|---------|-----|--------|
+| RHOAI 3.5 EA2 | `v3.5.0-ea2` | **Current** |
+| RHOAI 3.4 | `archive/v3.4.0` | Archived |
 
-## How to Use This Site
+---
 
-1. **Learn the concepts** -- Read [Concepts](concepts/index.md) to build your mental model
-2. **Deploy** -- Follow the [Quick Start](quickstart.md) with understanding
-3. **Customize** -- Use [Capabilities](capabilities/index.md) to enable exactly what you need
-4. **Troubleshoot** -- Check [Known Issues](reference/known-issues.md) and [Troubleshooting](reference/troubleshooting.md) when things go wrong
-5. **Contribute** -- Submit issues and PRs on [GitHub](https://github.com/rrbanda/rhoai-deploy-gitops)
+<div style="text-align: center; padding: 2rem 0;" markdown>
+
+**Ready?** Start with the [Concepts](concepts/) to understand the architecture, or jump straight to the [Quick Start](quickstart/) to deploy.
+
+[:material-arrow-right: Get Started](quickstart/){ .md-button .md-button--primary }
+
+</div>

@@ -1,39 +1,61 @@
 site_name: RHOAI GitOps Deploy
-site_description: Deploy Red Hat OpenShift AI on OpenShift using GitOps -- learn the concepts, understand the architecture, and deploy with confidence
+site_description: The definitive guide to deploying Red Hat OpenShift AI on OpenShift using GitOps — from concept to production
 site_url: https://rrbanda.github.io/rhoai-deploy-gitops/
 repo_url: https://github.com/rrbanda/rhoai-deploy-gitops
 repo_name: rrbanda/rhoai-deploy-gitops
 
 theme:
   name: material
+  custom_dir: docs/overrides
   palette:
-    - scheme: default
-      primary: custom
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
     - scheme: slate
       primary: custom
+      accent: custom
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  font:
+    text: Inter
+    code: JetBrains Mono
   features:
     - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.sections
     - navigation.expand
     - navigation.indexes
     - navigation.top
     - navigation.footer
+    - navigation.instant
+    - navigation.instant.progress
     - content.code.copy
+    - content.code.annotate
     - content.tabs.link
     - search.suggest
     - search.highlight
+    - search.share
     - toc.follow
+    - announce.dismiss
   icon:
     repo: fontawesome/brands/github
+    logo: material/cube-outline
 
 extra_css:
   - stylesheets/extra.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/rrbanda/rhoai-deploy-gitops
+  generator: false
+  status:
+    new: Recently added
+    deprecated: Deprecated
 
 markdown_extensions:
   - pymdownx.superfences:
@@ -45,6 +67,8 @@ markdown_extensions:
       alternate_style: true
   - pymdownx.highlight:
       anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - admonition
@@ -54,10 +78,19 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tasklist:
+      custom_checkbox: true
   - tables
   - def_list
+  - footnotes
   - toc:
       permalink: true
+      toc_depth: 3
+
+plugins:
+  - search
 
 nav:
   - Home: index.md
