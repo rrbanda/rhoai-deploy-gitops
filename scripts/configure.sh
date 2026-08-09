@@ -262,7 +262,7 @@ if [[ "$CHANNEL" != "fast" && "$CHANNEL" != "beta" && "$CHANNEL" != "stable" ]];
 fi
 
 valid_overlays=("minimal" "serving" "training" "full" "dev" "maas")
-if [[ ! " ${valid_overlays[*]} " =~ " ${DSC_OVERLAY} " ]]; then
+if [[ ! " ${valid_overlays[*]} " =~ \ ${DSC_OVERLAY}\  ]]; then
   echo "Error: --dsc must be one of: ${valid_overlays[*]}"
   exit 1
 fi
