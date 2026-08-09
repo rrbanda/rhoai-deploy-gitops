@@ -1,22 +1,27 @@
-apiVersion: dashboard.opendatahub.io/v1alpha1
+apiVersion: infrastructure.opendatahub.io/v1
 kind: HardwareProfile
 metadata:
   name: cpu-standard
   namespace: redhat-ods-applications
   annotations:
     argocd.argoproj.io/sync-wave: "6"
+  labels:
+    opendatahub.io/dashboard: "true"
 spec:
-  displayName: "CPU Standard (4 CPU, 16Gi RAM)"
-  description: "Standard CPU profile for workbenches and lightweight workloads"
-  enabled: true
   identifiers:
     - displayName: "CPU"
       identifier: cpu
+      resourceType: cpu
       defaultCount: 4
       minCount: 1
       maxCount: 8
     - displayName: "Memory"
       identifier: memory
+      resourceType: memory
       defaultCount: 16Gi
       minCount: 4Gi
       maxCount: 32Gi
+  scheduling:
+    type: kueue
+    kueue:
+      localQueueName: default
