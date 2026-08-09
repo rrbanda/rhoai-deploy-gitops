@@ -58,7 +58,7 @@ This repository provides the entire Red Hat OpenShift AI (RHOAI) platform as **d
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-**The result:** A fully governed GPU-as-a-Service platform where teams get model serving, training capacity, and notebooks — all managed through Git with zero manual cluster access.
+**The result:** A fully governed RHOAI platform where teams get model serving, training capacity, and notebooks — all managed through Git with zero manual cluster access.
 
 ---
 

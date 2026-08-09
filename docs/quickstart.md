@@ -27,7 +27,7 @@ graph LR
 !!! warning "Prerequisites"
     Before starting, verify:
 
-    - OpenShift 4.19+ cluster with at least 2 worker nodes (8 CPU, 32 GiB each)
+    - OpenShift 4.18+ cluster with at least 2 worker nodes (8 CPU, 32 GiB each)
     - `oc` CLI authenticated as cluster-admin
     - Default StorageClass with dynamic provisioning
     - Identity provider configured (not kubeadmin)

@@ -6,11 +6,11 @@ hide:
 
 <div class="hero" markdown>
 
-# GPU-as-a-Service on OpenShift
+# Deploy Red Hat OpenShift AI with GitOps
 
 <p class="subtitle">
-Deploy Red Hat OpenShift AI using GitOps. A complete, production-ready platform 
-for model serving, distributed training, and GPU quota management — 
+A production-ready, fully declarative deployment of RHOAI 3.5 on OpenShift — 
+model serving, distributed training, batch inference, and GPU quota management — 
 managed entirely through Git.
 </p>
 
@@ -103,7 +103,7 @@ Most organizations deploying AI on Kubernetes face the same challenges:
 
 <div class="journey-card" style="border-left: 3px solid var(--rhoai-accent-green);">
 <h3>The Result</h3>
-<p>A fully managed GPU-as-a-Service platform. Teams get models, training capacity, and quotas — all governed by Git with zero manual intervention.</p>
+<p>A fully managed RHOAI platform deployed via GitOps. Teams get model serving, training capacity, and GPU quotas — all governed by Git with zero manual intervention.</p>
 </div>
 
 </div>
@@ -195,8 +195,8 @@ graph LR
 
 !!! warning "Verify before deploying"
 
-    - **OpenShift 4.19+** with at least 2 worker nodes (8 CPU, 32 GiB each)
-    - **GPU nodes** available (NVIDIA L4, L40S, A100, or H100)
+    - **OpenShift 4.18+** with at least 2 worker nodes (8 CPU, 32 GiB each)
+    - **GPU nodes** available for inference/training (NVIDIA L4, L40S, A100, or H100)
     - `oc` CLI authenticated as cluster-admin
     - Default StorageClass with dynamic provisioning
     - Identity provider configured (kubeadmin is not sufficient)

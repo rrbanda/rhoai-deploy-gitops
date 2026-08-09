@@ -172,7 +172,7 @@ graph LR
 | ServiceMesh 3 | `stable` | Service mesh for batch gateway | Batch inference |
 | NFD | `stable` | GPU node detection | GPU workloads |
 | GPU Operator | `stable` | NVIDIA drivers + toolkit | GPU workloads |
-| Kueue | `stable-v1.2` | GPU quota management | Training |
+| Kueue | `stable-v1` | GPU quota management | Training |
 | JobSet | (default) | Multi-pod job orchestration | Training |
 | LeaderWorkerSet | `stable` | Leader-worker topology | Distributed inference |
 | CMA/KEDA | `stable` | Custom metrics autoscaling | Auto-scaling |
