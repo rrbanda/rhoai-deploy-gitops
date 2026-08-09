@@ -8,14 +8,52 @@ metadata:
     argocd.argoproj.io/sync-options: ServerSideApply=true
 spec:
   dashboardConfig:
-    disableKueue: false
+    aiAssetCustomEndpoints: true
+    automl: true
+    autorag: true
+    deploymentWizardYAMLViewer: true
+    disableAdminConnectionTypes: false
+    disableBYONImageStream: false
+    disableClusterManager: false
+    disableCustomServingRuntimes: false
     disableDistributedWorkloads: false
+    disableFeatureStore: false
+    disableHome: false
+    disableISVBadges: false
+    disableInfo: false
+    disableKServe: false
+    disableKServeAuth: false
+    disableKServeMetrics: false
+    disableKServeRaw: false
+    disableKueue: false
     disableLLMd: false
     disableLMEval: false
+    disableModelCatalog: false
+    disableModelMesh: false
+    disableModelRegistry: false
+    disableModelRegistrySecureDB: false
+    disableModelServing: false
+    disableNIMModelServing: false
+    disablePerformanceMetrics: false
+    disablePipelines: false
+    disableProjectScoped: false
+    disableProjectSharing: false
+    disableProjects: false
+    disableServingRuntimeParams: false
+    disableStorageClasses: false
+    disableSupport: false
+    disableTracking: false
+    disableTrustyBiasMetrics: false
+    disableUserManagement: false
+    enablement: true
+    externalVectorStores: true
     genAiStudio: true
+    llmGatewayField: true
+    maasAuthPolicies: true
     mcpCatalog: true
     modelAsService: true
     observabilityDashboard: true
-    vLLMDeploymentOnMaaS: true
+    projectRBAC: true
+    promptManagement: true
     trainingJobs: true
-    maasAuthPolicies: true
+    vLLMDeploymentOnMaaS: true

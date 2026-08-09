@@ -20,6 +20,8 @@ spec:
       managementState: Managed
     kserve:
       managementState: Managed
+      modelCache:
+        managementState: Managed
       modelsAsService:
         managementState: Managed
       nim:

@@ -12,7 +12,7 @@ spec:
         managementState: Managed
     aipipelines:
       argoWorkflowsControllers:
-        managementState: Removed
+        managementState: Managed
       managementState: Managed
     dashboard:
       managementState: Managed
@@ -20,6 +20,8 @@ spec:
       managementState: Managed
     kserve:
       managementState: Managed
+      modelCache:
+        managementState: Managed
       modelsAsService:
         managementState: Managed
       nim:

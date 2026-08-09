@@ -8,16 +8,20 @@ spec:
   components:
     aigateway:
       managementState: Managed
+      batchGateway:
+        managementState: Managed
     aipipelines:
       argoWorkflowsControllers:
-        managementState: Removed
-      managementState: Removed
+        managementState: Managed
+      managementState: Managed
     dashboard:
       managementState: Managed
     feastoperator:
-      managementState: Removed
+      managementState: Managed
     kserve:
       managementState: Managed
+      modelCache:
+        managementState: Managed
       modelsAsService:
         managementState: Managed
       nim:
@@ -31,27 +35,27 @@ spec:
       defaultLocalQueueName: default
       managementState: Unmanaged
     mlflowoperator:
-      managementState: Removed
+      managementState: Managed
     modelregistry:
       managementState: Managed
       registriesNamespace: rhoai-model-registries
     ogx:
       managementState: Managed
     ray:
-      managementState: Removed
+      managementState: Managed
     sparkoperator:
-      managementState: Removed
+      managementState: Managed
     trainer:
-      managementState: Removed
+      managementState: Managed
     trainingoperator:
-      managementState: Removed
+      managementState: Managed
     trustyai:
       eval:
         lmeval:
-          permitCodeExecution: deny
-          permitOnline: deny
+          permitCodeExecution: allow
+          permitOnline: allow
       managementState: Managed
       mcpGuardrailsMode: true
     workbenches:
-      managementState: Removed
+      managementState: Managed
       workbenchNamespace: rhods-notebooks
