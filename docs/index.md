@@ -15,8 +15,8 @@ managed entirely through Git.
 </p>
 
 <div class="cta-group">
-<a href="quickstart/" class="cta-primary">:material-rocket-launch: Deploy Now</a>
-<a href="concepts/" class="cta-secondary">:material-book-open-variant: Learn the Concepts</a>
+<a href="quickstart/" class="cta-primary">Deploy Now</a>
+<a href="concepts/" class="cta-secondary">Learn the Concepts</a>
 </div>
 
 </div>
@@ -249,10 +249,10 @@ From this point, **Git is your interface**. Push a change, ArgoCD syncs. Self-he
 Start with the concepts to understand the architecture, or jump straight to deploying.
 
 <div class="cta-group">
-<a href="quickstart/" class="cta-primary">:material-rocket-launch: Quick Start</a>
-<a href="concepts/" class="cta-secondary">:material-book-open-variant: Concepts</a>
-<a href="capabilities/" class="cta-secondary">:material-puzzle: Capabilities</a>
-<a href="usecases/" class="cta-secondary">:material-flask: Use Cases</a>
+<a href="quickstart/" class="cta-primary">Quick Start</a>
+<a href="concepts/" class="cta-secondary">Concepts</a>
+<a href="capabilities/" class="cta-secondary">Capabilities</a>
+<a href="usecases/" class="cta-secondary">Use Cases</a>
 </div>
 
 </div>

@@ -295,9 +295,9 @@
 
 .hero h1 {
   font-size: 2.8rem;
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: -0.03em;
-  line-height: 1.1;
+  line-height: 1.15;
   margin-bottom: 1.2rem;
   color: var(--md-default-fg-color);
   border-bottom: none;
@@ -305,6 +305,7 @@
 
 .hero h1 strong {
   color: var(--rh-red);
+  font-weight: 900;
 }
 
 .hero .subtitle {
