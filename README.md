@@ -1,104 +1,52 @@
 # Red Hat OpenShift AI — GitOps Deployment
 
-<p align="center">
-  <strong>Deploy a production-grade AI/ML platform on any OpenShift cluster with a single command.</strong><br>
-  <em>Declarative. Reproducible. Self-healing. Fully managed through Git.</em>
-</p>
+Production-grade, GitOps-driven deployment of [Red Hat OpenShift AI](https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-ai) on any OpenShift 4.18+ cluster. One configuration file, one command, fully self-healing.
 
-<p align="center">
-  <a href="https://rrbanda.github.io/rhoai-deploy-gitops/"><img src="https://img.shields.io/badge/Documentation-blue?style=for-the-badge&logo=readthedocs&logoColor=white" alt="Docs"></a>
-  <a href="https://github.com/rrbanda/rhoai-deploy-gitops/releases"><img src="https://img.shields.io/github/v/release/rrbanda/rhoai-deploy-gitops?include_prereleases&style=for-the-badge&label=Release" alt="Release"></a>
-  <a href="https://github.com/rrbanda/rhoai-deploy-gitops/actions/workflows/validate.yml"><img src="https://img.shields.io/github/actions/workflow/status/rrbanda/rhoai-deploy-gitops/validate.yml?style=for-the-badge&label=CI" alt="CI"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-green?style=for-the-badge" alt="License"></a>
-</p>
+[![CI](https://github.com/rrbanda/rhoai-deploy-gitops/actions/workflows/validate.yml/badge.svg)](https://github.com/rrbanda/rhoai-deploy-gitops/actions/workflows/validate.yml)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
----
+## Overview
 
-## Deploy in 1 Command
+This repository implements the [app-of-apps pattern](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/) using ArgoCD ApplicationSets to deploy and manage the complete RHOAI stack — 12 operators, GPU infrastructure, model serving, distributed training, and AI services — entirely through Git.
 
-**Prerequisites:** OpenShift 4.18+ with cluster-admin access.
+**Key properties:**
 
-```bash
-# Fork this repo → edit bootstrap/overlays/default/cluster-config.yaml → push
-
-until oc apply -k bootstrap/overlays/default; do sleep 10; done
-```
-
-**That's it.** This single command:
-
-1. Installs the OpenShift GitOps operator
-2. Configures ArgoCD with production-grade settings
-3. Creates ApplicationSets that auto-discover all platform components
-4. Deploys 11+ operators, the DataScienceCluster, and GPU infrastructure
-5. Sets up self-management — ArgoCD manages itself from Git going forward
-
-The platform converges in 15–30 minutes. From this point, every change goes through Git.
-
----
-
-## How It Works
-
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                                                                          │
-│  1. You edit ONE file:                                                   │
-│     bootstrap/overlays/default/cluster-config.yaml                       │
-│                                                                          │
-│       repoURL: https://github.com/YOUR-ORG/rhoai-deploy-gitops.git      │
-│       targetRevision: main                                               │
-│                                                                          │
-│  2. You run ONE command:                                                 │
-│     until oc apply -k bootstrap/overlays/default; do sleep 10; done      │
-│                                                                          │
-│  3. ArgoCD takes over:                                                   │
-│     ┌──────────────────────────────────────────────────────────────┐     │
-│     │  Discovers operators, instances, workloads from Git          │     │
-│     │  Installs them in dependency order (sync waves)              │     │
-│     │  Self-heals drift — reverts manual changes automatically     │     │
-│     │  Manages its own configuration from Git                      │     │
-│     └──────────────────────────────────────────────────────────────┘     │
-│                                                                          │
-└──────────────────────────────────────────────────────────────────────────┘
-```
-
----
+- **Single entry point** — edit `cluster-config.yaml`, run one `oc apply`, everything else is automatic
+- **Auto-discovery** — add a directory under `components/operators/` or `usecases/models/`, push, and ArgoCD creates the Application
+- **Self-healing** — every Application uses `selfHeal: true`; manual cluster drift is reverted automatically
+- **Self-managing** — ArgoCD manages its own configuration from Git after bootstrap
+- **Composable profiles** — choose `minimal`, `serving`, `training`, or `full` DataScienceCluster profiles via Kustomize overlays
+- **Opt-in workloads** — models and services are disabled by default; enable via `config.json` flags
 
 ## Quick Start
 
-### 1. Fork & Clone
+### 1. Fork and configure
 
 ```bash
-# Fork on GitHub, then:
-git clone https://github.com/YOUR-ORG/rhoai-deploy-gitops.git
+git clone https://github.com/<YOUR-ORG>/rhoai-deploy-gitops.git
 cd rhoai-deploy-gitops
-```
 
-### 2. Configure (edit one file)
+./scripts/configure.sh \
+  --repo https://github.com/<YOUR-ORG>/rhoai-deploy-gitops.git \
+  --channel fast \
+  --dsc full
 
-```bash
-vi bootstrap/overlays/default/cluster-config.yaml
-```
-
-```yaml
-data:
-  repoURL: "https://github.com/YOUR-ORG/rhoai-deploy-gitops.git"
-  targetRevision: "main"
-  rhoaiChannel: "fast"       # fast = latest GA, beta = EA/preview, stable = LTS
-  rhoaiOverlay: "full"       # minimal | serving | training | full | maas
-```
-
-### 3. Push & Deploy
-
-```bash
 git add -A && git commit -m "Configure for my cluster" && git push
+```
 
-# Bootstrap — the until loop handles CRD timing (operator not ready yet)
+### 2. Bootstrap
+
+```bash
 until oc apply -k bootstrap/overlays/default; do sleep 10; done
 ```
 
-### 4. (Optional) Enable models and services
+This installs the OpenShift GitOps operator, configures ArgoCD, and deploys four ApplicationSets that auto-discover all platform components. The `until` loop handles CRD timing — the operator needs a few seconds before its resources are accepted.
 
-Models and services are **opt-in** — the platform deploys but workloads don't until you enable them:
+The platform converges in 15–30 minutes. **This is the only `oc apply` you will ever run.** From here, Git is your interface.
+
+### 3. Enable models and services (optional)
+
+Models and services are opt-in. Enable them by setting `"enabled": "true"` in their `config.json`:
 
 ```bash
 ./scripts/configure.sh enable-model gemma2-9b-fp8
@@ -106,151 +54,133 @@ Models and services are **opt-in** — the platform deploys but workloads don't 
 git add -A && git commit -m "Enable gemma2 and EPP" && git push
 ```
 
----
+### 4. Verify
+
+```bash
+# Watch ArgoCD Applications converge
+watch oc get applications.argoproj.io -n openshift-gitops
+
+# Confirm DSC is ready
+oc get datasciencecluster default-dsc \
+  -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
+```
+
+## Prerequisites
+
+| Requirement | Details |
+|---|---|
+| OpenShift | 4.18+ with cluster-admin access |
+| Worker nodes | 2+ nodes, 8 CPU / 32 GiB each (minimum) |
+| Storage | Default StorageClass with dynamic provisioning |
+| GPU | NVIDIA GPU nodes for inference/training workloads |
+| Network | Access to `registry.redhat.io`, `quay.io`, `cdn.redhat.com` |
+| CLI | `oc` authenticated as cluster-admin |
 
 ## Repository Structure
 
-This repo follows the [community-standard OpenShift GitOps pattern](https://github.com/gnunn-gitops/standards/blob/master/folders.md) established by gnunn-gitops, christianh814, and Red Hat AI Services.
-
 ```
-rhoai-deploy-gitops/
-├── bootstrap/                              # ← ENTRY POINT
-│   ├── base/                              # OpenShift GitOps operator install
-│   │   ├── kustomization.yaml             #   (references redhat-cop/gitops-catalog)
-│   │   └── argocd-rbac.yaml              #   cluster-admin for ArgoCD SA
-│   └── overlays/
-│       └── default/                       # THE SINGLE ENTRY POINT
-│           ├── kustomization.yaml         #   Aggregates everything + replacements
-│           ├── argocd-instance.yaml       #   ArgoCD CR (Kustomize + Helm enabled)
-│           ├── cluster-config.yaml        #   ← THE ONLY FILE YOU EDIT
-│           └── gitops-controller.yaml     #   Self-management Application
+├── bootstrap/                          # Entry point
+│   ├── base/                           # GitOps operator + RBAC
+│   └── overlays/default/
+│       ├── cluster-config.yaml         # ← The only file you edit
+│       ├── argocd-instance.yaml        # ArgoCD CR with health checks
+│       ├── kustomization.yaml          # Kustomize replacements
+│       └── gitops-controller.yaml      # Self-management Application
 │
 ├── components/
-│   ├── argocd/
-│   │   ├── applicationsets/               # Auto-discovery engines
-│   │   │   ├── cluster-operators-appset.yaml
-│   │   │   ├── cluster-instances-appset.yaml
-│   │   │   ├── cluster-models-appset.yaml
-│   │   │   └── cluster-services-appset.yaml
-│   │   ├── projects/                      # RBAC boundaries (platform, usecases)
-│   │   └── apps/                          # Standalone Applications (DSC)
-│   ├── operators/                         # Platform operators (auto-discovered)
-│   │   ├── rhoai-operator/
-│   │   ├── kueue-operator/
-│   │   ├── cert-manager/
-│   │   └── ...
-│   └── instances/                         # Platform instances (auto-discovered)
-│       ├── rhoai-instance/
-│       │   └── overlays/                  # full | serving | training | minimal
-│       ├── kueue-config/
-│       └── ...
+│   ├── argocd/                         # ApplicationSets, AppProjects, Apps
+│   ├── operators/                      # OLM subscriptions (auto-discovered)
+│   └── instances/                      # Operator CRs (auto-discovered)
+│       └── rhoai-instance/overlays/    # DSC profiles: full|serving|training|minimal
 │
-├── usecases/                              # Opt-in workloads (not deployed by default)
-│   ├── models/                            # Model serving configs
-│   │   └── gemma2-9b-fp8/
-│   │       └── profiles/tier1-minimal/
-│   │           └── config.json            # "enabled": "true" to deploy
-│   └── services/                          # Platform services
-│       └── llm-d-epp/
-│           └── profiles/tier1-minimal/
-│               └── config.json
+├── usecases/
+│   ├── models/                         # Model deployments (opt-in)
+│   └── services/                       # AI services (opt-in)
 │
-├── scripts/
-│   └── configure.sh                       # Optional CLI helper
-└── docs/                                  # MkDocs documentation site
+├── scripts/configure.sh                # Configuration helper
+└── docs/                               # Documentation (MkDocs)
 ```
-
----
-
-## Design Principles
-
-| Principle | Implementation |
-|-----------|---------------|
-| **One file to configure** | `cluster-config.yaml` drives all ArgoCD resources via Kustomize replacements |
-| **One command to deploy** | `oc apply -k bootstrap/overlays/default` — nothing else needed |
-| **Auto-discovery** | Add an operator directory → ArgoCD creates the Application automatically |
-| **Opt-in workloads** | Models/services use `config.json` markers with ArgoCD post-selectors |
-| **Self-managing** | `gitops-controller` Application makes ArgoCD manage its own config from Git |
-| **Portable** | No hardcoded cluster IDs or URLs — works on any OpenShift 4.18+ cluster |
-| **Self-healing** | Every Application has `selfHeal: true` — manual drift is reverted |
-| **Community standard** | Follows gnunn-gitops/christianh814 folder structure and patterns |
-
----
 
 ## What Gets Deployed
 
-| Layer | Components | Auto-deploy? |
-|-------|-----------|:------------:|
-| **Operators** | cert-manager, NFD, GPU Operator, Kueue, JobSet, LWS, CMA, ServiceMesh, AI Gateway, RHCL, RHOAI | ✅ Always |
-| **Instances** | DSC, Kueue config, GPU instance, NFD instance | ✅ Always |
-| **Models** | gemma2-9b-fp8, qwen25-7b, orchestrator-8b, gpt-oss-120b, qwen-math-7b | ❌ Opt-in |
-| **Services** | AI Gateway, LlamaStack, llm-d EPP, Guardrails, GenAI Toolbox, RHOKP, ToolOrchestra | ❌ Opt-in |
+### Platform (always deployed)
+
+| Category | Components |
+|---|---|
+| **Operators** | RHOAI, cert-manager, NFD, GPU Operator, Kueue, JobSet, LeaderWorkerSet, CMA, ServiceMesh, RHCL, External Secrets |
+| **Instances** | DataScienceCluster, GPU ClusterPolicy, NFD discovery, Kueue quotas |
 
 ### DataScienceCluster Profiles
 
-| Profile | Enables | Use Case |
-|---------|---------|----------|
+| Profile | What it enables | Use case |
+|---|---|---|
 | `minimal` | Dashboard only | Platform exploration |
-| `serving` | Dashboard + KServe + Model Registry | Model inference |
-| `training` | Dashboard + Ray + Training Operator | Distributed training |
-| **`full`** | **All 12+ components** | **Complete AI platform** |
+| `serving` | Dashboard, KServe, Model Registry | Model inference |
+| `training` | Dashboard, Ray, Training Operator | Distributed training |
+| **`full`** | **All components** | **Complete AI platform (default)** |
+| `maas` | Serving-focused with MaaS | Models-as-a-Service |
 
----
+### Models and Services (opt-in)
 
-## Multi-Cluster Support
+| Models | Services |
+|---|---|
+| gemma2-9b-fp8 | AI Gateway (Kuadrant) |
+| qwen25-7b-instruct | Guardrails Gateway |
+| qwen-math-7b | GenAI Toolbox |
+| orchestrator-8b | LlamaStack |
+| gpt-oss-120b (multi-GPU) | llm-d EPP, RHOKP, ToolOrchestra |
 
-For multiple clusters, create additional bootstrap overlays:
+## Configuration
 
-```bash
-# Option A: Use the configure script
-./scripts/configure.sh --repo <url> --overlay prod --new-overlay --dsc serving --channel fast
+All configuration flows through a single ConfigMap:
 
-# Option B: Manually copy
-cp -r bootstrap/overlays/default bootstrap/overlays/prod
-vi bootstrap/overlays/prod/cluster-config.yaml
+```yaml
+# bootstrap/overlays/default/cluster-config.yaml
+data:
+  repoURL: "https://github.com/<YOUR-ORG>/rhoai-deploy-gitops.git"
+  targetRevision: "main"
+  rhoaiChannel: "fast"       # fast = GA, beta = EA, stable = LTS
+  rhoaiOverlay: "full"       # minimal | serving | training | full | maas
 ```
 
-Then deploy each cluster to its respective overlay:
-
-```bash
-until oc apply -k bootstrap/overlays/prod; do sleep 10; done
-```
-
----
+Kustomize replacements inject these values into every ArgoCD Application and ApplicationSet at build time. See [docs/configuration.md](docs/configuration.md) for details.
 
 ## Version Support
 
-This repo tracks the latest RHOAI release by default (`fast` channel). Switch channels in `cluster-config.yaml` to target a specific release stream:
-
-| Channel | What It Tracks | Use Case |
-|---------|---------------|----------|
+| Channel | Release stream | Use case |
+|---|---|---|
 | `fast` | Latest GA release | **Default** — production deployments |
 | `beta` | Early Access / preview | Testing upcoming features |
-| `stable` | Long Term Support | Conservative / regulated environments |
+| `stable` | Long Term Support | Regulated environments |
 
-| OpenShift | Status |
-|-----------|--------|
-| 4.18+ | Supported |
+## Multi-Cluster
 
----
+Create additional bootstrap overlays per environment:
+
+```bash
+cp -r bootstrap/overlays/default bootstrap/overlays/prod
+vi bootstrap/overlays/prod/cluster-config.yaml
+
+until oc apply -k bootstrap/overlays/prod; do sleep 10; done
+```
 
 ## Documentation
 
-**Full documentation with concepts, guides, and references:**
-
-**[rrbanda.github.io/rhoai-deploy-gitops](https://rrbanda.github.io/rhoai-deploy-gitops/)**
-
----
+- [Quick Start](docs/quickstart.md) — step-by-step deployment guide
+- [Architecture](docs/architecture.md) — app-of-apps flow, dependency chain, design decisions
+- [Configuration](docs/configuration.md) — replacements, overlays, opt-in pattern
+- [Upgrading](docs/upgrading.md) — channel switching and version migration
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Test with `oc kustomize bootstrap/overlays/default` to verify output
-4. Submit a pull request
+See [CONTRIBUTING.md](CONTRIBUTING.md). In short:
 
----
+1. Fork and clone
+2. Install pre-commit hooks: `pip install pre-commit && pre-commit install`
+3. Create a feature branch
+4. Test with `oc kustomize bootstrap/overlays/default` to verify output
+5. Submit a pull request
 
 ## License
 
-Apache License 2.0 — See [LICENSE](LICENSE) for details.
+[Apache License 2.0](LICENSE)
