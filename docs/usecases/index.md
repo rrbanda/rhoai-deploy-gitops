@@ -33,8 +33,10 @@ To add a new use case, create the directory structure, push to Git, and ArgoCD c
 
 | Use Case | Type | Description | Guide |
 |----------|------|------------|-------|
-| **LlamaStack** | Service | Meta's LlamaStack Distribution with agents, RAG, and tool use | [LlamaStack](llamastack.md) |
 | **GenAI Toolbox** | Service | MCP Server providing database tools to LLM agents | [GenAI Toolbox](genai-toolbox.md) |
+
+!!! info "LlamaStack → OGX (OpenGenX)"
+    In RHOAI 3.5, the `llamastackoperator` DSC component has been superseded by **OGX (OpenGenX)**. The `ogx` component is the active replacement. Set `llamastackoperator: Removed` and `ogx: Managed` in your DSC. The `usecases/services/llamastack/` directory still contains manifests for deploying a LlamaStack application instance, but the underlying operator is now OGX.
 
 ## Adding a New Model
 

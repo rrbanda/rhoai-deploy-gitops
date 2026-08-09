@@ -37,7 +37,7 @@ graph TD
     ModelsAS --> Mod1["model-gpt-oss-120b"]
     ModelsAS --> ModN["model-..."]
     
-    ServicesAS --> Svc1["service-llamastack"]
+    ServicesAS --> Svc1["service-genai-toolbox"]
     ServicesAS --> SvcN["service-..."]
   end
 ```
@@ -113,7 +113,7 @@ graph TD
     I2["instance-gpu-instance"]
     I3["instance-kueue-config"]
     M1["model-gpt-oss-120b"]
-    S1["service-llamastack"]
+    S1["service-genai-toolbox"]
   end
 
   subgraph layer4 ["Layer 4: Kubernetes Resources (actual workloads)"]

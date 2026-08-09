@@ -90,7 +90,6 @@ nav:
     - MLflow: capabilities/mlflow.md
   - Use Cases:
     - usecases/index.md
-    - LlamaStack: usecases/llamastack.md
     - GenAI Toolbox: usecases/genai-toolbox.md
   - Reference:
     - reference/index.md
