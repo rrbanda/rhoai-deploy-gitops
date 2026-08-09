@@ -24,6 +24,9 @@ graph LR
   Fork --> Boot --> Deploy --> Operators --> Instances --> DSC --> Models
 ```
 
+!!! note "Operator deployment methods"
+    The repository contains 12 operator directories. 10 are auto-deployed as ArgoCD Applications via the `cluster-operators` ApplicationSet. The remaining 2 — **NFD** and **GPU Operator** — use remote bases from `gitops-catalog` and are deployed via instance CRs (`NFDInstance` and `ClusterPolicy`) rather than the ApplicationSet.
+
 !!! warning "Prerequisites"
     Before starting, verify:
 
@@ -65,9 +68,13 @@ graph LR
     ```
 
 ??? info "What just happened?"
-    The `scripts/configure.sh` script updated one file: `bootstrap/overlays/default/cluster-config.yaml`. This ConfigMap contains your repository URL and branch. Kustomize replacements inject these values into every ArgoCD Application at build time.
+    The `scripts/configure.sh` script updated up to three files:
 
-    This means all ArgoCD apps will point to YOUR fork. When you push changes, YOUR cluster syncs -- not someone else's.
+    1. `bootstrap/overlays/default/cluster-config.yaml` -- Your repository URL and branch
+    2. `components/operators/rhoai-operator/patch-channel.yaml` -- The RHOAI operator channel (when `--channel` is specified)
+    3. `components/argocd/apps/rhoai-dsc-app.yaml` -- The DSC overlay path (when `--dsc` is specified)
+
+    The ConfigMap in `cluster-config.yaml` is the primary source of truth. Kustomize replacements inject its values into every ArgoCD Application at build time. This means all ArgoCD apps will point to YOUR fork. When you push changes, YOUR cluster syncs -- not someone else's.
 
 ## Step 2: Bootstrap (Single Command)
 

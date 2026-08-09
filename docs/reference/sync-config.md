@@ -114,7 +114,7 @@ The higher retry count for instances and use cases gives operators time to insta
 
 | Setting | Value | Notes |
 |---------|-------|-------|
-| RHOAI channel | `beta` | Delivers 3.5 Early Access releases |
+| RHOAI channel | `fast` | Latest GA release (default) |
 | DSC API | `datasciencecluster.opendatahub.io/v2` | Required API for 3.5 |
 | Kueue | `Unmanaged` in DSC | `Managed` is not supported in 3.5; standalone operator required |
 | Batch Gateway | `Managed` in DSC | Requires ServiceMesh 3 + LWS operators |

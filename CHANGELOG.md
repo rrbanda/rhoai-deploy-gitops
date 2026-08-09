@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 - Repo restructured for multi-version support and portability
 - Single `cluster-config.yaml` now drives all ArgoCD applications
-- `setup.sh` rewritten with full parameterization support
+- `configure.sh` rewritten with full parameterization support
 
 ## [3.5.0-ea2] — 2026-08-09
 

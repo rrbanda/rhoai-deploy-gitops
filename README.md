@@ -7,7 +7,7 @@ Production-grade, GitOps-driven deployment of [Red Hat OpenShift AI](https://www
 
 ## Overview
 
-This repository implements the [app-of-apps pattern](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/) using ArgoCD ApplicationSets to deploy and manage the complete RHOAI stack — 12 operators, GPU infrastructure, model serving, distributed training, and AI services — entirely through Git.
+This repository implements the [app-of-apps pattern](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/) using ArgoCD ApplicationSets to deploy and manage the complete RHOAI stack — 12 operators (10 auto-deployed via ApplicationSet; NFD and GPU Operator deploy via instance CRs), GPU infrastructure, model serving, distributed training, and AI services — entirely through Git.
 
 **Key properties:**
 
@@ -15,7 +15,7 @@ This repository implements the [app-of-apps pattern](https://argo-cd.readthedocs
 - **Auto-discovery** — add a directory under `components/operators/` or `usecases/models/`, push, and ArgoCD creates the Application
 - **Self-healing** — every Application uses `selfHeal: true`; manual cluster drift is reverted automatically
 - **Self-managing** — ArgoCD manages its own configuration from Git after bootstrap
-- **Composable profiles** — choose `minimal`, `serving`, `training`, or `full` DataScienceCluster profiles via Kustomize overlays
+- **Composable profiles** — choose `minimal`, `serving`, `training`, `full`, `maas`, or `dev` DataScienceCluster profiles via Kustomize overlays
 - **Opt-in workloads** — models and services are disabled by default; enable via `config.json` flags
 
 ## Quick Start
@@ -112,13 +112,14 @@ oc get datasciencecluster default-dsc \
 
 ### DataScienceCluster Profiles
 
-| Profile | What it enables | Use case |
+| Profile | What it does | Use case |
 |---|---|---|
-| `minimal` | Dashboard only | Platform exploration |
-| `serving` | Dashboard, KServe, Model Registry | Model inference |
-| `training` | Dashboard, Ray, Training Operator | Distributed training |
-| **`full`** | **All components** | **Complete AI platform (default)** |
-| `maas` | Serving-focused with MaaS | Models-as-a-Service |
+| `minimal` | Dashboard only (all other components Removed) | Platform exploration |
+| `serving` | Full platform minus training (removes ray, sparkoperator, trainer, trainingoperator, batchGateway) | Model inference |
+| `training` | Full platform minus serving (removes aigateway, kserve, mlflowoperator, modelregistry, ogx) | Distributed training |
+| **`full`** | **All components (no patches)** | **Complete AI platform (default)** |
+| `maas` | Same as serving (removes training components) | Models-as-a-Service |
+| `dev` | Same as full (no patches) | Development and testing |
 
 ### Models and Services (opt-in)
 
@@ -140,7 +141,7 @@ data:
   repoURL: "https://github.com/<YOUR-ORG>/rhoai-deploy-gitops.git"
   targetRevision: "main"
   rhoaiChannel: "fast"       # fast = GA, beta = EA, stable = LTS
-  rhoaiOverlay: "full"       # minimal | serving | training | full | maas
+  rhoaiOverlay: "full"       # minimal | serving | training | full | maas | dev
 ```
 
 Kustomize replacements inject these values into every ArgoCD Application and ApplicationSet at build time. See [docs/configuration.md](docs/configuration.md) for details.

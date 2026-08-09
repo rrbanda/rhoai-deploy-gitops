@@ -38,9 +38,13 @@ GenAI Toolbox connects to the LlamaStack PostgreSQL database at `postgres.llamas
 
 === "GitOps"
 
-    GenAI Toolbox is auto-deployed by the `cluster-services` ApplicationSet when using the `tier1-minimal` profile.
+    GenAI Toolbox is deployed by the `cluster-services` ApplicationSet when using the `tier1-minimal` profile, but only after you explicitly enable it:
 
-    After bootstrapping the cluster, the `service-genai-toolbox` Application is created automatically. The `instance-dashboard-config` and `instance-mcp-servers` Applications (auto-discovered by the `cluster-instances` AppSet) register it in the RHOAI dashboard.
+    ```bash
+    ./scripts/configure.sh enable-service genai-toolbox
+    ```
+
+    By default, `config.json` has `"enabled": "false"` — the service is **not** auto-deployed. After enabling, push to Git, and the `service-genai-toolbox` Application is created. The `instance-dashboard-config` and `instance-mcp-servers` Applications (auto-discovered by the `cluster-instances` AppSet) register it in the RHOAI dashboard.
 
 === "Manual"
 

@@ -8,14 +8,7 @@ MLflow provides experiment tracking, model registry, dataset management, and tra
     To change, edit `rhoaiOverlay` in `cluster-config.yaml` or create a [custom overlay](../concepts/kustomize-overlays.md).
 
 !!! info "Support level"
-
-    | RHOAI version | MLflow version | Support level |
-    |---------------|----------------|---------------|
-    | 3.2 / 3.3 | 3.6.0 | Developer Preview |
-    | 3.4 EA1 | 3.10.0 (prerelease) | Developer Preview |
-    | 3.4 EA2 | 3.10.1 | Technical Preview |
-
-    For questions, contact Matt Prahl or Humair Khan in `#wg-openshift-ai-mlflow-integration`.
+    MLflow integration is under active development. Check the [RHOAI release notes](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/) for the current support level (Developer Preview, Technology Preview, or GA) in your RHOAI version.
 
 ## Dependencies
 

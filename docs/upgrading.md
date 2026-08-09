@@ -8,9 +8,9 @@ RHOAI upgrades are driven by the **operator channel**. The RHOAI operator subscr
 
 | Channel | Delivers | Use Case |
 |---------|---------|----------|
+| `fast` | Latest GA release | **Default** — production deployments |
 | `beta` | Early Access / preview releases | Testing new features |
-| `stable` | GA releases | Production deployments |
-| `fast` | Rapid release cycle | When available |
+| `stable` | Long Term Support | Regulated environments |
 
 **To upgrade:** Change the channel in Git, push, and let ArgoCD + OLM handle the rest.
 
@@ -106,7 +106,7 @@ watch "oc get applications.argoproj.io -n openshift-gitops"
 |------|-----|-----|
 | Kueue management | `Managed` allowed | Must be `Unmanaged` |
 | Batch inference | Not available | `batchGateway` component |
-| Distributed inference | Not available | `advancedkserve` component |
+| Distributed inference | Not available | Part of `kserve` component |
 | New operators needed | None | LWS, CMA, AI Gateway, RHCL |
 | DSC API | v2 | v2 (unchanged) |
 
@@ -124,8 +124,6 @@ watch "oc get applications.argoproj.io -n openshift-gitops"
 3. **Add new components to DSC (optional):**
    ```yaml
    batchGateway:
-     managementState: Managed
-   advancedkserve:
      managementState: Managed
    ```
 

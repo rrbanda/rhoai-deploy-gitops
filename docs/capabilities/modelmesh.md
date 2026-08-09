@@ -1,14 +1,12 @@
 # ModelMesh Multi-Model Serving
 
+!!! danger "Not Available in DSC v2"
+    ModelMesh (`modelmeshserving`) is **not available** in the DSC v2 API and this repository does not deploy it. The component was dropped when RHOAI moved to v2. For multi-model serving, use KServe with dedicated pods per model. This page is retained for historical context and migration guidance only.
+
 ModelMesh enables efficient multi-model serving by packing multiple models into shared serving pods. Use ModelMesh when you need to serve many smaller models cost-effectively with shared GPU resources, rather than dedicating a full pod per model as KServe does.
 
 !!! info "Default State"
-    **Enabled in:** `full`, `serving`, `maas`, `dev` overlays.  
-    **Disabled in:** `minimal`, `training` overlays.  
-    To change, edit `rhoaiOverlay` in `cluster-config.yaml` or create a [custom overlay](../concepts/kustomize-overlays.md).
-
-!!! warning "Legacy component"
-    ModelMesh is considered a legacy serving component. For new deployments, KServe with dedicated pods per model is the recommended approach. ModelMesh may not be present in the v2 DSC API in future releases.
+    **Not available** in any overlay. The `modelmeshserving` component does not exist in the DSC v2 API used by this repository.
 
 ## Dependencies
 

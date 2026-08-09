@@ -51,8 +51,9 @@ The `scripts/configure.sh` script updates `cluster-config.yaml` and the RHOAI op
 
 1. `bootstrap/overlays/default/cluster-config.yaml` -- Updates `repoURL` and `targetRevision`
 2. `components/operators/rhoai-operator/patch-channel.yaml` -- Updates the operator channel
+3. `components/argocd/apps/rhoai-dsc-app.yaml` -- Updates the DSC overlay path (when `--dsc` is specified)
 
-That is all. Two files. Everything else is derived from these through Kustomize replacements and ArgoCD ApplicationSet templates.
+Three files total. Everything else is derived from these through Kustomize replacements and ArgoCD ApplicationSet templates.
 
 ## Manual Configuration
 

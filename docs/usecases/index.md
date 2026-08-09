@@ -22,12 +22,20 @@ usecases/
 
 ## Auto-Discovery
 
-Use cases are automatically discovered and deployed by ArgoCD ApplicationSets:
+Use cases are discovered by ArgoCD ApplicationSets, but deployment is **opt-in**:
 
-- **Models:** Any directory matching `usecases/models/*/profiles/tier1-minimal/` becomes an ArgoCD Application named `model-<dirname>`
-- **Services:** Any directory matching `usecases/services/*/profiles/tier1-minimal/` becomes an ArgoCD Application named `service-<dirname>`
+- **Models:** A directory matching `usecases/models/*/profiles/tier1-minimal/` becomes an ArgoCD Application named `model-<dirname>` **only when** its `config.json` has `"enabled": "true"`
+- **Services:** A directory matching `usecases/services/*/profiles/tier1-minimal/` becomes an ArgoCD Application named `service-<dirname>` **only when** its `config.json` has `"enabled": "true"`
 
-To add a new use case, create the directory structure, push to Git, and ArgoCD creates the Application automatically.
+Pushing a new directory alone does **not** deploy it. You must explicitly opt in:
+
+```bash
+./scripts/configure.sh enable-model <name>
+# or
+./scripts/configure.sh enable-service <name>
+```
+
+This sets `"enabled": "true"` in the model's or service's `config.json`, which is the gate the ApplicationSet's git file generator uses to create the Application.
 
 ## Available Models
 
@@ -72,7 +80,13 @@ See [GenAI Toolbox](genai-toolbox.md) for a detailed deployment guide.
            └── kustomization.yaml   # References ../../manifests/
    ```
 
-2. Push to Git. The `cluster-models` ApplicationSet auto-discovers it.
+2. Enable the model:
+   ```bash
+   ./scripts/configure.sh enable-model my-model
+   ```
+   This creates `config.json` with `"enabled": "true"` in the model's directory.
+
+3. Push to Git. The `cluster-models` ApplicationSet discovers it via the enabled `config.json`.
 
 ### Key Patterns for Model Deployments
 
@@ -106,24 +120,24 @@ See [GenAI Toolbox](genai-toolbox.md) for a detailed deployment guide.
            └── kustomization.yaml
    ```
 
-2. Push to Git. The `cluster-services` ApplicationSet auto-discovers it.
+2. Enable the service:
+   ```bash
+   ./scripts/configure.sh enable-service my-service
+   ```
 
-## Excluding a Use Case
+3. Push to Git. The `cluster-services` ApplicationSet discovers it via the enabled `config.json`.
 
-To include a use case in the repo without deploying it, add it to the ApplicationSet's `exclude` list:
+## Disabling a Use Case
 
-```yaml
-# In cluster-models-appset.yaml or cluster-services-appset.yaml
-spec:
-  generators:
-    - git:
-        directories:
-          - path: usecases/models/*/profiles/tier1-minimal
-          - path: usecases/models/my-excluded-model/profiles/tier1-minimal
-            exclude: true
+To include a use case in the repo without deploying it, set `"enabled": "false"` in its `config.json` (or run the disable command):
+
+```bash
+./scripts/configure.sh disable-model <name>
+# or
+./scripts/configure.sh disable-service <name>
 ```
 
-The manifests remain in Git (ready for future use) but ArgoCD does not create an Application for them.
+This sets `"enabled": "false"` in `config.json`. The manifests remain in Git (ready for future use) but the ApplicationSet does not create an Application for them because the git file generator only matches directories where `config.json` contains `"enabled": "true"`.
 
 !!! warning "Deploy models before services"
     Services typically depend on model endpoints being reachable. In manual deployment, deploy all required models and wait for them to become Ready before deploying services. In GitOps mode, ArgoCD deploys both in parallel; services will self-heal once their model dependencies are ready.

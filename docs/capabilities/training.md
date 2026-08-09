@@ -186,12 +186,12 @@ oc get pods -n redhat-ods-applications -l control-plane=kubeflow-training-operat
 This repo includes a complete GRPO training pipeline. To run it:
 
 ```bash
-# Via ArgoCD
-argocd app sync usecase-toolorchestra-training
-
-# Or manually (deploys both training infra and workloads)
+# Deploys both training infra and workloads
 oc apply -k usecases/services/toolorchestra-app/manifests/training/
 ```
+
+!!! note "No dedicated ArgoCD Application"
+    Training workloads are deployed manually with `oc apply`, not via a dedicated ArgoCD Application. There is no `usecase-toolorchestra-training` Application — training jobs are on-demand and not managed by the ApplicationSets.
 
 The training pipeline uses sync waves:
 - **Wave 0**: Download jobs fetch the base model and dataset

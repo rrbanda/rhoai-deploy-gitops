@@ -71,6 +71,9 @@ Each ApplicationSet uses a **Git directory generator** to scan specific paths in
 | `cluster-models` | `usecases/models/*/profiles/tier1-minimal/` | `model-<dirname>` |
 | `cluster-services` | `usecases/services/*/profiles/tier1-minimal/` | `service-<dirname>` |
 
+!!! important "Opt-in for models and services"
+    Unlike operators and instances, models and services use an **opt-in mechanism**. Each model/service directory contains a `config.json` file with an `"enabled"` flag. The ApplicationSet's Git file generator only creates an Application when `"enabled": "true"` is set. Pushing a new directory alone does **not** deploy it — you must explicitly enable it with `./scripts/configure.sh enable-model <name>` (or `enable-service <name>`), which sets `"enabled": "true"` in `config.json`.
+
 ### Step 4: Generated Applications Deploy Resources
 
 Each generated Application points to its respective directory and deploys the Kubernetes resources found there (Subscriptions, CRDs, Deployments, etc.).

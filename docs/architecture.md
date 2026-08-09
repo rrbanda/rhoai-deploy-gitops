@@ -143,16 +143,18 @@ After Phase 2, you never run `oc apply` again. Git becomes the interface.
 
 ## ApplicationSet Auto-Discovery
 
-Four ApplicationSets use Git directory generators to discover content automatically:
+Four ApplicationSets auto-discover content. The operators and instances ApplicationSets use **Git directory generators** (scanning directories). The models and services ApplicationSets use **Git file generators** (scanning `config.json` files with an `enabled: "true"` selector):
 
-| ApplicationSet | Scans Path | Creates | Naming |
-|---------------|-----------|---------|--------|
-| `cluster-operators` | `components/operators/*/` | Operator subscriptions | `operator-<dirname>` |
-| `cluster-instances` | `components/instances/*/` | Operator instance CRs | `instance-<dirname>` |
-| `cluster-models` | `usecases/models/*/profiles/tier1-minimal/` | Model serving deployments | `model-<dirname>` |
-| `cluster-services` | `usecases/services/*/profiles/tier1-minimal/` | AI applications | `service-<dirname>` |
+| ApplicationSet | Generator | Scans Path | Creates | Naming |
+|---------------|-----------|-----------|---------|--------|
+| `cluster-operators` | Directory | `components/operators/*/` | Operator subscriptions | `operator-<dirname>` |
+| `cluster-instances` | Directory | `components/instances/*/` | Operator instance CRs | `instance-<dirname>` |
+| `cluster-models` | Git file | `usecases/models/*/profiles/tier1-minimal/config.json` | Model serving deployments | `model-<name>` |
+| `cluster-services` | Git file | `usecases/services/*/profiles/tier1-minimal/config.json` | AI applications | `service-<name>` |
 
-**To add a new component:** Create a directory, push to Git. ArgoCD discovers it and creates an Application automatically. No manual configuration.
+**For operators/instances:** Create a directory, push to Git. ArgoCD discovers it and creates an Application automatically.
+
+**For models/services:** Create the directory structure with a `config.json` that contains `"enabled": "true"`. ArgoCD discovers any `config.json` matching the pattern and creates an Application only when the selector matches.
 
 ## Dependency Chain
 
@@ -180,19 +182,26 @@ graph LR
 
 ## Operators Deployed
 
-| Operator | Channel | Purpose | Required For |
-|----------|---------|---------|-------------|
-| cert-manager | `stable-v1` | TLS certificates | KServe, Kueue, training |
-| ServiceMesh 3 | `stable` | Service mesh for batch gateway | Batch inference |
-| NFD | `stable` | GPU node detection | GPU workloads |
-| GPU Operator | `stable` | NVIDIA drivers + toolkit | GPU workloads |
-| Kueue | `stable-v1` | GPU quota management | Training |
-| JobSet | (default) | Multi-pod job orchestration | Training |
-| LeaderWorkerSet | `stable` | Leader-worker topology | Distributed inference |
-| CMA/KEDA | `stable` | Custom metrics autoscaling | Auto-scaling |
-| AI Gateway | `beta` | API gateway for models | MaaS |
-| RHCL | `stable` | Connectivity link | AI Gateway |
-| **RHOAI** | `beta` | Core AI platform | Everything |
+| Operator | Directory | Channel | Purpose | Required For |
+|----------|-----------|---------|---------|-------------|
+| cert-manager | `cert-manager/` | `stable-v1` | TLS certificates | KServe, Kueue, training |
+| CMA/KEDA | `cma-operator/` | `stable` | Custom metrics autoscaling | Auto-scaling |
+| External Secrets | `external-secrets/` | `stable` | Secrets sync from Vault / cloud providers | External secrets management |
+| GPU Operator | `gpu-operator/` | `stable` | NVIDIA drivers + toolkit | GPU workloads |
+| JobSet | `jobset-operator/` | (default) | Multi-pod job orchestration | Training |
+| Kueue | `kueue-operator/` | `stable-v1` | GPU quota management | Training |
+| LeaderWorkerSet | `lws/` | `stable` | Leader-worker topology | Distributed inference |
+| NFD | `nfd/` | `stable` | GPU node detection | GPU workloads |
+| RHCL | `rhcl/` | `stable` | Connectivity link | AI Gateway |
+| RHDH | `rhdh/` | `fast` | Red Hat Developer Hub | Developer portal |
+| **RHOAI** | `rhoai-operator/` | `fast` | Core AI platform | Everything |
+| ServiceMesh 3 | `servicemesh/` | `stable` | Service mesh for batch gateway | Batch inference |
+
+!!! note "Excluded from auto-discovery"
+    **NFD** (`nfd/`) and **GPU Operator** (`gpu-operator/`) are excluded from the `cluster-operators` ApplicationSet. They use gitops-catalog external bases and are handled by their corresponding instance CRs (`nfd-instance`, `gpu-instance`).
+
+!!! note "AI Gateway is not a standalone operator"
+    AI Gateway is managed via the DSC `aigateway` component, not a standalone OLM operator. It is deployed when the RHOAI operator reconciles a DataScienceCluster with `aigateway` set to `Managed`.
 
 ## Instances Deployed
 
@@ -220,8 +229,18 @@ Each instance is auto-discovered by the `cluster-instances` ApplicationSet. They
 | `nfd-instance` | NodeFeatureDiscovery CR — detects hardware features on nodes |
 | `observability` | ServiceMonitors and Grafana dashboards for RHOAI platform monitoring |
 | `oidc-integration` | OIDC/AuthConfig for MaaS authentication via Keycloak or external IdP |
+| `rhdh-instance` | Red Hat Developer Hub (Backstage) instance CR |
 | `rhcl-instance` | Red Hat Connectivity Link instance CR |
 | `vault-dev` | Development-mode HashiCorp Vault instance (for testing external secrets) |
+
+!!! note "Excluded from auto-discovery"
+    The following instances are excluded from the `cluster-instances` ApplicationSet:
+
+    - **`rhoai-instance`** — managed by a dedicated Application (`rhoai-dsc`); see below
+    - **`gpu-instance`** — uses gitops-catalog external base
+    - **`gpu-workers`** — cluster-specific GPU MachineSets
+    - **`oidc-integration`** — requires cluster-specific Keycloak URLs
+    - **`vault-dev`** — development-only HashiCorp Vault instance
 
 !!! note "DSC is separate"
     The `rhoai-instance` (DataScienceCluster) is **not** managed by the `cluster-instances` ApplicationSet. It has its own dedicated Application (`rhoai-dsc`) due to special sync requirements. See below.

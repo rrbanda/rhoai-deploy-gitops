@@ -79,13 +79,13 @@ spec:
       managementState: Managed
 ```
 
-This is already enabled in the `full`, `dev`, and `maas` overlays.
+This is already enabled in the `full` and `dev` overlays. The `maas` overlay sets `batchGateway: Removed` because MaaS focuses on real-time serving.
 
 ## Deploy
 
 === "GitOps"
 
-    Batch inference is enabled automatically when using the `full` or `maas` DSC overlay. The required operators (ServiceMesh, LWS) are installed via the `cluster-operators` ApplicationSet.
+    Batch inference is enabled automatically when using the `full` or `dev` DSC overlay. The `maas` overlay disables batch inference (`batchGateway: Removed`). The required operators (ServiceMesh, LWS) are installed via the `cluster-operators` ApplicationSet.
 
 === "Manual"
 

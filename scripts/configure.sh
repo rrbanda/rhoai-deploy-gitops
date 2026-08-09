@@ -192,8 +192,8 @@ Setup options:
   --repo <url>       Your Git repository URL (required for initial setup)
   --branch <ref>     Git branch or tag to track (default: main)
   --overlay <name>   Bootstrap overlay to configure (default: default)
-  --channel <ch>     RHOAI OLM channel: fast|beta|stable (default: beta)
-  --dsc <overlay>    DSC overlay: minimal|serving|training|full (default: full)
+  --channel <ch>     RHOAI OLM channel: fast|beta|stable (default: fast)
+  --dsc <overlay>    DSC overlay: minimal|serving|training|full|dev|maas (default: full)
   --registry <url>   Private registry URL for disconnected environments
   --new-overlay      Create a new overlay by copying from dev
   --dry-run          Show what would be changed without modifying files
@@ -261,7 +261,7 @@ if [[ "$CHANNEL" != "fast" && "$CHANNEL" != "beta" && "$CHANNEL" != "stable" ]];
   exit 1
 fi
 
-valid_overlays=("minimal" "serving" "training" "full" "dev")
+valid_overlays=("minimal" "serving" "training" "full" "dev" "maas")
 if [[ ! " ${valid_overlays[*]} " =~ " ${DSC_OVERLAY} " ]]; then
   echo "Error: --dsc must be one of: ${valid_overlays[*]}"
   exit 1

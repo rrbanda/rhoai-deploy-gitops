@@ -29,7 +29,10 @@ usecases/
     profiles/tier1-minimal/ Kustomize overlay (auto-discovered by cluster-services AppSet)
 ```
 
-ArgoCD auto-discovers any directory matching these patterns. Adding a new directory and pushing to Git is all that's needed to deploy.
+ArgoCD auto-discovers any directory matching these patterns. Adding a new directory and pushing to Git is all that's needed to deploy **operators and instances**.
+
+!!! important "Opt-in for models and services"
+    Models and services require an additional opt-in step. Each model/service directory has a `config.json` with an `"enabled"` flag. Pushing the directory alone does **not** deploy it — you must run `./scripts/configure.sh enable-model <name>` or `enable-service <name>` to set `"enabled": "true"` in `config.json` before the ApplicationSet creates an Application.
 
 ## Adding a New Model
 
@@ -37,6 +40,9 @@ ArgoCD auto-discovers any directory matching these patterns. Adding a new direct
    - `kustomization.yaml`, `namespace.yaml`, `serving-runtime.yaml`, `inference-service.yaml`
 2. Create `usecases/models/<name>/profiles/tier1-minimal/kustomization.yaml` referencing the manifests
 3. Push to Git -- the `cluster-models` ApplicationSet creates a `model-<name>` Application
+
+!!! note
+    Models use an opt-in mechanism. After creating the directory, run `./scripts/configure.sh enable-model <name>` to set `"enabled": "true"` in `config.json`. The ApplicationSet only creates the Application when this flag is set.
 
 See existing models (`orchestrator-8b`, `qwen-math-7b`, `gpt-oss-120b`) for working examples.
 
@@ -46,6 +52,9 @@ See existing models (`orchestrator-8b`, `qwen-math-7b`, `gpt-oss-120b`) for work
 2. Add service-specific manifests under `manifests/`
 3. Create `usecases/services/<name>/profiles/tier1-minimal/kustomization.yaml`
 4. Push to Git -- the `cluster-services` ApplicationSet creates a `service-<name>` Application
+
+!!! note
+    Services use an opt-in mechanism. After creating the directory, run `./scripts/configure.sh enable-service <name>` to set `"enabled": "true"` in `config.json`. The ApplicationSet only creates the Application when this flag is set.
 
 See the [Use Cases documentation](usecases/) in the `docs/` directory for details.
 

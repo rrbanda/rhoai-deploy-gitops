@@ -76,7 +76,7 @@ Whether you are evaluating the platform, deploying for production, or building o
 <a href="architecture/" class="journey-card">
 <span class="card-icon">:material-layers-triple:</span>
 <h3>I'm Evaluating Architecture</h3>
-<p>See how 12 operators, 4 ApplicationSets, and composable overlays create a self-managing AI platform.</p>
+<p>See how 12 operators (10 via ApplicationSet, 2 via instance CRs), 4 ApplicationSets, and composable overlays create a self-managing AI platform.</p>
 <span class="card-tag tag-advanced">Advanced · 20 min</span>
 </a>
 
@@ -153,7 +153,7 @@ graph LR
 | Layer | What You Get |
 |-------|-------------|
 | **Operators** | cert-manager, ServiceMesh, NFD, GPU Operator, Kueue, JobSet, LWS, CMA, External Secrets, RHDH, RHCL, RHOAI |
-| **Platform** | Dashboard, KServe, ModelMesh, Ray, Training, Pipelines, Workbenches, Registry, MLflow, TrustyAI |
+| **Platform** | Dashboard, KServe, Ray, Training, Pipelines, Workbenches, Registry, MLflow, TrustyAI |
 | **Advanced** | Batch Gateway (llm-d), Distributed Inference, Hardware Profiles, MaaS |
 | **Infrastructure** | GPU node detection, driver installation, quota management, auto-scaling |
 
@@ -166,7 +166,7 @@ graph LR
 <div class="journey-card">
 <span class="card-icon">:material-numeric-1-circle:</span>
 <h3>Declare</h3>
-<p>Define your desired state in YAML. Choose your profile: serving-only, training-only, or full platform. Commit to Git.</p>
+<p>Define your desired state in YAML. Choose your profile: minimal, serving, training, full, maas, or dev. Commit to Git.</p>
 </div>
 
 <div class="journey-card">

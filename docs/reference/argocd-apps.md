@@ -1,6 +1,6 @@
 # ArgoCD Applications
 
-After bootstrap, ArgoCD manages **25 Applications** across four layers.
+After bootstrap, ArgoCD manages Applications across four layers. The exact count varies based on which models and services are enabled.
 
 ## Application Hierarchy
 
@@ -22,7 +22,6 @@ graph TD
 
   subgraph layer3ops ["Layer 3a: Operator Applications (auto-discovered)"]
     O1["operator-cert-manager"]
-    O2["operator-nfd"]
     O3["operator-gpu-operator"]
     O4["operator-kueue-operator"]
     O5["operator-rhoai-operator"]
@@ -60,7 +59,6 @@ graph TD
   Boot --> DSC
 
   OAS --> O1
-  OAS --> O2
   OAS --> O3
   OAS --> O4
   OAS --> O5
@@ -87,11 +85,13 @@ graph TD
 
 ## Application Table
 
+!!! note "Model and service Applications are conditional"
+    Applications in the `model-*` and `service-*` rows below are **not** always present. They are only created when their respective `config.json` file contains `"enabled": "true"`. Use `./scripts/configure.sh enable-model <name>` or `enable-service <name>` to opt in.
+
 | Application | Source | Sync Policy | Purpose |
 |-------------|--------|-------------|---------|
 | `gitops-controller` | `bootstrap/overlays/default/` | Auto (selfHeal) | Self-manages the dev overlay: AppSets, explicit Apps |
 | `operator-cert-manager` | `components/operators/cert-manager/` | Auto (selfHeal) | cert-manager operator subscription |
-| `operator-nfd` | `components/operators/nfd/` | Auto (selfHeal) | Node Feature Discovery operator |
 | `operator-gpu-operator` | `components/operators/gpu-operator/` | Auto (selfHeal) | NVIDIA GPU Operator |
 | `operator-kueue-operator` | `components/operators/kueue-operator/` | Auto (selfHeal) | Red Hat Build of Kueue |
 | `operator-jobset-operator` | `components/operators/jobset-operator/` | Auto (selfHeal) | JobSet Operator |
@@ -113,7 +113,9 @@ graph TD
 | `service-llamastack` | `usecases/services/llamastack/profiles/tier1-minimal/` | Auto (selfHeal, prune) | LlamaStack Distribution + PostgreSQL (legacy, uses OGX operator) |
 | `service-genai-toolbox` | `usecases/services/genai-toolbox/profiles/tier1-minimal/` | Auto (selfHeal, prune) | GenAI Toolbox MCP Server |
 | `service-rhokp` | `usecases/services/rhokp/profiles/tier1-minimal/` | Auto (selfHeal, prune) | Red Hat OKP MCP Server (Solr + MCP) |
-| `usecase-toolorchestra-training` | `usecases/services/toolorchestra-app/manifests/training/workloads/` | **Manual only** | Download jobs + RayJob (on-demand) |
+
+!!! note "Model and service Applications are conditional"
+    Applications prefixed with `model-*` and `service-*` only appear when their corresponding `config.json` has `"enabled": "true"`. By default no models or services are deployed. See [Configuration > Deploying Models and Services](../configuration.md#deploying-models-and-services-opt-in-pattern) for the opt-in mechanism.
 
 ## Sync Wave Ordering
 
@@ -133,7 +135,8 @@ The `gitops-controller` Application watches `bootstrap/overlays/default/` and au
 
 - Adding a new `Application` YAML to `bootstrap/overlays/default/` and pushing to Git automatically creates the new ArgoCD Application
 - Adding a new operator directory to `components/operators/` automatically creates a new operator Application via the `cluster-operators` ApplicationSet
-- Same for `components/instances/*`, `usecases/models/*/profiles/tier1-minimal`, and `usecases/services/*/profiles/tier1-minimal`
+- Same for `components/instances/*`
+- For `usecases/models/*/profiles/tier1-minimal` and `usecases/services/*/profiles/tier1-minimal`, the directory must also contain a `config.json` with `"enabled": "true"` (see the opt-in mechanism below)
 
 The only manual `oc apply` ever needed is the initial bootstrap.
 

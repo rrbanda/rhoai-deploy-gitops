@@ -67,9 +67,9 @@ graph TD
 | Requirement | Type | Purpose |
 |-------------|------|---------|
 | RHOAI Operator | Operator | Core platform with Dashboard |
-| AI Gateway Operator | Operator | API gateway for model access |
-| RHCL (Red Hat Connectivity Link) | Operator | Connectivity management |
-| KServe (DSC) | DSC component | Model serving backend |
+| AI Gateway | DSC component (`aigateway`) | API gateway for model access (DSC-managed, not a standalone operator) |
+| RHCL (Red Hat Connectivity Link) | Operator (`components/operators/rhcl/`) | Connectivity management (standalone operator) |
+| KServe | DSC component | Model serving backend |
 | cert-manager | Operator | TLS for gateway endpoints |
 
 ## Enable It
@@ -81,13 +81,14 @@ spec:
   components:
     kserve:
       managementState: Managed
-    batchGateway:
-      managementState: Managed
     dashboard:
       managementState: Managed
+    aigateway:
+      batchGateway:
+        managementState: Removed
 ```
 
-Plus the external AI Gateway and RHCL operators. The `maas` DSC overlay enables the correct combination.
+The `maas` overlay explicitly disables `batchGateway` — MaaS focuses on real-time serving via the AI Gateway, not batch inference. Plus the external RHCL operator. The `maas` DSC overlay enables the correct combination.
 
 ## Deploy
 
@@ -101,7 +102,7 @@ Plus the external AI Gateway and RHCL operators. The `maas` DSC overlay enables 
       rhoaiOverlay: "maas"
     ```
 
-    The AI Gateway and RHCL operators are installed via the `cluster-operators` ApplicationSet.
+    The RHCL operator is installed via the `cluster-operators` ApplicationSet. The AI Gateway is DSC-managed (enabled by setting `aigateway: Managed` in the DSC).
 
 === "Manual"
 

@@ -55,11 +55,9 @@ spec:
       managementState: Managed       # Enables KubeRay operator
     trainingoperator:
       managementState: Managed       # Enables Kubeflow Training Operator
-    modelmeshserving:
-      managementState: Managed       # Enables ModelMesh
     workbenches:
       managementState: Managed       # Enables JupyterHub notebooks
-    datasciencepipelines:
+    aipipelines:
       managementState: Managed       # Enables Tekton-based pipelines
     modelregistry:
       managementState: Managed       # Enables Model Registry
@@ -89,10 +87,9 @@ When you set a component to `Managed`, the RHOAI operator installs its dependenc
 | `ray` | KubeRay operator, Ray CRDs |
 | `trainingoperator` | Kubeflow Training Operator, TrainJob CRD |
 | `dashboard` | RHOAI Dashboard, OAuth proxy, RBAC |
-| `datasciencepipelines` | Tekton pipelines, DSP controller, MariaDB for metadata |
+| `aipipelines` | Tekton pipelines, DSP controller, MariaDB for metadata |
 | `workbenches` | Notebook controller, default notebook images |
 | `batchGateway` | AI Gateway Operator, llm-d batch gateway controller |
-| `advancedkserve` | Distributed inference controller, llm-d framework |
 
 ## The Operator Hierarchy
 
@@ -115,7 +112,6 @@ graph TD
   subgraph rhoai_operator ["RHOAI Operator (installs sub-operators)"]
     Dashboard["Dashboard"]
     KServe["KServe + Knative"]
-    ModelMesh["ModelMesh"]
     Ray["KubeRay"]
     TrainOp["Training Operator"]
     Pipelines["DS Pipelines"]
@@ -187,8 +183,8 @@ sequenceDiagram
 RHOAI uses the **v2 API** (`datasciencecluster.opendatahub.io/v2`). Key differences from v1:
 
 - Component name `datasciencepipelines` became `aipipelines`
-- Component `modelmeshserving` may be removed in future versions
-- New components: `batchGateway`, `advancedkserve`, `feastoperator`, `mlflowoperator`
+- Component `modelmeshserving` was removed
+- New components: `batchGateway`, `feastoperator`, `mlflowoperator`
 - New fields: `defaultClusterQueueName`, `defaultLocalQueueName`, `registriesNamespace`
 
 ## Why ArgoCD Needs Special Handling for the DSC

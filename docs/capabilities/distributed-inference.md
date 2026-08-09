@@ -68,7 +68,7 @@ For very large models, combine both: tensor parallelism within a node (fast NVLi
 | cert-manager | Operator | TLS certificates |
 | LeaderWorkerSet (LWS) | Operator | Manages leader-worker pod groups |
 | RHCL | Operator | Connectivity for distributed pods |
-| DSC `advancedkserve: Managed` | DSC component | Enables distributed inference |
+| DSC `kserve: Managed` | DSC component | Enables distributed inference (via kserve sub-fields) |
 | GPU Infrastructure | Operators + Instances | Multi-GPU nodes |
 
 !!! warning "OpenShift 4.20+ required"
@@ -76,14 +76,16 @@ For very large models, combine both: tensor parallelism within a node (fast NVLi
 
 ## Enable It
 
+Distributed inference is managed via the `kserve` component. Ensure `kserve` is set to `Managed`:
+
 ```yaml
 spec:
   components:
-    advancedkserve:
+    kserve:
       managementState: Managed
 ```
 
-This is enabled in the `full` and `dev` overlays.
+This is enabled in the `full`, `serving`, `maas`, and `dev` overlays.
 
 ## Deploy
 
@@ -100,7 +102,7 @@ This is enabled in the `full` and `dev` overlays.
     oc apply -k components/operators/rhcl/
     oc apply -k components/operators/rhoai-operator/
 
-    # Deploy DSC with advancedkserve enabled
+    # Deploy DSC with kserve enabled (includes distributed inference)
     oc apply -k components/instances/rhoai-instance/overlays/full/
     ```
 

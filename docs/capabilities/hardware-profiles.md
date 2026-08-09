@@ -75,7 +75,7 @@ graph TD
 Hardware Profiles are defined as custom resources in the `redhat-ods-applications` namespace:
 
 ```yaml
-apiVersion: dashboard.opendatahub.io/v1alpha1
+apiVersion: infrastructure.opendatahub.io/v1
 kind: HardwareProfile
 metadata:
   name: gpu-large-l40s

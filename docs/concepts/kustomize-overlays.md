@@ -20,20 +20,21 @@ A **base** is a directory containing foundational manifests and a `kustomization
 ```
 components/instances/rhoai-instance/base/
 ├── kustomization.yaml          # Lists resources
-├── datasciencecluster.yaml     # The DSC with Dashboard only
+├── datasciencecluster.yaml     # Full-platform DSC (all components enabled)
 └── namespace.yaml              # The namespace
 ```
 
-The base represents the minimal, correct version of a component. In this repo, the DSC base enables only the Dashboard -- the absolute minimum viable RHOAI installation.
+In this repo, the DSC base enables **all RHOAI components** -- KServe, Ray, training operators, pipelines, MLflow, model registry, TrustyAI, workbenches, and more. This "full by default" approach means overlays only need to **remove** what isn't needed.
 
 ### Overlays
 
-An **overlay** extends a base by applying patches. It references the base and adds modifications:
+An **overlay** extends a base by applying patches. It references the base and applies a strategic merge patch to disable specific components:
 
 ```
 components/instances/rhoai-instance/overlays/serving/
-├── kustomization.yaml          # References ../../base + adds patches
-└── patch-serving.yaml          # JSON patch to enable KServe + ModelMesh
+├── kustomization.yaml          # References ../../base + applies patches
+├── datasciencecluster.yaml     # Strategic merge patch to remove training components
+└── gateway-memory-rbac.yaml    # PostSync hook for AI Gateway
 ```
 
 The overlay's `kustomization.yaml`:
@@ -43,30 +44,40 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../../base
+  - gateway-memory-rbac.yaml
 patches:
-  - path: patch-serving.yaml
-    target:
-      kind: DataScienceCluster
+  - path: datasciencecluster.yaml
 ```
 
-And the patch:
+And the strategic merge patch (`datasciencecluster.yaml`):
 
 ```yaml
-- op: replace
-  path: /spec/components/kserve/managementState
-  value: Managed
-- op: replace
-  path: /spec/components/modelmeshserving/managementState
-  value: Managed
+apiVersion: datasciencecluster.opendatahub.io/v2
+kind: DataScienceCluster
+metadata:
+  name: default-dsc
+spec:
+  components:
+    aigateway:
+      batchGateway:
+        managementState: Removed
+    ray:
+      managementState: Removed
+    sparkoperator:
+      managementState: Removed
+    trainer:
+      managementState: Removed
+    trainingoperator:
+      managementState: Removed
 ```
 
 ### The Result
 
 When ArgoCD (or `kustomize build`) processes the `serving` overlay:
 
-1. It reads the base DSC (Dashboard only)
-2. It applies the patch (enables KServe and ModelMesh)
-3. The output is a complete DSC with Dashboard + KServe + ModelMesh
+1. It reads the base DSC (all components enabled)
+2. It applies the strategic merge patch (removes training-related components)
+3. The output is a DSC with everything **except** training infrastructure
 
 No templating. No variables. Just composition.
 
@@ -74,27 +85,31 @@ No templating. No variables. Just composition.
 
 ```mermaid
 graph TD
-  Base["base/ (Dashboard only)"] --> Minimal["overlays/minimal/"]
-  Base --> Serving["overlays/serving/"]
-  Base --> Training["overlays/training/"]
-  Base --> Full["overlays/full/"]
-  Base --> Dev["overlays/dev/"]
+  Base["base/ (full platform)"] --> Minimal["minimal/ (dashboard only)"]
+  Base --> Serving["serving/ (no training)"]
+  Base --> Training["training/ (no serving)"]
+  Base --> MaaS["maas/ (no training)"]
+  Base --> Full["full/ (all components)"]
+  Base --> Dev["dev/ (same as full)"]
   
-  Serving -->|"enables"| KServe["KServe + ModelMesh"]
-  Training -->|"enables"| Ray["Ray + Training Operator"]
-  Full -->|"enables"| All["All 12+ components"]
-  Dev -->|"same as"| Full
+  Minimal -->|"removes"| MostComponents["All except Dashboard"]
+  Serving -->|"removes"| TrainingStack["Ray, Spark, Trainer, BatchGateway"]
+  Training -->|"removes"| ServingStack["KServe, AI Gateway, MLflow, Registry, OGX"]
+  MaaS -->|"removes"| TrainingStack2["Ray, Spark, Trainer, BatchGateway"]
+  Full -->|"no patches"| FullPlatform["Uses base as-is"]
+  Dev -->|"no patches"| FullPlatform
 ```
 
-Each overlay adds exactly the components needed for its use case. This means:
+Each overlay **subtracts** the components that aren't needed for its use case:
 
-- **Serving teams** deploy only what they need (no training infrastructure consuming resources)
-- **Training teams** get Kueue and Ray without model serving overhead
+- **Serving teams** get inference without training infrastructure consuming resources
+- **Training teams** get Ray and Kueue without model serving overhead
+- **MaaS teams** get the same as serving, optimized for Models-as-a-Service
 - **Platform teams** deploy everything with the `full` overlay
 
 ## Composing a Custom Profile
 
-You are not limited to the pre-built overlays. Compose your own by combining patches:
+You are not limited to the pre-built overlays. Create your own by writing a strategic merge patch:
 
 ```yaml
 # components/instances/rhoai-instance/overlays/my-custom/kustomization.yaml
@@ -103,15 +118,28 @@ kind: Kustomization
 resources:
   - ../../base
 patches:
-  - path: ../serving/patch-serving.yaml    # Reuse the serving patch
-    target:
-      kind: DataScienceCluster
-  - path: patch-pipelines.yaml             # Add your own
-    target:
-      kind: DataScienceCluster
+  - path: datasciencecluster.yaml
 ```
 
-This gives you serving + pipelines without training, workbenches, or model registry.
+```yaml
+# components/instances/rhoai-instance/overlays/my-custom/datasciencecluster.yaml
+apiVersion: datasciencecluster.opendatahub.io/v2
+kind: DataScienceCluster
+metadata:
+  name: default-dsc
+spec:
+  components:
+    ray:
+      managementState: Removed
+    sparkoperator:
+      managementState: Removed
+    mlflowoperator:
+      managementState: Removed
+    workbenches:
+      managementState: Removed
+```
+
+This gives you serving + pipelines + training operators without Ray, MLflow, Spark, or workbenches.
 
 ## Kustomize Replacements (Parameterization)
 
@@ -147,9 +175,9 @@ This transparency is a major advantage over Helm charts, where the rendered outp
 
 | Concept | Purpose | Example in This Repo |
 |---------|---------|---------------------|
-| Base | Minimal correct starting point | DSC with Dashboard only |
-| Overlay | Extends base for a specific use case | `serving/` enables KServe |
-| Patch | A targeted modification to a resource | JSON patch setting `managementState: Managed` |
+| Base | Full-platform starting point with all components | DSC with all 16+ components enabled |
+| Overlay | Subtracts components for a specific use case | `serving/` removes training infrastructure |
+| Patch | A strategic merge patch setting components to `Removed` | `datasciencecluster.yaml` in each overlay |
 | Replacement | Injects dynamic values without templates | Repo URL propagated to all ArgoCD apps |
 
 ## What Happens Next

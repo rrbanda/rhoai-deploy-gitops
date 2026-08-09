@@ -55,7 +55,7 @@ graph TD
 | Requirement | Type | Path |
 |-------------|------|------|
 | RHOAI Operator | Operator | `components/operators/rhoai-operator/` |
-| DSC `datasciencepipelines: Managed` | DSC component | `components/instances/rhoai-instance/` |
+| DSC `aipipelines: Managed` | DSC component | `components/instances/rhoai-instance/` |
 | S3-compatible object storage | External service | Provisioned outside the cluster |
 
 !!! warning "S3-compatible storage required"
@@ -71,7 +71,7 @@ CPU nodes and is one of the lightest RHOAI capabilities to enable.
     ```yaml
     spec:
       components:
-        datasciencepipelines:
+        aipipelines:
           managementState: Managed
     ```
 
@@ -94,7 +94,7 @@ CPU nodes and is one of the lightest RHOAI capabilities to enable.
     ```yaml
     # patch-pipelines.yaml
     - op: replace
-      path: /spec/components/datasciencepipelines/managementState
+      path: /spec/components/aipipelines/managementState
       value: Managed
     ```
 
@@ -166,7 +166,7 @@ pipelines in that namespace.
 
 ## Disable It
 
-Set `datasciencepipelines.managementState` to `Removed` in the DSC.
+Set `aipipelines.managementState` to `Removed` in the DSC.
 
 Clean up pipeline servers first:
 

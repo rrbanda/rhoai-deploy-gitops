@@ -6,7 +6,7 @@ If you discover a security vulnerability in this repository, please report it re
 
 **Do NOT open a public GitHub issue for security vulnerabilities.**
 
-Instead, please email the maintainers directly or use GitHub's private vulnerability reporting feature.
+Instead, please report via [GitHub Issues](https://github.com/rrbanda/rhoai-deploy-gitops/issues) or use GitHub's private vulnerability reporting feature.
 
 ## Security Practices in This Repository
 

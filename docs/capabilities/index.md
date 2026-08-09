@@ -9,7 +9,7 @@ Red Hat OpenShift AI (RHOAI) is modular. You choose which capabilities to enable
 | KServe Model Serving | `kserve` | cert-manager, RHOAI | Yes | [Model Serving](model-serving.md) |
 | Batch Inference | `batchGateway` | cert-manager, ServiceMesh, LWS, RHOAI | Yes | [Batch Inference](batch-inference.md) |
 | Distributed Inference | (part of `kserve`) | cert-manager, LWS, RHCL, RHOAI | Yes | [Distributed Inference](distributed-inference.md) |
-| ModelMesh Serving | `modelmeshserving` | RHOAI | Yes | [ModelMesh](modelmesh.md) |
+| ModelMesh Serving | _(not available in DSC v2)_ | RHOAI | No | [ModelMesh](modelmesh.md) |
 | Distributed Training | `ray`, `trainingoperator` | cert-manager, Kueue, JobSet, RHOAI | Yes | [Training](training.md) |
 | Data Science Pipelines | `aipipelines` | RHOAI | Yes | [Pipelines](pipelines.md) |
 | Workbenches | `workbenches` | RHOAI | Yes | [Workbenches](workbenches.md) |
@@ -39,7 +39,6 @@ graph TD
   GPUNodes --> BatchGW
   RHOAI["RHOAI Operator"] --> DSC["DSC Components"]
   DSC --> KServe
-  DSC --> ModelMesh["ModelMesh"]
   DSC --> Pipelines["Pipelines"]
   DSC --> Workbenches["Workbenches"]
   DSC --> Registry["Model Registry"]
@@ -73,7 +72,7 @@ Instead of editing the DSC YAML directly, use a pre-built overlay that enables t
 |---------|-------------|----------|
 | `overlays/minimal/` | Dashboard only — all other components Removed | Exploration, getting started |
 | `overlays/serving/` | Full base minus training components (ray, sparkoperator, trainer, trainingoperator, batchGateway removed) | Teams focused on model inference |
-| `overlays/training/` | Full base minus serving components (aigateway, batchGateway, kserve, mlflowoperator, modelregistry, ogx removed) | Teams focused on model training |
+| `overlays/training/` | Full base minus serving components (aigateway, kserve, mlflowoperator, modelregistry, ogx removed) | Teams focused on model training |
 | `overlays/maas/` | Same as serving overlay — serving-focused for Models-as-a-Service | Platform teams offering MaaS |
 | `overlays/full/` | All components enabled | Complete AI platform (default) |
 | `overlays/dev/` | Same as full — no patches applied | Development and testing |
