@@ -17,6 +17,10 @@ spec:
             exclude: true
           - path: components/instances/gpu-instance
             exclude: true
+          # GPU workers MachineSet is cluster-specific (AMI, infra ID, etc.)
+          # Each cluster must configure its own or use cluster-autoscaler
+          - path: components/instances/gpu-workers
+            exclude: true
           # OIDC integration references a stale Keycloak from another cluster
           - path: components/instances/oidc-integration
             exclude: true
