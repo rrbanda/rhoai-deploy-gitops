@@ -7,6 +7,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "3"
 spec:
+  priority: 100
   owner:
     users:
       - admin

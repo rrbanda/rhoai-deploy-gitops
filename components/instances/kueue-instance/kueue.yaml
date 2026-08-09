@@ -15,3 +15,5 @@ spec:
         - JobSet
         - PyTorchJob
         - TrainJob
+        - LeaderWorkerSet
+        - Pod

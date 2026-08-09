@@ -6,6 +6,8 @@ metadata:
     argocd.argoproj.io/sync-wave: "4"
 spec:
   components:
+    aigateway:
+      managementState: Managed
     aipipelines:
       argoWorkflowsControllers:
         managementState: Removed
@@ -17,23 +19,27 @@ spec:
     kserve:
       managementState: Managed
       modelsAsService:
-        managementState: Removed
+        managementState: Managed
       nim:
         airGapped: false
         managementState: Managed
       rawDeploymentServiceConfig: Headless
+      wva:
+        managementState: Managed
     kueue:
       defaultClusterQueueName: default
       defaultLocalQueueName: default
       managementState: Unmanaged
-    llamastackoperator:
-      managementState: Removed
     mlflowoperator:
       managementState: Removed
     modelregistry:
-      managementState: Removed
+      managementState: Managed
       registriesNamespace: rhoai-model-registries
+    ogx:
+      managementState: Managed
     ray:
+      managementState: Removed
+    sparkoperator:
       managementState: Removed
     trainer:
       managementState: Removed
@@ -44,7 +50,8 @@ spec:
         lmeval:
           permitCodeExecution: deny
           permitOnline: deny
-      managementState: Removed
+      managementState: Managed
+      mcpGuardrailsMode: true
     workbenches:
       managementState: Removed
       workbenchNamespace: rhods-notebooks

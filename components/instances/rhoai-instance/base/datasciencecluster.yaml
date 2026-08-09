@@ -6,6 +6,8 @@ metadata:
     argocd.argoproj.io/sync-wave: "4"
 spec:
   components:
+    aigateway:
+      managementState: Removed
     aipipelines:
       argoWorkflowsControllers:
         managementState: Removed
@@ -22,18 +24,22 @@ spec:
         airGapped: false
         managementState: Removed
       rawDeploymentServiceConfig: Headless
+      wva:
+        managementState: Removed
     kueue:
       defaultClusterQueueName: default
       defaultLocalQueueName: default
       managementState: Unmanaged
-    llamastackoperator:
-      managementState: Removed
     mlflowoperator:
       managementState: Removed
     modelregistry:
       managementState: Removed
       registriesNamespace: rhoai-model-registries
+    ogx:
+      managementState: Removed
     ray:
+      managementState: Removed
+    sparkoperator:
       managementState: Removed
     trainer:
       managementState: Removed

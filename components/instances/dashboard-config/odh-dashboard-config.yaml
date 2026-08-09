@@ -8,4 +8,6 @@ metadata:
     argocd.argoproj.io/sync-options: ServerSideApply=true
 spec:
   dashboardConfig:
+    disableKueue: false
     genAiStudio: true
+    toolCalling: true

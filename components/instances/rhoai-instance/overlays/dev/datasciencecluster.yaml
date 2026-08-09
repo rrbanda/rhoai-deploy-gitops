@@ -6,6 +6,10 @@ metadata:
     argocd.argoproj.io/sync-wave: "4"
 spec:
   components:
+    aigateway:
+      managementState: Managed
+      batchGateway:
+        managementState: Managed
     aipipelines:
       argoWorkflowsControllers:
         managementState: Managed
@@ -28,13 +32,13 @@ spec:
       defaultClusterQueueName: default
       defaultLocalQueueName: default
       managementState: Unmanaged
-    llamastackoperator:
-      managementState: Managed
     mlflowoperator:
       managementState: Managed
     modelregistry:
       managementState: Managed
       registriesNamespace: rhoai-model-registries
+    ogx:
+      managementState: Managed
     ray:
       managementState: Managed
     sparkoperator:
