@@ -21,23 +21,6 @@ managed entirely through Git.
 
 </div>
 
-<div class="stats-bar" markdown>
-<div class="stat-item">
-<span class="stat-number">12</span>
-<span class="stat-label">Operators</span>
-</div>
-<div class="stat-item">
-<span class="stat-number">6</span>
-<span class="stat-label">DSC Profiles</span>
-</div>
-<div class="stat-item">
-<span class="stat-number">0</span>
-<span class="stat-label">Manual Steps</span>
-</div>
-</div>
-
----
-
 <div class="grid cards" markdown>
 
 -   :material-school:{ .lg .middle } **I'm New to GitOps**
