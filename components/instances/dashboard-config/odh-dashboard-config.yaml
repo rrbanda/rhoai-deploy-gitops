@@ -9,5 +9,16 @@ metadata:
 spec:
   dashboardConfig:
     disableKueue: false
+    disableHardwareProfiles: false
+    disableDistributedWorkloads: false
+    disableFineTuning: false
+    disableLLMd: false
+    disableLMEval: false
     genAiStudio: true
-    toolCalling: true
+    mcpCatalog: true
+    modelAsService: true
+    observabilityDashboard: true
+    vLLMDeploymentOnMaaS: true
+    trainingJobs: true
+    mlflow: true
+    maasAuthPolicies: true
