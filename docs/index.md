@@ -1,96 +1,116 @@
-# Deploying OpenShift AI
+# RHOAI GitOps Deploy
 
-Deploy **Red Hat OpenShift AI (RHOAI) 3.4 (Early Access)** on OpenShift -- from a full GitOps-managed platform to individual capabilities applied manually.
+Deploy **Red Hat OpenShift AI (RHOAI) 3.5** on OpenShift using a fully declarative, GitOps-driven approach. This repository provides production-ready Kustomize manifests that are composable, portable, and educational -- designed so you understand *what* you are deploying and *why*.
 
 ## What This Project Does
 
-This repository provides production-ready Kustomize manifests for deploying Red Hat OpenShift AI and AI use cases on OpenShift. The manifests are composable -- start with a minimal dashboard, add model serving, training, or the full stack -- and work with two deployment methods:
+This repository gives you everything needed to deploy RHOAI on any OpenShift 4.19+ cluster:
 
-- **GitOps (ArgoCD):** Two commands bootstrap a self-managing app-of-apps. Push to Git, everything syncs automatically.
-- **Manual (Kustomize):** Apply manifests directly with `oc apply -k`. No ArgoCD needed. Full control over what gets deployed and when.
+- **Operators** -- All required operators installed via OLM Subscriptions
+- **GPU Infrastructure** -- NFD, GPU Operator, auto-scaling, and Kueue quota management
+- **DataScienceCluster** -- Composable profiles (serving-only, training-only, or full platform)
+- **AI Workloads** -- Model serving, distributed inference, and training jobs
+- **GitOps Management** -- ArgoCD app-of-apps pattern with self-healing and auto-discovery
 
-**Target audience:** Platform engineers deploying RHOAI, ML engineers who need a reproducible AI platform, and teams evaluating OpenShift AI capabilities.
+Two deployment methods use the same manifests:
 
-**What gets deployed:**
+- **GitOps (ArgoCD):** Two commands bootstrap a self-managing platform. Push to Git, everything syncs.
+- **Manual (Kustomize):** Apply manifests directly with `oc apply -k`. Full control, no ArgoCD needed.
 
-- 7 operators (cert-manager, ServiceMesh, NFD, GPU Operator, Kueue, JobSet, RHOAI)
-- GPU infrastructure (cloud-specific examples provided for AWS)
-- A composable DataScienceCluster (DSC) with 10+ AI capabilities
-- 3 models (orchestrator-8b, qwen-math-7b, gpt-oss-120b) independently deployable via GitOps
-- 4 services (ToolOrchestra, LlamaStack, GenAI Toolbox, Red Hat OKP) auto-discovered by ArgoCD
+## Who This Is For
 
-## What's Inside
+- **Platform engineers** deploying RHOAI for their organization
+- **ML engineers** who need a reproducible, version-controlled AI platform
+- **Architects** evaluating how RHOAI components fit together
+- **Anyone learning** GitOps patterns for AI/ML infrastructure
+
+## What Gets Deployed
+
+The full stack includes:
+
+| Layer | Components |
+|-------|-----------|
+| **Operators** | cert-manager, ServiceMesh, NFD, GPU Operator, Kueue, JobSet, LeaderWorkerSet, CMA/KEDA, AI Gateway, RHCL, RHOAI |
+| **GPU Infrastructure** | Node labeling, driver installation, device plugin, cluster autoscaling |
+| **AI Platform** | Dashboard, KServe, ModelMesh, Ray, Training Operator, Pipelines, Workbenches, Model Registry, MLflow, TrustyAI |
+| **Advanced Inference** | Batch Gateway (llm-d), AI Gateway, distributed inference, hardware profiles |
+| **Workloads** | Model deployments, training jobs, AI applications |
+
+## Start Here
 
 <div class="grid cards" markdown>
 
--   **Architecture**
+-   **New to GitOps?**
 
     ---
 
-    Layered Kustomize structure (operators, instances, overlays), ArgoCD app-of-apps pattern, and dependency chain.
+    Start with the Concepts section. Learn why GitOps matters for AI platforms, how ArgoCD works, and how this repository is structured.
 
-    [:octicons-arrow-right-24: Architecture](architecture.md)
+    [:octicons-arrow-right-24: Concepts](concepts/index.md)
 
--   **Quick Start**
+-   **Ready to Deploy?**
 
     ---
 
-    Deploy the full stack or just what you need. GitOps and manual paths side by side.
+    Follow the guided Quick Start. Every step includes an explanation of what is happening and why.
 
     [:octicons-arrow-right-24: Quick Start](quickstart.md)
 
--   **Capabilities**
+-   **Pick Your Profile**
 
     ---
 
-    Pick what you need: model serving, training, pipelines, workbenches, and more. Each has its own guide with composable overlays.
+    Deploy only what you need. Choose from serving-only, training-only, or the full platform with all capabilities.
 
     [:octicons-arrow-right-24: Capabilities](capabilities/index.md)
 
--   **Use Cases**
+-   **Understand the Architecture**
 
     ---
 
-    Pre-built AI applications: NVIDIA ToolOrchestra, Meta LlamaStack, and GenAI Toolbox.
+    See how the repo is structured, how applications are auto-discovered, and how dependencies flow.
 
-    [:octicons-arrow-right-24: Use Cases](usecases/index.md)
+    [:octicons-arrow-right-24: Architecture](architecture.md)
 
 </div>
 
+## DSC Profiles
+
+The DataScienceCluster (DSC) controls which RHOAI capabilities are active. Choose a pre-built profile or compose your own:
+
+| Profile | What It Enables | Use Case |
+|---------|----------------|----------|
+| `minimal` | Dashboard only | Exploration, start here |
+| `serving` | Dashboard, KServe, ModelMesh | Model serving without training overhead |
+| `training` | Dashboard, Ray, Training Operator | Distributed training without serving |
+| `full` | All components (12+) | Complete AI platform |
+| Custom | Your choice | [Compose your own](concepts/kustomize-overlays.md#composing-a-custom-profile) |
+
 ## Prerequisites
 
-!!! warning "Review before installing"
-    These requirements come from the [official RHOAI 3.4 Installation Guide](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.4/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install). Verify them before deploying.
+!!! warning "Verify before deploying"
+    These requirements come from the [RHOAI 3.5 documentation](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3-latest/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install).
 
-- **OpenShift Container Platform 4.19 or 4.20** (other versions are not supported)
+- **OpenShift Container Platform 4.19 or later**
 - **Minimum 2 worker nodes** with 8 CPUs and 32 GiB RAM each
-- **Default storage class** with dynamic provisioning configured
-- **Identity provider configured** -- `kubeadmin` is not sufficient for RHOAI
+- **Default StorageClass** with dynamic provisioning
+- **Identity provider configured** (kubeadmin is not sufficient)
 - `oc` CLI authenticated as cluster-admin
-- **Open Data Hub must NOT be installed** -- RHOAI and ODH cannot coexist on the same cluster
-- **No upgrade path from RHOAI 2.x** -- 3.0 requires a fresh installation; upgrade support from 2.25 to a stable 3.x is planned for a later release (see [Known Issues #4](reference/known-issues.md))
-- **Internet access** to `cdn.redhat.com`, `registry.redhat.io`, `quay.io`, and related Red Hat domains (or a disconnected mirror)
-- GPU nodes available (NVIDIA L4, L40S, A100, or H100) -- required for model serving and training workloads
-- At least 50Gi storage per model in the GPU node availability zone
+- **Internet access** to registry.redhat.io, quay.io, cdn.redhat.com (or disconnected mirror)
+- **GPU nodes** (NVIDIA L4, L40S, A100, H100) for inference and training workloads
+- Open Data Hub must NOT be installed (RHOAI and ODH cannot coexist)
 
-## DSC Overlays -- Pick Your Profile
+## Version Support
 
-The base DataScienceCluster starts minimal (Dashboard only). Pick an overlay for your needs:
+| RHOAI Version | Branch/Tag | OCP Versions | Channel |
+|--------------|-----------|--------------|---------|
+| 3.5 EA2 | `main` / `v3.5.0-ea2` | 4.19, 4.20 | `beta` |
+| 3.4 (archived) | `archive/v3.4.0` | 4.19, 4.20 | `beta` |
 
-| Overlay | Components | Command |
-|---------|-----------|---------|
-| `minimal` | Dashboard | `oc apply -k components/instances/rhoai-instance/overlays/minimal/` |
-| `serving` | Dashboard, KServe, ModelMesh | `oc apply -k components/instances/rhoai-instance/overlays/serving/` |
-| `training` | Dashboard, Ray, Training Operator | `oc apply -k components/instances/rhoai-instance/overlays/training/` |
-| `full` | All 10 DSC components | `oc apply -k components/instances/rhoai-instance/overlays/full/` |
-| `dev` | All 10 DSC components (default) | `oc apply -k components/instances/rhoai-instance/overlays/dev/` |
+## How to Use This Site
 
-See [Composing a Custom Profile](capabilities/index.md#composing-a-custom-profile) for building your own overlay.
-
-## References
-
-- [RHOAI 3.4 Install Docs](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.4/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install)
-- [RHOAI 3.4 Release Notes](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.4/html/release_notes)
-- [redhat-cop/gitops-catalog](https://github.com/redhat-cop/gitops-catalog) -- Kustomize bases for operators
-- [ToolOrchestra Paper](https://arxiv.org/abs/2503.02495) -- NVIDIA's multi-model orchestration approach
-- [verl Framework](https://github.com/volcengine/verl) -- Reinforcement learning training framework
+1. **Learn the concepts** -- Read [Concepts](concepts/index.md) to build your mental model
+2. **Deploy** -- Follow the [Quick Start](quickstart.md) with understanding
+3. **Customize** -- Use [Capabilities](capabilities/index.md) to enable exactly what you need
+4. **Troubleshoot** -- Check [Known Issues](reference/known-issues.md) and [Troubleshooting](reference/troubleshooting.md) when things go wrong
+5. **Contribute** -- Submit issues and PRs on [GitHub](https://github.com/rrbanda/rhoai-deploy-gitops)

@@ -1,204 +1,154 @@
 # Capabilities Guide
 
-Red Hat OpenShift AI (RHOAI) is modular. Pick the capabilities you need, understand their dependencies, and deploy only what matters for your use case.
+Red Hat OpenShift AI (RHOAI) 3.5 is modular. You choose which capabilities to enable, understand their dependencies, and deploy only what your use case requires. This guide helps you navigate the options.
 
 ## Capability Map
 
-| Capability | DataScienceCluster (DSC) Component | Required Operators | Required Instances | Guide |
-|------------|---------------|--------------------|--------------------|-------|
-| KServe Model Serving | `kserve` | rhoai-operator, cert-manager | rhoai-instance | [model-serving.md](model-serving.md) |
-| ModelMesh Serving | `modelmeshserving` | rhoai-operator | rhoai-instance | [modelmesh.md](modelmesh.md) |
-| Distributed Training | `ray`, `trainingoperator` | rhoai-operator, cert-manager, kueue-operator, jobset-operator | rhoai-instance, kueue-instance, jobset-instance | [training.md](training.md) |
-| Data Science Pipelines | `datasciencepipelines` | rhoai-operator | rhoai-instance | [pipelines.md](pipelines.md) |
-| Workbenches | `workbenches` | rhoai-operator | rhoai-instance | [workbenches.md](workbenches.md) |
-| Model Registry | `modelregistry` | rhoai-operator | rhoai-instance, external MySQL 5.x+, S3 storage | [model-registry.md](model-registry.md) |
-| MLflow | `mlflowoperator` | rhoai-operator | rhoai-instance, mlflow-instance | [mlflow.md](mlflow.md) |
-| GPU Infrastructure | N/A | nfd, gpu-operator | nfd-instance, gpu-instance, gpu-workers | [gpu-infrastructure.md](gpu-infrastructure.md) |
-| Kueue (GPU Quotas) | `kueue` (Unmanaged) | kueue-operator, cert-manager | kueue-instance, kueue-config | [kueue.md](kueue.md) |
+| Capability | DSC Component | Required External Operators | Guide |
+|------------|--------------|---------------------------|-------|
+| KServe Model Serving | `kserve` | cert-manager, RHOAI | [Model Serving](model-serving.md) |
+| Batch Inference | `batchGateway` | cert-manager, ServiceMesh, LWS, RHOAI | [Batch Inference](batch-inference.md) |
+| Distributed Inference | `advancedkserve` | cert-manager, LWS, RHCL, RHOAI | [Distributed Inference](distributed-inference.md) |
+| ModelMesh Serving | `modelmeshserving` | RHOAI | [ModelMesh](modelmesh.md) |
+| Distributed Training | `ray`, `trainingoperator` | cert-manager, Kueue, JobSet, RHOAI | [Training](training.md) |
+| Data Science Pipelines | `datasciencepipelines` | RHOAI | [Pipelines](pipelines.md) |
+| Workbenches | `workbenches` | RHOAI | [Workbenches](workbenches.md) |
+| Model Registry | `modelregistry` | RHOAI | [Model Registry](model-registry.md) |
+| Hardware Profiles | (Dashboard feature) | RHOAI | [Hardware Profiles](hardware-profiles.md) |
+| Models-as-a-Service | (AI Gateway + Dashboard) | AI Gateway, RHCL, RHOAI | [MaaS](maas.md) |
+| MLflow | `mlflowoperator` | RHOAI | [MLflow](mlflow.md) |
+| GPU Infrastructure | N/A (external) | NFD, GPU Operator | [GPU Infrastructure](gpu-infrastructure.md) |
+| Kueue (GPU Quotas) | `kueue: Unmanaged` | Kueue Operator, cert-manager | [Kueue](kueue.md) |
 
 ## Dependency Diagram
 
 ```mermaid
 graph TD
-  CertMgr["cert-manager"] -->|"TLS certificates"| KServe["KServe"]
-  CertMgr -->|"required"| KueueInst["Kueue Instance + ClusterQueue"]
+  CertMgr["cert-manager"] -->|"TLS"| KServe["KServe"]
+  CertMgr -->|"webhooks"| Kueue["Kueue"]
   CertMgr -->|"required"| Training["Training"]
-  CertMgr -->|"required"| LlamaStackOp["LlamaStack Operator"]
-  ServiceMesh["ServiceMesh Operator"] -->|"required"| LlamaStackOp
-  NFD["NFD Operator"] --> GPU["GPU Operator"]
-  KueueOp["Kueue Operator"] --> KueueInst
-  JobSetOp["JobSet Operator"] --> JobSetInst["JobSet Instance"]
-  RHOAI["RHOAI Operator"] --> DSC["DSC (components)"]
-  GPU --> GPUWorkers["GPU Workers"]
+  ServiceMesh["ServiceMesh 3"] -->|"required"| BatchGW["Batch Gateway"]
+  LWS["LeaderWorkerSet"] -->|"required"| BatchGW
+  LWS -->|"required"| DistInf["Distributed Inference"]
+  RHCL["RHCL"] -->|"required"| AIGateway["AI Gateway"]
+  AIGateway -->|"enables"| MaaS["Models-as-a-Service"]
+  NFD["NFD"] --> GPU["GPU Operator"]
+  GPU --> GPUNodes["GPU Workers"]
+  GPUNodes --> Serving["Model Serving"]
+  GPUNodes --> Training
+  GPUNodes --> BatchGW
+  RHOAI["RHOAI Operator"] --> DSC["DSC Components"]
   DSC --> KServe
   DSC --> ModelMesh["ModelMesh"]
   DSC --> Pipelines["Pipelines"]
   DSC --> Workbenches["Workbenches"]
-  DSC --> Registry["Registry"]
-  DSC --> TrustyAI["TrustyAI"]
-  DSC --> CodeFlare["CodeFlare"]
-  DSC --> MLflow["MLflow Operator"]
-  MLflow --> MLflowInst["MLflow Instance"]
-  DSC --> LlamaStackOp
-  GPUWorkers --> ModelServing["Model Serving"]
-  KServe --> ModelServing
-  ModelMesh --> ModelServing
+  DSC --> Registry["Model Registry"]
+  DSC --> MLflow["MLflow"]
   DSC --> Ray["Ray"]
   DSC --> TrainOp["Training Operator"]
+  DSC --> BatchGW
+  DSC --> DistInf
+  KueueOp["Kueue Operator"] --> KueueCfg["ClusterQueue + Quotas"]
+  KueueCfg --> Training
+  JobSet["JobSet Operator"] --> Training
   Ray --> Training
   TrainOp --> Training
-  KueueInst --> Training
-  JobSetInst --> Training
 ```
 
-**Key takeaways:**
+**Key dependencies to remember:**
 
-- Every capability requires the **RHOAI operator** and a **DataScienceCluster** (DSC)
-- GPU Infrastructure (NFD + GPU Operator) is required for any GPU workload (model serving, training)
-- Kueue is required for training workloads that need GPU quota management
-- **JobSet** is required for distributed training (TrainJob depends on it)
-- cert-manager is required for KServe (TLS via Knative), Kueue-based workloads (training), distributed inference (llm-d), and LlamaStack
-- ServiceMesh Operator 3.x is required for LlamaStack
-- Model Registry requires an external MySQL database (5.x+) and S3-compatible object storage
-- Capabilities without GPU needs (Pipelines, Workbenches, Registry) can run on CPU-only clusters
+- Every capability requires the **RHOAI operator** and a **DataScienceCluster**
+- GPU Infrastructure (NFD + GPU Operator) is needed for any GPU workload
+- **cert-manager** is needed for KServe (TLS), Kueue (webhooks), and training
+- **Batch inference** requires ServiceMesh 3 and LeaderWorkerSet
+- **AI Gateway / MaaS** requires Red Hat Connectivity Link
+- Kueue is only required for training (not for serving)
+- Capabilities without GPU needs (Pipelines, Workbenches, Registry) run on CPU-only clusters
 
-!!! note "Additional RHOAI 3.4 capabilities not covered in this repo"
-    The official RHOAI 3.4 documentation lists additional DSC components that this repository does not deploy or document in detail:
+## DSC Profiles
 
-    - **`advancedkserve` (Distributed Inference with llm-d)** -- enables distributed model inference using the llm-d framework. Requires cert-manager, Red Hat Connectivity Link Operator, Red Hat Leader Worker Set Operator, and OpenShift 4.20+. Not included in this repo's manifests.
-    - **`feastoperator` (Feature Store)** -- present in our base DSC as `Removed`. The Feast Operator provides a feature store for ML workloads. Enable it by setting `feastoperator.managementState: Managed` if needed.
+Instead of editing the DSC YAML directly, use a pre-built overlay that enables the right components:
 
-## DSC Overlays -- Pick Your Profile
-
-Instead of editing the DSC YAML directly, use a pre-built overlay:
-
-| Overlay | Components Enabled | Use Case |
+| Profile | Components Enabled | Best For |
 |---------|-------------------|----------|
-| `overlays/minimal/` | Dashboard only | Exploration, start here |
-| `overlays/serving/` | Dashboard, KServe, ModelMesh | Model serving only |
-| `overlays/training/` | Dashboard, Ray, TrainingOperator | Distributed training only |
-| `overlays/full/` | All 10 DSC components (see below) | Full platform |
-| `overlays/dev/` | All 10 DSC components (same as full) | Development (current default) |
+| `overlays/minimal/` | Dashboard only | Exploration, getting started |
+| `overlays/serving/` | Dashboard, KServe, ModelMesh | Teams focused on model inference |
+| `overlays/training/` | Dashboard, Ray, Training Operator | Teams focused on model training |
+| `overlays/maas/` | Dashboard, KServe, BatchGateway, AI Gateway | Platform teams offering MaaS |
+| `overlays/full/` | All components | Complete AI platform |
+| `overlays/dev/` | All components | Development and testing |
 
-!!! info "What 'All components' means"
-    The `full` and `dev` overlays enable: workbenches, kserve, ray, trainingoperator, modelregistry, trustyai, datasciencepipelines, modelmeshserving, codeflare, and llamastackoperator. The base DSC always keeps `dashboard` Managed and `kueue` Unmanaged (Red Hat Build of Kueue is deployed as a standalone operator).
+### Deploy a profile
 
-### Deploy with an overlay
+=== "GitOps"
 
-```bash
-# GitOps: point the rhoai-instance ArgoCD app at your chosen overlay
-# Manual:
-oc apply -k components/instances/rhoai-instance/overlays/serving/
-```
+    Point the `rhoai-dsc` ArgoCD Application at your chosen overlay. Edit `cluster-config.yaml`:
+    ```yaml
+    data:
+      rhoaiOverlay: "full"   # or: minimal, serving, training, maas
+    ```
 
-## Composing a Custom Profile
+=== "Manual"
 
-If the pre-built overlays don't match your needs, compose your own by stacking
-JSON patches from the capability overlays.
+    ```bash
+    oc apply -k components/instances/rhoai-instance/overlays/serving/
+    ```
 
-**Example: serving + pipelines**
+### Compose a custom profile
 
-Create `components/instances/rhoai-instance/overlays/my-profile/kustomization.yaml`:
+If no pre-built profile matches, compose your own by stacking patches. See [Kustomize and Overlays](../concepts/kustomize-overlays.md#composing-a-custom-profile) for a walkthrough.
 
-```yaml
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
+## Installation Order
 
-resources:
-  - ../../base
+When deploying without ArgoCD, install in this order. Each phase depends on the previous.
 
-patches:
-  - path: ../serving/patch-serving.yaml
-    target:
-      kind: DataScienceCluster
-  - path: patch-pipelines.yaml
-    target:
-      kind: DataScienceCluster
-```
-
-And `patch-pipelines.yaml`:
-
-```yaml
-- op: replace
-  path: /spec/components/datasciencepipelines/managementState
-  value: Managed
-```
-
-Each capability overlay's patch file can be referenced from any custom overlay,
-making profiles fully composable without duplication.
-
-## Manual Installation Order
-
-When deploying without ArgoCD, install in this order. The four phases must be
-completed sequentially -- each phase depends on the previous one.
-
-### Phase 1 -- Pre-RHOAI Operators
+### Phase 1: Operators
 
 ```bash
-oc apply -k components/operators/cert-manager/       # Required for KServe, training, Kueue, LlamaStack
-oc apply -k components/operators/servicemesh/         # Required for LlamaStack
-oc apply -k components/operators/nfd/                 # Required for GPU
-oc apply -k components/operators/gpu-operator/        # Required for GPU
-oc apply -k components/operators/kueue-operator/      # Required for training
-oc apply -k components/operators/jobset-operator/     # Required for training
-oc apply -k components/operators/rhoai-operator/      # Always required
-
-# Wait for all CSVs to reach Succeeded (re-run until all show Succeeded)
-watch "oc get csv -A | grep -E 'cert-manager|servicemesh|nfd|gpu-operator|kueue|jobset|rhods'"
-
-# IMPORTANT: Do NOT proceed until every CSV shows "Succeeded".
+oc apply -k components/operators/cert-manager/
+oc apply -k components/operators/servicemesh/
+oc apply -k components/operators/nfd/
+oc apply -k components/operators/gpu-operator/
+oc apply -k components/operators/kueue-operator/
+oc apply -k components/operators/jobset-operator/
+oc apply -k components/operators/lws-operator/
+oc apply -k components/operators/cma-operator/
+oc apply -k components/operators/rhoai-operator/
 ```
 
-### Phase 2 -- Pre-DSC Instances (order matters)
+!!! info "Why this order?"
+    Operators are independent of each other at install time -- OLM handles them in parallel. However, installing RHOAI last ensures its dependencies (cert-manager, ServiceMesh) are already resolving.
+
+### Phase 2: Instances (order matters)
 
 ```bash
-oc apply -k components/instances/nfd-instance/        # NFD first (GPU depends on it)
-oc apply -k components/instances/gpu-instance/         # GPU ClusterPolicy
-oc apply -k components/instances/gpu-workers/examples/aws/  # GPU MachineSets (cloud-specific)
-oc apply -k components/instances/cluster-autoscaler/   # Auto-scaling
-oc apply -k components/instances/kueue-instance/       # Kueue
-oc apply -k components/instances/kueue-config/         # GPU ResourceFlavors + ClusterQueue
-oc apply -k components/instances/jobset-instance/      # JobSet
+oc apply -k components/instances/nfd-instance/        # NFD must label nodes before GPU Operator
+oc apply -k components/instances/gpu-instance/         # GPU drivers on labeled nodes
+oc apply -k components/instances/kueue-instance/       # Kueue controller
+oc apply -k components/instances/kueue-config/         # Quotas and queues
+oc apply -k components/instances/jobset-instance/      # JobSet for training
 ```
 
-### Phase 3 -- DSC + Post-DSC Instances
+!!! info "Why this order?"
+    NFD must label GPU nodes before the GPU Operator can install drivers. Kueue must be running before config (ClusterQueue) can be applied.
+
+### Phase 3: DataScienceCluster
 
 ```bash
-# RHOAI DSC -- pick your overlay
-oc apply -k components/instances/rhoai-instance/overlays/serving/
-
-# Wait for DSC to be Ready before applying post-DSC instances
+oc apply -k components/instances/rhoai-instance/overlays/full/
 oc wait --for=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'=True \
   datasciencecluster/default-dsc --timeout=600s
-
-# Post-DSC instances (target the redhat-ods-applications namespace created by DSC)
-oc apply -k components/instances/dashboard-config/     # Enables GenAI Studio (Tech Preview, not enabled by default)
-oc apply -k components/instances/mcp-servers/           # Registers MCP servers in GenAI Studio
-oc apply -k components/instances/mlflow-instance/       # MLflow tracking server
 ```
 
-### Phase 4 -- Use Cases (models before services)
-
-```bash
-# Deploy models first
-oc apply -k usecases/models/orchestrator-8b/profiles/tier1-minimal/
-oc apply -k usecases/models/qwen-math-7b/profiles/tier1-minimal/
-
-# Deploy services (depend on model endpoints being reachable)
-oc apply -k usecases/services/toolorchestra-app/profiles/tier1-minimal/
-```
+!!! info "Why wait?"
+    The DSC triggers installation of internal sub-operators (KServe, Knative, Authorino). This takes 5-10 minutes. Subsequent steps depend on these being ready.
 
 ## Minimal Installs by Goal
 
-**"I just want to serve a model"** -- install cert-manager, RHOAI operator, then
-use the `serving` overlay. See [model-serving.md](model-serving.md).
-
-**"I just want notebooks"** -- install RHOAI operator, use the `dev` or `full`
-overlay (includes Dashboard + Workbenches). The `minimal` overlay only enables
-Dashboard without Workbenches. See [workbenches.md](workbenches.md).
-
-**"I need training"** -- install RHOAI, Kueue, JobSet, NFD, GPU operators,
-their instances, then use the `training` overlay. See [training.md](training.md).
-
-**"I want everything"** -- follow the [Quick Start](../quickstart.md)
-with the `full` or `dev` overlay.
+| Goal | Install | Profile |
+|------|---------|---------|
+| "Just serve a model" | cert-manager + RHOAI | `serving` |
+| "Just notebooks" | RHOAI only | `minimal` + workbenches patch |
+| "Training with quotas" | cert-manager + Kueue + JobSet + NFD + GPU + RHOAI | `training` |
+| "Full AI platform" | All operators | `full` |
+| "MaaS for the org" | All operators + AI Gateway + RHCL | `maas` |

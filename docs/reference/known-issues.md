@@ -10,11 +10,11 @@ Model download jobs share RWO PVCs with predictor pods. Sync waves (download at 
 
 ## 3. DataScienceCluster (DSC) API Version -- v2
 
-This repository uses the **v2 API** (`datasciencecluster.opendatahub.io/v2`), which is the required API for RHOAI 3.4. The v2 API uses component names like `aipipelines` (instead of v1's `datasciencepipelines`), drops `modelmeshserving` and `codeflare`, and adds fields like `argoWorkflowsControllers`, `registriesNamespace`, `workbenchNamespace`, `defaultClusterQueueName`, and `defaultLocalQueueName`.
+This repository uses the **v2 API** (`datasciencecluster.opendatahub.io/v2`), which is the required API for RHOAI 3.5. The v2 API uses component names like `aipipelines` (instead of v1's `datasciencepipelines`), drops `modelmeshserving` and `codeflare`, and adds fields like `argoWorkflowsControllers`, `registriesNamespace`, `workbenchNamespace`, `defaultClusterQueueName`, and `defaultLocalQueueName`.
 
 ## 4. No Upgrade Path from RHOAI 2.x to 3.x
 
-You cannot upgrade from OpenShift AI 2.25 or any earlier version to 3.0. OpenShift AI 3.0 introduces significant technology and component changes and is intended for new installations only. Install the RHOAI Operator on a cluster running OpenShift 4.19 or later and select the `beta` channel for 3.4 EA releases. The official docs state that support for upgrades from 2.25 to a stable 3.x version will be available in a later release. See the [official documentation](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.4/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install) for details.
+You cannot upgrade from OpenShift AI 2.25 or any earlier version to 3.0. OpenShift AI 3.0 introduces significant technology and component changes and is intended for new installations only. Install the RHOAI Operator on a cluster running OpenShift 4.19 or later and select the `beta` channel for 3.4 EA releases. The official docs state that support for upgrades from 2.25 to a stable 3.x version will be available in a later release. See the [official documentation](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3-latest/html/installing_and_uninstalling_openshift_ai_self-managed/installing-and-deploying-openshift-ai_install) for details.
 
 ## 5. GPU ClusterPolicy v25.x
 
@@ -48,3 +48,19 @@ If a download job's spec changes in Git while a completed job exists on the clus
 ```bash
 oc delete job <name> -n <namespace>
 ```
+
+## 11. Kueue managementState in 3.5
+
+In RHOAI 3.5, setting `kueue.managementState: Managed` in the DSC is **not supported** and will be rejected by the admission webhook. The standalone Red Hat Build of Kueue Operator must be used instead. Always set `kueue.managementState: Unmanaged`.
+
+## 12. AI Gateway / Batch Gateway OOMKilled
+
+The `ai-gateway-operator` and `llm-d-batch-gateway-operator` deployments ship with default memory limits (512Mi / 256Mi) that are insufficient under load. They crash with exit code 137. This repository includes a PostSync hook that patches memory to 1Gi / 512Mi respectively after each ArgoCD sync.
+
+## 13. Batch Gateway Null Field Error
+
+When using `ServerSideApply=true` with the DSC, the `batchGateway` field can produce "Invalid value: null" errors due to three-way merge conflicts. The fix is to use `Replace=true` in the Application's syncOptions instead of `ServerSideApply=true`.
+
+## 14. LlamaStack and OGX Conflict
+
+The `llamastackoperator` and `ogx` (OpenGenX) DSC components cannot both be `Managed` simultaneously in RHOAI 3.5 EA2. If you enable OGX, set `llamastackoperator.managementState: Removed`.

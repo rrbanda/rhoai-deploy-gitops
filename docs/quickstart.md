@@ -1,128 +1,214 @@
 # Quick Start Guide
 
-Two paths to deploy the full Red Hat OpenShift AI (RHOAI) stack. Both use the same manifests.
+This guide deploys Red Hat OpenShift AI (RHOAI) 3.5 on your OpenShift cluster using GitOps. Every step includes an explanation of what is happening and why, so you are never just running commands blindly.
+
+**Time estimate:** 5 minutes of setup, 15-30 minutes for convergence.
+
+**What you will build:**
+
+```mermaid
+graph LR
+  subgraph yourActions ["What You Do (5 min)"]
+    Fork["Fork + configure repo"]
+    Boot["Bootstrap ArgoCD"]
+    Deploy["Deploy app-of-apps"]
+  end
+
+  subgraph argocdDoes ["What ArgoCD Does (15-30 min)"]
+    Operators["Install 11 operators"]
+    Instances["Configure GPU, Kueue, NFD"]
+    DSC["Deploy DataScienceCluster"]
+    Models["Deploy AI models"]
+  end
+
+  Fork --> Boot --> Deploy --> Operators --> Instances --> DSC --> Models
+```
 
 !!! warning "Prerequisites"
-    Before deploying, verify your cluster meets the [official RHOAI 3.4 requirements](index.md):
+    Before starting, verify:
 
-    - OpenShift 4.19 or 4.20 with at least 2 worker nodes (8 CPUs, 32 GiB RAM each)
-    - Default storage class with dynamic provisioning
-    - Identity provider configured (not `kubeadmin`)
-    - Open Data Hub **not** installed
-    - Internet access to Red Hat registries (or a disconnected mirror)
+    - OpenShift 4.19+ cluster with at least 2 worker nodes (8 CPU, 32 GiB each)
+    - `oc` CLI authenticated as cluster-admin
+    - Default StorageClass with dynamic provisioning
+    - Identity provider configured (not kubeadmin)
+    - GPU nodes available for inference/training workloads
+    - Internet access to registry.redhat.io, quay.io, cdn.redhat.com
 
-## Deploy
+## Step 1: Fork and Configure
 
-=== "GitOps (ArgoCD)"
+=== "GitOps (Recommended)"
+
+    Fork the repository and configure it for your cluster:
 
     ```bash
-    # 1. Install OpenShift GitOps operator
-    oc apply -k bootstrap/
+    # Fork on GitHub, then clone your fork
+    git clone https://github.com/YOUR-ORG/rhoai-deploy-gitops.git
+    cd rhoai-deploy-gitops
 
-    # 2. Wait for GitOps operator to be ready
-    oc wait --for=condition=Available deployment/openshift-gitops-server \
-      -n openshift-gitops --timeout=300s
+    # Run the setup script
+    ./setup.sh --repo https://github.com/YOUR-ORG/rhoai-deploy-gitops.git \
+               --branch main \
+               --channel beta \
+               --overlay full
 
-    # 3. Bootstrap the cluster (one-time manual apply, self-manages after this)
-    oc apply -k clusters/overlays/dev/
-
-    # 4. Monitor convergence (~15-30 min for full stack)
-    watch oc get application.argoproj.io -n openshift-gitops
+    # Commit and push
+    git add -A && git commit -m "Configure for my cluster" && git push
     ```
-
-    After step 3, the `cluster-bootstrap` app-of-apps takes over. Any future
-    changes pushed to Git are auto-synced -- no further `oc apply` needed.
-
-    !!! warning "Using a fork? Update the repo URL first"
-        The ArgoCD manifests reference `https://github.com/rrbanda/rhoai-deploy-gitops.git`. If you forked this repo, run `./setup.sh <your-repo-url>` to update all references automatically, or manually edit `repoURL` in these files:
-
-        - `clusters/overlays/dev/bootstrap-app.yaml`
-        - `clusters/overlays/dev/rhoai-instance-app.yaml`
-        - `clusters/overlays/dev/training-workloads-app.yaml`
-        - `components/argocd/apps/cluster-operators-appset.yaml`
-        - `components/argocd/apps/cluster-instances-appset.yaml`
-        - `components/argocd/apps/cluster-models-appset.yaml`
-        - `components/argocd/apps/cluster-services-appset.yaml`
-        - `components/argocd/projects/base/platform-project.yaml`
-        - `components/argocd/projects/base/usecases-project.yaml`
 
 === "Manual (no ArgoCD)"
 
+    Clone directly -- no fork needed since you will not use ArgoCD:
+
     ```bash
-    # Phase 1 -- Pre-RHOAI Operators
-    # Install all operators and wait for CSVs before proceeding.
-    oc apply -k components/operators/cert-manager/
-    oc apply -k components/operators/servicemesh/           # Required for LlamaStack
-    oc apply -k components/operators/nfd/
-    oc apply -k components/operators/gpu-operator/
-    oc apply -k components/operators/kueue-operator/
-    oc apply -k components/operators/jobset-operator/
-    oc apply -k components/operators/rhoai-operator/
-
-    # Verify all operator CSVs are Succeeded (re-run until all show Succeeded)
-    watch "oc get csv -A | grep -E 'cert-manager|servicemesh|nfd|gpu-operator|kueue|jobset|rhods'"
-    # IMPORTANT: Do NOT proceed until every CSV shows "Succeeded".
-
-    # Phase 2 -- Pre-DSC Instances (order matters)
-    oc apply -k components/instances/nfd-instance/
-    oc wait --for=jsonpath='{.status.conditions[0].type}'=Available \
-      nodefeaturediscovery/nfd-instance -n openshift-nfd --timeout=300s
-
-    oc apply -k components/instances/gpu-instance/
-    oc wait --for=jsonpath='{.status.state}'=ready \
-      clusterpolicy/gpu-cluster-policy --timeout=600s
-
-    oc apply -k components/instances/gpu-workers/examples/aws/  # Cloud-specific, see examples/
-    oc apply -k components/instances/cluster-autoscaler/
-
-    oc apply -k components/instances/kueue-instance/
-    oc apply -k components/instances/kueue-config/
-    oc apply -k components/instances/jobset-instance/
-
-    # Phase 3 -- DSC + Post-DSC Instances
-    oc apply -k components/instances/rhoai-instance/overlays/dev/
-    oc wait --for=jsonpath='{.status.conditions[?(@.type=="Ready")].status}'=True \
-      datasciencecluster/default-dsc --timeout=600s
-
-    oc apply -k components/instances/dashboard-config/      # Enables GenAI Studio (Tech Preview, not enabled by default)
-    oc apply -k components/instances/mcp-servers/            # Registers MCP servers in GenAI Studio
-
-    # Phase 4 -- Use Cases (deploy models first, then services)
-    oc apply -k usecases/models/orchestrator-8b/profiles/tier1-minimal/
-    oc apply -k usecases/models/qwen-math-7b/profiles/tier1-minimal/
-    oc apply -k usecases/services/toolorchestra-app/profiles/tier1-minimal/
-
-    # Wait for models to download and become Ready
-    oc wait --for=condition=Ready inferenceservice/orchestrator-8b \
-      -n orchestrator-8b --timeout=1800s
-    oc wait --for=condition=Ready inferenceservice/qwen-math-7b \
-      -n qwen-math-7b --timeout=1800s
+    git clone https://github.com/rrbanda/rhoai-deploy-gitops.git
+    cd rhoai-deploy-gitops
     ```
 
-## What Gets Deployed
+??? info "What just happened?"
+    The `setup.sh` script updated one file: `clusters/overlays/dev/cluster-config.yaml`. This ConfigMap contains your repository URL and branch. Kustomize replacements inject these values into every ArgoCD Application at build time.
 
-The full stack installs ArgoCD Applications across four layers:
+    This means all ArgoCD apps will point to YOUR fork. When you push changes, YOUR cluster syncs -- not someone else's.
 
-- **7 operators** -- cert-manager, ServiceMesh, NFD, GPU Operator, Kueue, JobSet, RHOAI
-- **9 instances** -- NFD, GPU ClusterPolicy, ClusterAutoscaler, Kueue, Kueue Config, JobSet, DataScienceCluster, Dashboard Config, MCP Servers
-- **3 models** -- orchestrator-8b, qwen-math-7b, gpt-oss-120b (auto-discovered by `cluster-models` AppSet)
-- **3 services** -- toolorchestra-app, llamastack, genai-toolbox (auto-discovered by `cluster-services` AppSet)
-- **1 bootstrap** -- self-managing app-of-apps
+## Step 2: Bootstrap ArgoCD
 
-See [ArgoCD Applications](reference/argocd-apps.md) for the complete list.
+=== "GitOps"
 
-## Partial Installs
-
-You don't need the full stack. See [Capabilities](capabilities/index.md) for per-capability guides and the DSC Overlays section for pre-built profiles.
-
-!!! tip "Minimal serving install (CPU-only models)"
-    If you only need model serving on CPU nodes (no GPU), install just cert-manager + RHOAI operator, then use the `serving` overlay:
     ```bash
-    oc apply -k components/operators/cert-manager/
-    oc apply -k components/operators/rhoai-operator/
-    oc apply -k components/instances/rhoai-instance/overlays/serving/
+    oc apply -k bootstrap/
     ```
-    For GPU-accelerated model serving, also install NFD, GPU Operator, and GPU workers. See [GPU Infrastructure](capabilities/gpu-infrastructure.md).
 
-!!! warning "GPU MachineSet customization"
-    GPU worker provisioning is cloud-specific. Example MachineSet manifests for AWS are in `components/instances/gpu-workers/examples/aws/`. Copy and customize them for your cluster, or create your own for other clouds. See [GPU Infrastructure](capabilities/gpu-infrastructure.md) for details.
+    Wait for the operator to be ready:
+
+    ```bash
+    oc wait --for=condition=Available deployment/openshift-gitops-server \
+      -n openshift-gitops --timeout=300s
+    ```
+
+=== "Manual"
+
+    Skip this step -- you do not need ArgoCD for manual deployment.
+
+??? info "What just happened?"
+    You installed the **OpenShift GitOps operator**, which provides ArgoCD. This operator:
+
+    1. Creates the `openshift-gitops` namespace
+    2. Deploys the ArgoCD server, application controller, and repo server
+    3. Grants ArgoCD cluster-admin permissions to manage resources
+
+    ArgoCD is now running but has no Applications to manage yet. It is waiting for you to tell it what to sync.
+
+## Step 3: Deploy the Platform
+
+=== "GitOps"
+
+    ```bash
+    oc apply -k clusters/overlays/dev/
+    ```
+
+    This is the last `oc apply` you will ever need. From this point forward, Git is your interface.
+
+=== "Manual"
+
+    Follow the phased installation in [Capabilities > Installation Order](capabilities/index.md#installation-order).
+
+??? info "What just happened?"
+    You created the `cluster-bootstrap` ArgoCD Application. This single resource triggers a cascade:
+
+    1. **cluster-bootstrap** syncs `clusters/overlays/dev/` from your Git repo
+    2. Inside that directory, it finds **4 ApplicationSets** and the **rhoai-dsc Application**
+    3. Each ApplicationSet scans Git directories and **auto-generates Applications**:
+        - `cluster-operators` → creates an app for each operator subscription
+        - `cluster-instances` → creates an app for each instance configuration
+        - `cluster-models` → creates an app for each model deployment
+        - `cluster-services` → creates an app for each AI service
+
+    Within minutes, ArgoCD is managing 20+ Applications. Each one syncs its respective directory from Git and deploys resources to the cluster.
+
+## Step 4: Monitor Convergence
+
+Watch the Applications come online:
+
+```bash
+# See all ArgoCD Applications and their sync/health status
+watch oc get applications.argoproj.io -n openshift-gitops
+
+# Expected output (initially):
+# NAME                    SYNC STATUS   HEALTH STATUS   
+# cluster-bootstrap       Synced        Healthy         
+# operator-cert-manager   Synced        Healthy         
+# operator-nfd            OutOfSync     Progressing     
+# operator-rhoai-operator Synced        Progressing     
+# ...
+```
+
+??? info "What to expect during convergence"
+    The platform deploys in waves due to dependencies:
+
+    | Time | What is Happening |
+    |------|------------------|
+    | 0-2 min | Operator subscriptions created, OLM begins installing |
+    | 2-5 min | Operators reach `Succeeded`, instances start deploying |
+    | 5-10 min | NFD labels nodes, GPU Operator installs drivers |
+    | 10-15 min | RHOAI operator installs, DSC begins reconciling |
+    | 15-25 min | Sub-operators (KServe, Knative, etc.) installed by RHOAI |
+    | 25-30 min | All components healthy, models begin downloading |
+
+    **Normal states during convergence:**
+
+    - `OutOfSync` + `Progressing` → Resource applied, waiting for it to become healthy
+    - `SyncFailed` → CRD not yet available; ArgoCD will retry automatically
+    - `Degraded` → Dependency not ready; will self-resolve as upstream completes
+
+## Step 5: Verify
+
+Once all Applications show `Synced` + `Healthy`:
+
+```bash
+# Verify DSC is ready
+oc get datasciencecluster default-dsc -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}'
+# Expected: True
+
+# Verify RHOAI Dashboard is accessible
+oc get route rhods-dashboard -n redhat-ods-applications -o jsonpath='{.spec.host}'
+# Open this URL in your browser
+
+# Verify GPU nodes are detected
+oc get nodes -l nvidia.com/gpu.present=true
+
+# Verify Kueue quotas
+oc get clusterqueue
+```
+
+??? info "What does healthy look like?"
+    A fully converged cluster has:
+
+    - All ArgoCD Applications in `Synced` + `Healthy`
+    - DSC status `Ready: True`
+    - RHOAI Dashboard accessible via browser
+    - GPU nodes labeled and drivers installed
+    - Kueue ClusterQueue with available quota
+
+## What Next?
+
+You now have a fully GitOps-managed RHOAI platform. Here is what you can do:
+
+| Goal | Action |
+|------|--------|
+| **Deploy a model** | Add a directory under `usecases/models/`, push to Git |
+| **Change the profile** | Edit the DSC overlay, push to Git |
+| **Add GPU quotas** | Edit `components/instances/kueue-config/`, push to Git |
+| **Scale GPU nodes** | Configure MachineSets in `components/instances/gpu-workers/` |
+| **Remove a component** | Set its `managementState: Removed` in the DSC overlay |
+
+Every change goes through Git → ArgoCD → Cluster. No more `oc apply` needed.
+
+## Troubleshooting
+
+| Symptom | Likely Cause | Fix |
+|---------|-------------|-----|
+| Application stuck `OutOfSync` | CRD not yet installed | Wait -- ArgoCD retries automatically |
+| Operator `InstallPlan` pending | Manual approval required | Check if approval mode is `Automatic` |
+| DSC stuck `Ready: False` | Dependency operator not ready | Check operator pods in relevant namespace |
+| GPU nodes not detected | NFD not running | Verify `oc get pods -n openshift-nfd` |
+
+See [Troubleshooting](reference/troubleshooting.md) for comprehensive diagnosis guidance.

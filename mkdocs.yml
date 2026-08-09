@@ -1,5 +1,5 @@
-site_name: Deploying OpenShift AI
-site_description: Deploy Red Hat OpenShift AI 3.4 (Early Access) on OpenShift -- GitOps or manual, full stack or individual capabilities
+site_name: RHOAI GitOps Deploy
+site_description: Deploy Red Hat OpenShift AI on OpenShift using GitOps -- learn the concepts, understand the architecture, and deploy with confidence
 site_url: https://rrbanda.github.io/rhoai-deploy-gitops/
 repo_url: https://github.com/rrbanda/rhoai-deploy-gitops
 repo_name: rrbanda/rhoai-deploy-gitops
@@ -23,10 +23,12 @@ theme:
     - navigation.expand
     - navigation.indexes
     - navigation.top
+    - navigation.footer
     - content.code.copy
     - content.tabs.link
     - search.suggest
     - search.highlight
+    - toc.follow
   icon:
     repo: fontawesome/brands/github
 
@@ -59,28 +61,41 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Concepts:
+    - concepts/index.md
+    - What is GitOps?: concepts/gitops-fundamentals.md
+    - App-of-Apps Pattern: concepts/app-of-apps.md
+    - Kustomize and Overlays: concepts/kustomize-overlays.md
+    - GPU Scheduling: concepts/gpu-scheduling.md
+    - RHOAI Architecture: concepts/rhoai-architecture.md
+  - Getting Started:
+    - Quick Start: quickstart.md
+    - Configuration: configuration.md
+    - Upgrading: upgrading.md
   - Architecture: architecture.md
-  - Quick Start: quickstart.md
   - Capabilities:
     - capabilities/index.md
-    - Model Serving: capabilities/model-serving.md
+    - Model Serving (KServe): capabilities/model-serving.md
+    - Batch Inference: capabilities/batch-inference.md
+    - Distributed Inference: capabilities/distributed-inference.md
     - ModelMesh: capabilities/modelmesh.md
     - Training: capabilities/training.md
     - Pipelines: capabilities/pipelines.md
     - Workbenches: capabilities/workbenches.md
     - Model Registry: capabilities/model-registry.md
+    - Hardware Profiles: capabilities/hardware-profiles.md
+    - Models-as-a-Service: capabilities/maas.md
     - GPU Infrastructure: capabilities/gpu-infrastructure.md
     - Kueue: capabilities/kueue.md
     - MLflow: capabilities/mlflow.md
   - Use Cases:
     - usecases/index.md
-    - ToolOrchestra: usecases/toolorchestra.md
     - LlamaStack: usecases/llamastack.md
     - GenAI Toolbox: usecases/genai-toolbox.md
-    - Red Hat OKP: usecases/rhokp.md
   - Reference:
     - reference/index.md
     - ArgoCD Applications: reference/argocd-apps.md
     - Sync Configuration: reference/sync-config.md
+    - Troubleshooting: reference/troubleshooting.md
     - Teardown: reference/teardown.md
     - Known Issues: reference/known-issues.md

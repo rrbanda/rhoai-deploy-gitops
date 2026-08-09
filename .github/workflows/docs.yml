@@ -1,4 +1,4 @@
-name: Deploy docs
+name: Deploy Documentation
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
     paths:
       - 'docs/**'
       - 'mkdocs.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -21,7 +22,8 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: pip install mkdocs-material
+        run: |
+          pip install mkdocs-material pymdown-extensions
 
       - name: Build and deploy
         run: mkdocs gh-deploy --force

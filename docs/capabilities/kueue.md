@@ -13,11 +13,11 @@ Kueue provides job queuing and GPU quota management for OpenShift AI training wo
 | GPU Infrastructure | Operator + Instance | See [gpu-infrastructure.md](gpu-infrastructure.md) |
 
 !!! info "cert-manager is required"
-    The official RHOAI 3.4 documentation lists cert-manager as a dependency for Kueue-based workloads. Install it before deploying the Kueue Operator.
+    The official RHOAI 3.5 documentation lists cert-manager as a dependency for Kueue-based workloads. Install it before deploying the Kueue Operator.
 
 ## Why Standalone?
 
-RHOAI 3.4 includes a Kueue component in the DSC, but the standalone Red Hat
+RHOAI 3.5 includes a Kueue component in the DSC, but the standalone Red Hat
 Build of Kueue Operator provides newer features and independent lifecycle
 management. Setting `kueue: Unmanaged` in the DSC tells RHOAI not to install
 its own Kueue -- the standalone operator takes over.

@@ -93,19 +93,19 @@ After deployment the MLflow UI appears in the **Applications** drop-down in the 
     pip install "git+https://github.com/red-hat-data-services/mlflow@rhoai-3.3"
     ```
 
-=== "RHOAI 3.4 EA1 (Red Hat fork)"
+=== "RHOAI 3.5 EA1 (Red Hat fork)"
 
     ```bash
     pip install "git+https://github.com/red-hat-data-services/mlflow@rhoai-3.4-ea.1"
     ```
 
-=== "RHOAI 3.4 EA1/EA2 (upstream SDK 3.10+)"
+=== "RHOAI 3.5 EA1/EA2 (upstream SDK 3.10+)"
 
     ```bash
     pip install "mlflow>=3.10"
     ```
 
-=== "RHOAI 3.4 GA / MLflow SDK 3.11+"
+=== "RHOAI 3.5 GA / MLflow SDK 3.11+"
 
     ```bash
     pip install "mlflow>=3.11"
@@ -129,7 +129,7 @@ export MLFLOW_TRACKING_INSECURE_TLS=true
     export MLFLOW_WORKSPACE=<namespace>
     ```
 
-=== "Kubernetes Plugin (RHOAI 3.4 EA1/EA2, Red Hat fork)"
+=== "Kubernetes Plugin (RHOAI 3.5 EA1/EA2, Red Hat fork)"
 
     ```bash
     export MLFLOW_TRACKING_AUTH=kubernetes
@@ -137,7 +137,7 @@ export MLFLOW_TRACKING_INSECURE_TLS=true
 
     Reads credentials from the mounted service-account token (in-pod) or `~/.kube/config` (workstation).
 
-=== "Built-in Plugin (MLflow SDK 3.11+, RHOAI 3.4 GA)"
+=== "Built-in Plugin (MLflow SDK 3.11+, RHOAI 3.5 GA)"
 
     ```bash
     export MLFLOW_TRACKING_AUTH=kubernetes-namespaced
@@ -196,7 +196,7 @@ The checked resources belong to the `mlflow.kubeflow.org` API group. These are *
 
 ### RBAC for Service Accounts
 
-For interactive users, the OpenShift `admin`, `edit`, and `view` roles already include the necessary permissions. For service accounts (RHOAI 3.4 EA2+), bind the `mlflow-integration` ClusterRole:
+For interactive users, the OpenShift `admin`, `edit`, and `view` roles already include the necessary permissions. For service accounts (RHOAI 3.5 EA2+), bind the `mlflow-integration` ClusterRole:
 
 ```bash
 oc -n <namespace> create rolebinding my-component-mlflow \

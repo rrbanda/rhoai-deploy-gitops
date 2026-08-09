@@ -25,7 +25,7 @@ multi-pod job orchestration.
 | GPU Infrastructure | Operator + Instance | See [gpu-infrastructure.md](gpu-infrastructure.md) |
 
 !!! info "cert-manager is required"
-    The official RHOAI 3.4 documentation lists cert-manager as a dependency for Kueue-based workloads (training, Ray). Install the cert-manager Operator before deploying training workloads.
+    The official RHOAI 3.5 documentation lists cert-manager as a dependency for Kueue-based workloads (training, Ray). Install the cert-manager Operator before deploying training workloads.
 
 ## Enable It
 
