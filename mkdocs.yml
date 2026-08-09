@@ -21,8 +21,8 @@ theme:
         icon: material/brightness-7
         name: Switch to dark mode
   font:
-    text: Inter
-    code: JetBrains Mono
+    text: Red Hat Display
+    code: Red Hat Mono
   features:
     - navigation.tabs
     - navigation.tabs.sticky
@@ -41,9 +41,10 @@ theme:
     - search.share
     - toc.follow
     - announce.dismiss
+  favicon: assets/favicon.png
+  logo: assets/rh-hat-logo.png
   icon:
     repo: fontawesome/brands/github
-    logo: material/cube-outline
 
 extra_css:
   - stylesheets/extra.css
@@ -104,15 +105,12 @@ nav:
   - Getting Started:
     - Quick Start: quickstart.md
     - Configuration: configuration.md
-    - Upgrading: upgrading.md
-    - Disconnected Deployment: disconnected.md
-  - Architecture: architecture.md
+    - Repository Architecture: architecture.md
   - Capabilities:
     - capabilities/index.md
     - Model Serving (KServe): capabilities/model-serving.md
     - Batch Inference: capabilities/batch-inference.md
     - Distributed Inference: capabilities/distributed-inference.md
-    - ModelMesh: capabilities/modelmesh.md
     - Training: capabilities/training.md
     - Pipelines: capabilities/pipelines.md
     - Workbenches: capabilities/workbenches.md
@@ -122,14 +120,18 @@ nav:
     - GPU Infrastructure: capabilities/gpu-infrastructure.md
     - Kueue: capabilities/kueue.md
     - MLflow: capabilities/mlflow.md
+    - ModelMesh (Legacy): capabilities/modelmesh.md
   - Use Cases:
     - usecases/index.md
     - GenAI Toolbox: usecases/genai-toolbox.md
+  - Operations:
+    - Upgrading: upgrading.md
+    - Disconnected Deployment: disconnected.md
+    - Troubleshooting: reference/troubleshooting.md
+    - Teardown: reference/teardown.md
   - Reference:
     - reference/index.md
     - ArgoCD Applications: reference/argocd-apps.md
     - Sync Configuration: reference/sync-config.md
-    - Troubleshooting: reference/troubleshooting.md
-    - Teardown: reference/teardown.md
     - Network Policies: reference/network-policies.md
     - Known Issues: reference/known-issues.md

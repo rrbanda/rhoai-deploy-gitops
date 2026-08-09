@@ -2,5 +2,16 @@
 
 {% block announce %}
 Red Hat OpenShift AI — Full GitOps deployment with Batch Inference, Distributed Inference, and Models-as-a-Service.
-<a href="{{ page.canonical_url }}quickstart/">Get started →</a>
+<a href="{{ page.canonical_url }}quickstart/">Get started</a>
+{% endblock %}
+
+{% block content %}
+{{ super() }}
+{% endblock %}
+
+{% block footer %}
+{{ super() }}
+<div style="text-align: center; padding: 1rem 0; font-size: 0.7rem; color: var(--md-default-fg-color--light); border-top: 1px solid var(--rh-border, #2d3348);">
+  Red Hat and the Red Hat logo are trademarks or registered trademarks of Red Hat, Inc. | Community project — not officially supported by Red Hat
+</div>
 {% endblock %}

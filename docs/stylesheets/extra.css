@@ -1,23 +1,23 @@
 /* ==========================================================================
-   RHOAI GitOps Deploy — Premium Documentation Theme
-   Dark-first, enterprise-grade, presentation-ready
+   RHOAI GitOps Deploy — Red Hat Branded Documentation Theme
+   Aligned with Red Hat General Presentation template
    ========================================================================== */
 
-/* ---------- Color System ---------- */
+/* ---------- Color System (Red Hat Brand) ---------- */
 :root {
-  --rhoai-red: #EE0000;
-  --rhoai-red-light: #FF4D4D;
-  --rhoai-red-dark: #A30000;
-  --rhoai-navy: #0f1419;
-  --rhoai-surface: #1a1f2e;
-  --rhoai-surface-alt: #232836;
-  --rhoai-border: #2d3348;
-  --rhoai-text: #e8eaed;
-  --rhoai-text-muted: #9aa0b4;
-  --rhoai-accent-blue: #4da6ff;
-  --rhoai-accent-green: #34d399;
-  --rhoai-accent-purple: #a78bfa;
-  --rhoai-gradient: linear-gradient(135deg, #EE0000 0%, #a78bfa 50%, #4da6ff 100%);
+  --rh-red: #EE0000;
+  --rh-red-hover: #CC0000;
+  --rh-red-dark: #A30000;
+  --rh-dark: #151515;
+  --rh-section-bg: #292929;
+  --rh-surface: #1a1f2e;
+  --rh-surface-alt: #232836;
+  --rh-border: #2d3348;
+  --rh-text: #e8eaed;
+  --rh-text-muted: #9aa0b4;
+  --rh-light-bg: #F2F2F2;
+  --rh-mid-gray: #D2D2D2;
+  --rh-green: #63993D;
 }
 
 /* ---------- Dark Scheme (Default) ---------- */
@@ -25,7 +25,7 @@
   --md-primary-fg-color: #EE0000;
   --md-primary-fg-color--light: #FF4D4D;
   --md-primary-fg-color--dark: #A30000;
-  --md-accent-fg-color: #4da6ff;
+  --md-accent-fg-color: #EE0000;
   --md-default-bg-color: #0f1419;
   --md-default-fg-color: #e8eaed;
   --md-default-fg-color--light: #9aa0b4;
@@ -34,10 +34,10 @@
   --md-code-bg-color: #1a1f2e;
   --md-code-fg-color: #e8eaed;
   --md-typeset-color: #e8eaed;
-  --md-typeset-a-color: #4da6ff;
+  --md-typeset-a-color: #EE0000;
   --md-footer-bg-color: #0a0e14;
   --md-footer-bg-color--dark: #070a0f;
-  --md-hue: 220;
+  --md-hue: 0;
 }
 
 /* ---------- Light Scheme ---------- */
@@ -45,9 +45,10 @@
   --md-primary-fg-color: #EE0000;
   --md-primary-fg-color--light: #FF4D4D;
   --md-primary-fg-color--dark: #A30000;
-  --md-accent-fg-color: #0066cc;
+  --md-accent-fg-color: #CC0000;
   --md-default-bg-color: #ffffff;
   --md-code-bg-color: #f6f8fa;
+  --md-typeset-a-color: #CC0000;
 }
 
 /* ---------- Typography ---------- */
@@ -76,16 +77,16 @@
 
 /* ---------- Header ---------- */
 .md-header {
-  background: rgba(15, 20, 25, 0.85);
+  background: rgba(15, 20, 25, 0.92);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--rhoai-border);
+  border-bottom: 3px solid var(--rh-red);
 }
 
 [data-md-color-scheme="default"] .md-header {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 3px solid var(--rh-red);
 }
 
 .md-header__title {
@@ -95,12 +96,12 @@
 /* ---------- Navigation Tabs ---------- */
 .md-tabs {
   background: transparent;
-  border-bottom: 1px solid var(--rhoai-border);
+  border-bottom: 1px solid var(--rh-border);
 }
 
 .md-tabs__link--active,
 .md-tabs__link:hover {
-  color: var(--md-accent-fg-color);
+  color: var(--rh-red);
 }
 
 /* ---------- Sidebar ---------- */
@@ -110,17 +111,17 @@
 
 .md-nav__link--active {
   font-weight: 600;
-  color: var(--md-accent-fg-color);
+  color: var(--rh-red);
 }
 
 /* ---------- Code Blocks ---------- */
 .md-typeset pre {
-  border-radius: 0.6rem;
-  border: 1px solid var(--rhoai-border);
+  border-radius: 0.5rem;
+  border: 1px solid var(--rh-border);
 }
 
 .md-typeset code {
-  border-radius: 0.3rem;
+  border-radius: 0.2rem;
   padding: 0.1em 0.4em;
   font-size: 0.82em;
 }
@@ -133,9 +134,9 @@
 /* ---------- Admonitions ---------- */
 .md-typeset .admonition,
 .md-typeset details {
-  border-radius: 0.5rem;
+  border-radius: 0.4rem;
   border-left-width: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
 .md-typeset .admonition-title,
@@ -145,16 +146,16 @@
 
 /* ---------- Cards Grid ---------- */
 .md-typeset .grid.cards > ul > li {
-  border: 1px solid var(--rhoai-border);
-  border-radius: 0.75rem;
+  border: 1px solid var(--rh-border);
+  border-radius: 0.5rem;
   padding: 1.2rem;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   background: var(--md-code-bg-color);
 }
 
 .md-typeset .grid.cards > ul > li:hover {
-  border-color: var(--md-accent-fg-color);
-  box-shadow: 0 8px 24px rgba(77, 166, 255, 0.1);
+  border-color: var(--rh-red);
+  box-shadow: 0 4px 16px rgba(238, 0, 0, 0.08);
   transform: translateY(-2px);
 }
 
@@ -164,14 +165,15 @@
 }
 
 [data-md-color-scheme="default"] .md-typeset .grid.cards > ul > li:hover {
-  box-shadow: 0 8px 24px rgba(0, 102, 204, 0.08);
+  border-color: var(--rh-red);
+  box-shadow: 0 4px 16px rgba(238, 0, 0, 0.06);
 }
 
 /* ---------- Tables ---------- */
 .md-typeset table:not([class]) {
-  border-radius: 0.5rem;
+  border-radius: 0.4rem;
   overflow: hidden;
-  border: 1px solid var(--rhoai-border);
+  border: 1px solid var(--rh-border);
   font-size: 0.78rem;
 }
 
@@ -185,7 +187,7 @@
 
 .md-typeset table:not([class]) td,
 .md-typeset table:not([class]) th {
-  border-color: var(--rhoai-border);
+  border-color: var(--rh-border);
   padding: 0.6rem 0.8rem;
 }
 
@@ -196,7 +198,7 @@
 
 /* ---------- Footer ---------- */
 .md-footer {
-  border-top: 1px solid var(--rhoai-border);
+  border-top: 3px solid var(--rh-red);
 }
 
 /* ---------- Hero Section (Homepage) ---------- */
@@ -212,10 +214,7 @@
   letter-spacing: -0.03em;
   line-height: 1.1;
   margin-bottom: 1.2rem;
-  background: var(--rhoai-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--rh-red);
 }
 
 .hero .subtitle {
@@ -238,7 +237,7 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
+  border-radius: 0.3rem;
   font-weight: 600;
   font-size: 0.9rem;
   text-decoration: none;
@@ -246,25 +245,25 @@
 }
 
 .cta-primary {
-  background: var(--rhoai-red);
+  background: var(--rh-red);
   color: #ffffff !important;
 }
 
 .cta-primary:hover {
-  background: var(--rhoai-red-light);
+  background: var(--rh-red-hover);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(238, 0, 0, 0.3);
 }
 
 .cta-secondary {
-  border: 1px solid var(--rhoai-border);
+  border: 1px solid var(--rh-border);
   color: var(--md-default-fg-color) !important;
   background: var(--md-code-bg-color);
 }
 
 .cta-secondary:hover {
-  border-color: var(--md-accent-fg-color);
-  color: var(--md-accent-fg-color) !important;
+  border-color: var(--rh-red);
+  color: var(--rh-red) !important;
 }
 
 /* ---------- Journey Cards ---------- */
@@ -294,20 +293,20 @@
 }
 
 .journey-card {
-  border: 1px solid var(--rhoai-border);
-  border-radius: 0.75rem;
+  border: 1px solid var(--rh-border);
+  border-radius: 0.5rem;
   padding: 1.5rem;
   background: var(--md-code-bg-color);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   text-decoration: none;
   color: inherit;
   display: block;
 }
 
 .journey-card:hover {
-  border-color: var(--md-accent-fg-color);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 32px rgba(77, 166, 255, 0.12);
+  border-color: var(--rh-red);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(238, 0, 0, 0.08);
 }
 
 .journey-card .card-icon {
@@ -341,9 +340,9 @@
   letter-spacing: 0.05em;
 }
 
-.tag-beginner { background: rgba(52, 211, 153, 0.15); color: var(--rhoai-accent-green); }
-.tag-intermediate { background: rgba(77, 166, 255, 0.15); color: var(--rhoai-accent-blue); }
-.tag-advanced { background: rgba(167, 139, 250, 0.15); color: var(--rhoai-accent-purple); }
+.tag-beginner { background: rgba(99, 153, 61, 0.15); color: var(--rh-green); }
+.tag-intermediate { background: rgba(238, 0, 0, 0.1); color: var(--rh-red); }
+.tag-advanced { background: rgba(41, 41, 41, 0.4); color: var(--rh-text-muted); }
 
 /* ---------- Stats Bar ---------- */
 .stats-bar {
@@ -361,7 +360,7 @@
 .stat-number {
   font-size: 1.8rem;
   font-weight: 800;
-  color: var(--md-accent-fg-color);
+  color: var(--rh-red);
   display: block;
   line-height: 1.2;
 }
@@ -376,11 +375,33 @@
 
 /* ---------- Architecture Preview ---------- */
 .arch-preview {
-  border: 1px solid var(--rhoai-border);
-  border-radius: 0.75rem;
+  border: 1px solid var(--rh-border);
+  border-radius: 0.5rem;
   padding: 1.5rem;
   margin: 2rem 0;
   background: var(--md-code-bg-color);
+}
+
+/* ---------- Announcement Bar ---------- */
+.md-banner {
+  background: var(--rh-red);
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.md-banner a {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+/* ---------- Content Width ---------- */
+.md-content__inner {
+  max-width: 52rem;
+}
+
+/* ---------- Smooth Scroll ---------- */
+html {
+  scroll-behavior: smooth;
 }
 
 /* ---------- Responsive ---------- */
@@ -400,26 +421,4 @@
   .journey-grid {
     grid-template-columns: 1fr;
   }
-}
-
-/* ---------- Announcement Bar ---------- */
-.md-banner {
-  background: var(--rhoai-gradient);
-  color: #ffffff;
-  font-weight: 500;
-}
-
-.md-banner a {
-  color: #ffffff;
-  text-decoration: underline;
-}
-
-/* ---------- Content Width ---------- */
-.md-content__inner {
-  max-width: 52rem;
-}
-
-/* ---------- Smooth Scroll ---------- */
-html {
-  scroll-behavior: smooth;
 }

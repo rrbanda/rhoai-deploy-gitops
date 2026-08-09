@@ -143,7 +143,7 @@ After Phase 2, you never run `oc apply` again. Git becomes the interface.
 
 ## ApplicationSet Auto-Discovery
 
-Four ApplicationSets auto-discover content. The operators and instances ApplicationSets use **Git directory generators** (scanning directories). The models and services ApplicationSets use **Git file generators** (scanning `config.json` files with an `enabled: "true"` selector):
+Four ApplicationSets auto-discover content by scanning Git directories and files. For a detailed explanation of the pattern, see [App-of-Apps Pattern](concepts/app-of-apps.md).
 
 | ApplicationSet | Generator | Scans Path | Creates | Naming |
 |---------------|-----------|-----------|---------|--------|
@@ -151,10 +151,6 @@ Four ApplicationSets auto-discover content. The operators and instances Applicat
 | `cluster-instances` | Directory | `components/instances/*/` | Operator instance CRs | `instance-<dirname>` |
 | `cluster-models` | Git file | `usecases/models/*/profiles/tier1-minimal/config.json` | Model serving deployments | `model-<name>` |
 | `cluster-services` | Git file | `usecases/services/*/profiles/tier1-minimal/config.json` | AI applications | `service-<name>` |
-
-**For operators/instances:** Create a directory, push to Git. ArgoCD discovers it and creates an Application automatically.
-
-**For models/services:** Create the directory structure with a `config.json` that contains `"enabled": "true"`. ArgoCD discovers any `config.json` matching the pattern and creates an Application only when the selector matches.
 
 ## Dependency Chain
 

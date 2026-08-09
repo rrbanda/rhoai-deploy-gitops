@@ -20,14 +20,9 @@ usecases/
             └── tier1-minimal/  # Auto-discovered by cluster-services AppSet
 ```
 
-## Auto-Discovery
+## Auto-Discovery (Opt-In)
 
-Use cases are discovered by ArgoCD ApplicationSets, but deployment is **opt-in**:
-
-- **Models:** A directory matching `usecases/models/*/profiles/tier1-minimal/` becomes an ArgoCD Application named `model-<dirname>` **only when** its `config.json` has `"enabled": "true"`
-- **Services:** A directory matching `usecases/services/*/profiles/tier1-minimal/` becomes an ArgoCD Application named `service-<dirname>` **only when** its `config.json` has `"enabled": "true"`
-
-Pushing a new directory alone does **not** deploy it. You must explicitly opt in:
+Use cases are discovered by ArgoCD ApplicationSets via the [App-of-Apps pattern](../concepts/app-of-apps.md), but deployment is **opt-in**. Pushing a new directory alone does **not** deploy it — you must explicitly enable it:
 
 ```bash
 ./scripts/configure.sh enable-model <name>
@@ -35,29 +30,11 @@ Pushing a new directory alone does **not** deploy it. You must explicitly opt in
 ./scripts/configure.sh enable-service <name>
 ```
 
-This sets `"enabled": "true"` in the model's or service's `config.json`, which is the gate the ApplicationSet's git file generator uses to create the Application.
+This sets `"enabled": "true"` in the use case's `config.json`, which is the gate the ApplicationSet uses to create the Application. See [Configuration > Deploying Models and Services](../configuration.md#deploying-models-and-services-opt-in-pattern) for full details.
 
-## Available Models
+## Available Models and Services
 
-| Model | Description | GPU Required | Namespace | Enablement |
-|-------|------------|-------------|-----------|------------|
-| **gemma2-9b-fp8** | Gemma 2 9B FP8 quantized model — general-purpose instruct | 1x NVIDIA L4/A10G (24GB VRAM) | `models-as-a-service` | `./scripts/configure.sh enable-model gemma2-9b-fp8` |
-| **orchestrator-8b** | Orchestrator 8B — multi-agent orchestration router | 1x NVIDIA L4/A10G (24GB VRAM) | `models-as-a-service` | `./scripts/configure.sh enable-model orchestrator-8b` |
-| **qwen-math-7b** | Qwen Math 7B — specialized mathematical reasoning | 1x NVIDIA L4/A10G (24GB VRAM) | `models-as-a-service` | `./scripts/configure.sh enable-model qwen-math-7b` |
-| **qwen25-7b-instruct** | Qwen 2.5 7B Instruct — multilingual reasoning and chat | 1x NVIDIA L4/A10G (24GB VRAM) | `llm-inference` | `./scripts/configure.sh enable-model qwen25-7b-instruct` |
-| **gpt-oss-120b** | GPT-OSS 120B — large-scale multi-GPU model (requires TP/PP) | 4x NVIDIA A100 80GB (tensor parallelism) | `models-as-a-service` | `./scripts/configure.sh enable-model gpt-oss-120b` |
-
-## Available Services
-
-| Service | Description | Requires Customization | Namespace | Enablement |
-|---------|------------|----------------------|-----------|------------|
-| **ai-gateway** | Kuadrant AI Gateway — unified API gateway with OIDC auth and rate limiting | Yes — update `service-entry.yaml` and `auth-policy.yaml` with your cluster's inference and Keycloak URLs | `ai-gateway` | `./scripts/configure.sh enable-service ai-gateway` |
-| **guardrails-gateway** | Content safety guardrails gateway — input/output filtering for LLMs | Yes — update `VLLM_URL` in `deployment.yaml` and `configmap.yaml` to match your cluster's model serving endpoint | `guardrails-gateway` | `./scripts/configure.sh enable-service guardrails-gateway` |
-| **genai-toolbox** | GenAI Toolbox — tool calling infrastructure for function-calling agents | No | `genai-toolbox` | `./scripts/configure.sh enable-service genai-toolbox` |
-| **llamastack** | LlamaStack distribution — Meta reference inference stack with guardrails | No | `llamastack` | `./scripts/configure.sh enable-service llamastack` |
-| **llm-d-epp** | llm-d Endpoint Picker Pod — intelligent request routing with prefix cache and load scoring | No | `llm-d-epp` | `./scripts/configure.sh enable-service llm-d-epp` |
-| **rhokp** | Red Hat OpenShift Knowledge Platform — RAG-as-a-Service with document ingestion | No | `rhokp` | `./scripts/configure.sh enable-service rhokp` |
-| **toolorchestra-app** | ToolOrchestra — multi-agent orchestration platform with training pipelines | No | `toolorchestra` | `./scripts/configure.sh enable-service toolorchestra-app` |
+For the full catalog of available models and services (with GPU requirements, namespaces, and enable commands), see the [Configuration guide](../configuration.md#available-models).
 
 See [GenAI Toolbox](genai-toolbox.md) for a detailed deployment guide.
 

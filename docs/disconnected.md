@@ -171,6 +171,12 @@ Ensure the mirrored catalog image is accessible from the cluster.
 
 If notebooks, workbenches, or serving runtimes fail to start, you likely need to merge the RHOAI platform images from the [disconnected install helper](https://github.com/red-hat-data-services/rhoai-disconnected-install-helper). Re-run `oc-mirror` with the complete image list.
 
+## Related
+
+- **[Configuration](configuration.md)** — set the `--registry` flag for private registry URLs
+- **[Quick Start](quickstart.md)** — standard (connected) deployment guide
+- **[Troubleshooting](reference/troubleshooting.md)** — general troubleshooting guidance
+
 ## Reference
 
 - [RHOAI Disconnected Installation Guide (official)](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5/html/installing_and_uninstalling_openshift_ai_self-managed_in_a_disconnected_environment/deploying-openshift-ai-in-a-disconnected-environment_install)

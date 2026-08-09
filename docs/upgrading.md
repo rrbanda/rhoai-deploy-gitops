@@ -4,13 +4,7 @@ This guide explains how to upgrade between RHOAI versions using this GitOps repo
 
 ## Upgrade Strategy
 
-RHOAI upgrades are driven by the **operator channel**. The RHOAI operator subscription specifies which release stream to track:
-
-| Channel | Delivers | Use Case |
-|---------|---------|----------|
-| `fast` | Latest GA release | **Default** — production deployments |
-| `beta` | Early Access / preview releases | Testing new features |
-| `stable` | Long Term Support | Regulated environments |
+RHOAI upgrades are driven by the **operator channel**. The RHOAI operator subscription specifies which release stream to track. See the [Configuration guide](configuration.md#2-set-the-rhoai-channel) for channel options (`fast`, `beta`, `stable`).
 
 **To upgrade:** Change the channel in Git, push, and let ArgoCD + OLM handle the rest.
 

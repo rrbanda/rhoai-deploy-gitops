@@ -306,32 +306,7 @@ Set `"enabled": "false"` in config.json (or use `./scripts/configure.sh disable-
 
 ### Adding a New Model or Service
 
-1. Create the directory structure:
-   ```
-   usecases/models/my-new-model/
-   ├── manifests/
-   │   ├── kustomization.yaml
-   │   └── inference-service.yaml
-   └── profiles/
-       └── tier1-minimal/
-           ├── config.json
-           └── kustomization.yaml
-   ```
-
-2. Create `config.json` with `"enabled": "false"`:
-   ```json
-   {
-     "enabled": "false",
-     "name": "my-new-model",
-     "category": "models",
-     "path": "usecases/models/my-new-model/profiles/tier1-minimal",
-     "namespace": "models-as-a-service",
-     "description": "My custom model description",
-     "gpu_required": "1x NVIDIA L4 (24GB VRAM)"
-   }
-   ```
-
-3. The ApplicationSet auto-discovers new `config.json` files — no need to edit any ApplicationSet. When you set `"enabled": "true"` and push, ArgoCD generates and syncs the new Application automatically.
+See the [Use Cases guide](usecases/) for step-by-step instructions on adding new models and services to the repository.
 
 ## Environment Variables (Advanced)
 
@@ -348,3 +323,10 @@ export DSC_OVERLAY="full"
            --channel "$RHOAI_CHANNEL" \
            --dsc "$DSC_OVERLAY"
 ```
+
+## What's Next
+
+- **[Quick Start](quickstart.md)** — deploy the configured platform
+- **[Capabilities](capabilities/)** — explore RHOAI capabilities and overlays
+- **[Use Cases](usecases/)** — deploy pre-built models and services
+- **[Disconnected Deployment](disconnected.md)** — configure for air-gapped environments

@@ -214,6 +214,10 @@ You now have a fully GitOps-managed RHOAI platform. Here is what you can do:
 
 Every change goes through Git → ArgoCD → Cluster. No more `oc apply` needed.
 
+- **[Capabilities Guide](capabilities/)** — explore all RHOAI capabilities and how to enable them
+- **[Use Cases](usecases/)** — deploy pre-built models and services
+- **[Operations](upgrading/)** — upgrading, disconnected deployment, troubleshooting
+
 ## Troubleshooting
 
 | Symptom | Likely Cause | Fix |

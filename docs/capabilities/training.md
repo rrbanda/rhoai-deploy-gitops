@@ -271,3 +271,9 @@ in the DSC. Clean up any running jobs first:
 oc delete rayjob --all -A
 oc delete pytorchjob --all -A
 ```
+
+## Related
+
+- **[Kueue](kueue.md)** — GPU quota management for training jobs
+- **[GPU Infrastructure](gpu-infrastructure.md)** — GPU node provisioning and scaling
+- **[Use Cases](../usecases/)** — deploy training pipelines (e.g., ToolOrchestra)

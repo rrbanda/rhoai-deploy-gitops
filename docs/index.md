@@ -15,7 +15,7 @@ managed entirely through Git.
 </p>
 
 <div class="cta-group">
-<a href="quickstart/" class="cta-primary">Deploy in 5 Minutes</a>
+<a href="quickstart/" class="cta-primary">Get Started</a>
 <a href="concepts/" class="cta-secondary">Learn the Concepts</a>
 </div>
 
@@ -31,8 +31,8 @@ managed entirely through Git.
 <span class="stat-label">AI Capabilities</span>
 </div>
 <div class="stat-item">
-<span class="stat-number">1</span>
-<span class="stat-label">Command to Deploy</span>
+<span class="stat-number">6</span>
+<span class="stat-label">DSC Profiles</span>
 </div>
 <div class="stat-item">
 <span class="stat-number">0</span>
@@ -91,17 +91,17 @@ Most organizations deploying AI on Kubernetes face the same challenges:
 
 <div class="journey-grid" markdown>
 
-<div class="journey-card" style="border-left: 3px solid var(--rhoai-red);">
+<div class="journey-card" style="border-left: 3px solid var(--rh-red);">
 <h3>The Problem</h3>
 <p>Teams run manual installs, forget steps, create snowflake clusters, and cannot reproduce their AI platform. GPU resources are wasted. Nobody knows what changed or when.</p>
 </div>
 
-<div class="journey-card" style="border-left: 3px solid var(--rhoai-accent-blue);">
+<div class="journey-card" style="border-left: 3px solid var(--rh-mid-gray);">
 <h3>The Solution</h3>
 <p>Declare your entire AI platform in Git. Push a change, ArgoCD syncs it. Self-healing, auditable, reproducible. Same manifests work on any cluster.</p>
 </div>
 
-<div class="journey-card" style="border-left: 3px solid var(--rhoai-accent-green);">
+<div class="journey-card" style="border-left: 3px solid var(--rh-green);">
 <h3>The Result</h3>
 <p>A fully managed RHOAI platform deployed via GitOps. Teams get model serving, training capacity, and GPU quotas — all governed by Git with zero manual intervention.</p>
 </div>
@@ -193,32 +193,21 @@ graph LR
 
 ## Prerequisites
 
-!!! warning "Verify before deploying"
+!!! warning "Prerequisites"
 
-    - **OpenShift 4.19+** with at least 2 worker nodes (8 CPU, 32 GiB each)
-    - **GPU nodes** available for inference/training (NVIDIA L4, L40S, A100, or H100)
-    - `oc` CLI authenticated as cluster-admin
-    - Default StorageClass with dynamic provisioning
-    - Identity provider configured (kubeadmin is not sufficient)
-    - Internet access to registry.redhat.io, quay.io, cdn.redhat.com
+    OpenShift 4.19+ with GPU nodes, cluster-admin access, and internet connectivity to Red Hat registries. See the [Quick Start](quickstart/) for the complete checklist.
 
 ---
 
 ## Version Support
 
-| Channel | Release Stream | Use Case |
-|---------|---------------|----------|
-| `fast` | Latest GA release | **Default** — production deployments |
-| `beta` | Early Access / preview | Testing upcoming features |
-| `stable` | Long Term Support | Regulated environments |
-
-For the latest version compatibility matrix, see the [official supported configurations](https://access.redhat.com/articles/rhoai-supported-configs-3.x).
+This repo defaults to the `fast` channel (latest GA). See the [Configuration guide](configuration/) for channel options and the [official supported configurations](https://access.redhat.com/articles/rhoai-supported-configs-3.x) for the compatibility matrix.
 
 ---
 
 <div style="text-align: center; padding: 2rem 0;" markdown>
 
-**Ready?** Start with the [Concepts](concepts/) to understand the architecture, or jump straight to the [Quick Start](quickstart/) to deploy.
+**Ready?** Start with the [Concepts](concepts/) to understand the architecture, jump to the [Quick Start](quickstart/) to deploy, or explore [Capabilities](capabilities/) and [Use Cases](usecases/).
 
 [:material-arrow-right: Get Started](quickstart/){ .md-button .md-button--primary }
 

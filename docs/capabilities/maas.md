@@ -187,6 +187,29 @@ MaaS works with [Hardware Profiles](hardware-profiles.md) to standardize how mod
 
 When a platform admin deploys a model through the Dashboard, they select a Hardware Profile. This ensures consistent resource allocation without requiring every admin to know the exact Kubernetes resource spec.
 
+## Verify
+
+```bash
+# AI Gateway pods running
+oc get pods -n ai-gateway
+
+# RHCL instance running
+oc get rhcl -A
+
+# Models accessible via AI Gateway route
+oc get route -n ai-gateway
+```
+
+## Disable It
+
+Switch to a non-MaaS overlay (e.g., `serving` or `minimal`) in the DSC. Then clean up the gateway resources:
+
+```bash
+oc delete -k components/instances/maas-gateway/
+oc delete -k components/instances/maas-dns-patch/
+oc delete -k components/instances/maas-postgres/
+```
+
 ## Governance Features
 
 | Feature | Mechanism |
@@ -197,3 +220,7 @@ When a platform admin deploys a model through the Dashboard, they select a Hardw
 | **Model approval** | Dashboard catalog workflow |
 | **Audit trail** | Gateway access logs |
 | **Cost visibility** | GPU usage per model, attributable to teams |
+
+## Related Use Cases
+
+Deploy pre-built models through the MaaS platform using the [Use Cases guide](../usecases/). See also [Hardware Profiles](hardware-profiles.md) for standardizing GPU allocation.
