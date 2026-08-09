@@ -105,6 +105,7 @@ nav:
     - Quick Start: quickstart.md
     - Configuration: configuration.md
     - Upgrading: upgrading.md
+    - Disconnected Deployment: disconnected.md
   - Architecture: architecture.md
   - Capabilities:
     - capabilities/index.md

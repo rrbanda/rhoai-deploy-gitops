@@ -164,6 +164,24 @@ vi bootstrap/overlays/prod/cluster-config.yaml
 until oc apply -k bootstrap/overlays/prod; do sleep 10; done
 ```
 
+## Disconnected / Air-Gapped
+
+For environments without internet access, mirror all images to a private registry first:
+
+```bash
+# List required images
+./scripts/mirror-images.sh list
+
+# Mirror to your registry
+./scripts/mirror-images.sh mirror --target-registry myregistry.example.com:5000
+
+# Configure and deploy
+./scripts/configure.sh --repo <url> --overlay disconnected --new-overlay
+until oc apply -k bootstrap/overlays/disconnected; do sleep 10; done
+```
+
+See [docs/disconnected.md](docs/disconnected.md) for the full guide.
+
 ## Documentation
 
 - [Quick Start](docs/quickstart.md) — step-by-step deployment guide

@@ -15,6 +15,7 @@ jobs:
       matrix:
         overlay:
           - bootstrap/overlays/default
+          - bootstrap/overlays/disconnected
           - components/instances/rhoai-instance/overlays/minimal
           - components/instances/rhoai-instance/overlays/serving
           - components/instances/rhoai-instance/overlays/training
@@ -71,6 +72,7 @@ jobs:
       - name: Lint shell scripts
         run: |
           shellcheck scripts/configure.sh
+          shellcheck scripts/mirror-images.sh
           shellcheck demo/*.sh
 
   gitleaks:

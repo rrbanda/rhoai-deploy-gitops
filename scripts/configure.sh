@@ -194,6 +194,7 @@ Setup options:
   --overlay <name>   Bootstrap overlay to configure (default: default)
   --channel <ch>     RHOAI OLM channel: fast|beta|stable (default: beta)
   --dsc <overlay>    DSC overlay: minimal|serving|training|full (default: full)
+  --registry <url>   Private registry URL for disconnected environments
   --new-overlay      Create a new overlay by copying from dev
   --dry-run          Show what would be changed without modifying files
   --help             Show this help message
@@ -208,6 +209,10 @@ Examples:
   # Create a production overlay with minimal DSC
   $0 --repo https://github.com/myorg/rhoai-deploy-gitops.git \\
      --overlay prod --new-overlay --dsc serving --channel fast
+
+  # Configure for disconnected deployment
+  $0 --repo https://gitea.internal/platform/rhoai-deploy-gitops.git \\
+     --overlay disconnected --new-overlay --registry myregistry.example.com:5000
 
   # Enable a model for deployment
   $0 enable-model gemma2-9b-fp8
@@ -226,6 +231,7 @@ CHANNEL="fast"
 DSC_OVERLAY="full"
 NEW_OVERLAY=false
 DRY_RUN=false
+REGISTRY=""
 
 # ─── Parse arguments ────────────────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
@@ -235,6 +241,7 @@ while [[ $# -gt 0 ]]; do
     --overlay)     OVERLAY="$2"; shift 2 ;;
     --channel)     CHANNEL="$2"; shift 2 ;;
     --dsc)         DSC_OVERLAY="$2"; shift 2 ;;
+    --registry)    REGISTRY="$2"; shift 2 ;;
     --new-overlay) NEW_OVERLAY=true; shift ;;
     --dry-run)     DRY_RUN=true; shift ;;
     --help)        usage ;;
@@ -291,6 +298,7 @@ echo "│  Repository:    $REPO_URL"
 echo "│  Revision:      $BRANCH"
 echo "│  RHOAI Channel: $CHANNEL"
 echo "│  DSC Overlay:   $DSC_OVERLAY"
+[[ -n "$REGISTRY" ]] && echo "│  Registry:      $REGISTRY"
 echo "└─────────────────────────────────────────────────────────────┘"
 echo ""
 
@@ -322,6 +330,15 @@ data:
   rhoaiChannel: "$CHANNEL"
   rhoaiOverlay: "$DSC_OVERLAY"
 EOF
+
+if [[ -n "$REGISTRY" ]]; then
+  cat >> "$CONFIG_FILE" <<EOF
+
+  # Private registry for disconnected environments
+  # Used by the disconnected overlay for image mirroring
+  registryMirror: "$REGISTRY"
+EOF
+fi
 
 # ─── Update RHOAI operator channel if patch file exists ────────────────────
 CHANNEL_PATCH="$REPO_ROOT/components/operators/rhoai-operator/patch-channel.yaml"
