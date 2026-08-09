@@ -11,7 +11,7 @@ The app-of-apps pattern solves this by making ArgoCD manage its own Applications
 ```mermaid
 graph TD
   subgraph manual ["What You Do (Once)"]
-    Bootstrap["oc apply -k clusters/overlays/dev/"]
+    Bootstrap["oc apply -k bootstrap/overlays/default/"]
   end
 
   subgraph argocd ["What ArgoCD Does (Forever)"]
@@ -51,10 +51,10 @@ After the single bootstrap command, you never need to create an ArgoCD Applicati
 You run one command:
 
 ```bash
-oc apply -k clusters/overlays/dev/
+oc apply -k bootstrap/overlays/default/
 ```
 
-This creates a single ArgoCD Application called `cluster-bootstrap` that points to the `clusters/overlays/dev/` directory in Git.
+This creates a single ArgoCD Application called `cluster-bootstrap` that points to the `bootstrap/overlays/default/` directory in Git.
 
 ### Step 2: ArgoCD Discovers ApplicationSets
 

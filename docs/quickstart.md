@@ -46,7 +46,7 @@ graph LR
     cd rhoai-deploy-gitops
 
     # Run the setup script
-    ./setup.sh --repo https://github.com/YOUR-ORG/rhoai-deploy-gitops.git \
+    ./scripts/configure.sh --repo https://github.com/YOUR-ORG/rhoai-deploy-gitops.git \
                --branch main \
                --channel beta \
                --overlay full
@@ -65,58 +65,40 @@ graph LR
     ```
 
 ??? info "What just happened?"
-    The `setup.sh` script updated one file: `clusters/overlays/dev/cluster-config.yaml`. This ConfigMap contains your repository URL and branch. Kustomize replacements inject these values into every ArgoCD Application at build time.
+    The `scripts/configure.sh` script updated one file: `bootstrap/overlays/default/cluster-config.yaml`. This ConfigMap contains your repository URL and branch. Kustomize replacements inject these values into every ArgoCD Application at build time.
 
     This means all ArgoCD apps will point to YOUR fork. When you push changes, YOUR cluster syncs -- not someone else's.
 
-## Step 2: Bootstrap ArgoCD
+## Step 2: Bootstrap (Single Command)
 
 === "GitOps"
 
     ```bash
-    oc apply -k bootstrap/
+    until oc apply -k bootstrap/overlays/default; do sleep 10; done
     ```
 
-    Wait for the operator to be ready:
+    This single command does everything — installs the GitOps operator, configures ArgoCD, and deploys the entire platform. The `until` loop handles the timing where CRDs are not yet ready (the operator needs a few seconds to install).
 
-    ```bash
-    oc wait --for=condition=Available deployment/openshift-gitops-server \
-      -n openshift-gitops --timeout=300s
-    ```
-
-=== "Manual"
-
-    Skip this step -- you do not need ArgoCD for manual deployment.
-
-??? info "What just happened?"
-    You installed the **OpenShift GitOps operator**, which provides ArgoCD. This operator:
-
-    1. Creates the `openshift-gitops` namespace
-    2. Deploys the ArgoCD server, application controller, and repo server
-    3. Grants ArgoCD cluster-admin permissions to manage resources
-
-    ArgoCD is now running but has no Applications to manage yet. It is waiting for you to tell it what to sync.
-
-## Step 3: Deploy the Platform
-
-=== "GitOps"
-
-    ```bash
-    oc apply -k clusters/overlays/dev/
-    ```
-
-    This is the last `oc apply` you will ever need. From this point forward, Git is your interface.
+    This is the **only `oc apply` you will ever need**. From this point forward, Git is your interface.
 
 === "Manual"
 
     Follow the phased installation in [Capabilities > Installation Order](capabilities/index.md#installation-order).
 
 ??? info "What just happened?"
-    You created the `cluster-bootstrap` ArgoCD Application. This single resource triggers a cascade:
+    The bootstrap overlay applied everything in one shot:
 
-    1. **cluster-bootstrap** syncs `clusters/overlays/dev/` from your Git repo
-    2. Inside that directory, it finds **4 ApplicationSets** and the **rhoai-dsc Application**
-    3. Each ApplicationSet scans Git directories and **auto-generates Applications**:
+    1. **OpenShift GitOps operator** — installed via Subscription (from `redhat-cop/gitops-catalog`)
+    2. **ArgoCD instance** — configured with Kustomize + Helm support and production resource limits
+    3. **cluster-config ConfigMap** — your repository URL and branch (source of truth)
+    4. **AppProjects** — RBAC boundaries (platform, usecases)
+    5. **4 ApplicationSets** — auto-discovery engines for operators, instances, models, services
+    6. **RHOAI DSC Application** — DataScienceCluster configuration
+    7. **gitops-controller Application** — ArgoCD manages its own configuration from Git
+
+    The `until/do/done` loop is standard in the community (see christianh814, gnunn-gitops). It handles the chicken-and-egg timing where ArgoCD CRDs are not registered until the operator finishes installing. The loop retries every 10 seconds until all resources are accepted.
+
+    Once ArgoCD starts, each ApplicationSet scans Git directories and **auto-generates Applications**:
         - `cluster-operators` → creates an app for each operator subscription
         - `cluster-instances` → creates an app for each instance configuration
         - `cluster-models` → creates an app for each model deployment

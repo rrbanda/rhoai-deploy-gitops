@@ -89,7 +89,7 @@ graph TD
 
 | Application | Source | Sync Policy | Purpose |
 |-------------|--------|-------------|---------|
-| `cluster-bootstrap` | `clusters/overlays/dev/` | Auto (selfHeal) | Self-manages the dev overlay: AppSets, explicit Apps |
+| `cluster-bootstrap` | `bootstrap/overlays/default/` | Auto (selfHeal) | Self-manages the dev overlay: AppSets, explicit Apps |
 | `operator-cert-manager` | `components/operators/cert-manager/` | Auto (selfHeal) | cert-manager operator subscription |
 | `operator-nfd` | `components/operators/nfd/` | Auto (selfHeal) | Node Feature Discovery operator |
 | `operator-gpu-operator` | `components/operators/gpu-operator/` | Auto (selfHeal) | NVIDIA GPU Operator |
@@ -129,9 +129,9 @@ Download jobs are idempotent (check for `.download_complete` marker) and have no
 
 ## App-of-Apps Bootstrap
 
-The `cluster-bootstrap` Application watches `clusters/overlays/dev/` and auto-syncs any changes. This means:
+The `cluster-bootstrap` Application watches `bootstrap/overlays/default/` and auto-syncs any changes. This means:
 
-- Adding a new `Application` YAML to `clusters/overlays/dev/` and pushing to Git automatically creates the new ArgoCD Application
+- Adding a new `Application` YAML to `bootstrap/overlays/default/` and pushing to Git automatically creates the new ArgoCD Application
 - Adding a new operator directory to `components/operators/` automatically creates a new operator Application via the `cluster-operators` ApplicationSet
 - Same for `components/instances/*`, `usecases/models/*/profiles/tier1-minimal`, and `usecases/services/*/profiles/tier1-minimal`
 

@@ -9,21 +9,22 @@ This repository implements a fully declarative, GitOps-driven installation of Re
 
 ```
 rhoai-deploy-gitops/
-├── bootstrap/                          # OpenShift GitOps (ArgoCD) operator
-├── clusters/                           # Per-cluster configuration
-│   ├── base/                           # Common: AppSets + ArgoCD projects
-│   └── overlays/dev/
-│       ├── bootstrap-app.yaml          # Self-managing app-of-apps
-│       ├── cluster-config.yaml         # YOUR repo URL + branch (edit this)
-│       └── kustomization.yaml          # Replacements that inject config everywhere
+├── bootstrap/                          # ← SINGLE ENTRY POINT
+│   ├── base/                           # OpenShift GitOps operator + RBAC
+│   └── overlays/default/
+│       ├── kustomization.yaml          # Aggregates everything + Kustomize replacements
+│       ├── argocd-instance.yaml        # ArgoCD CR configuration
+│       ├── cluster-config.yaml         # ← THE ONLY FILE YOU EDIT
+│       └── gitops-controller.yaml      # Self-management (ArgoCD manages itself)
 ├── components/
-│   ├── argocd/                         # ArgoCD projects and ApplicationSets
-│   │   ├── apps/
+│   ├── argocd/
+│   │   ├── applicationsets/            # Auto-discovery ApplicationSets
 │   │   │   ├── cluster-operators-appset.yaml
 │   │   │   ├── cluster-instances-appset.yaml
 │   │   │   ├── cluster-models-appset.yaml
 │   │   │   └── cluster-services-appset.yaml
-│   │   └── projects/
+│   │   ├── projects/                   # AppProject definitions (platform, usecases)
+│   │   └── apps/                       # Standalone Applications (DSC)
 │   ├── operators/                      # OLM operator subscriptions
 │   │   ├── cert-manager/
 │   │   ├── servicemesh/
@@ -52,7 +53,7 @@ rhoai-deploy-gitops/
 │   ├── models/                         # Model deployments
 │   └── services/                       # AI application services
 ├── docs/                               # This documentation site (MkDocs)
-├── setup.sh                            # One-time configuration script
+├── scripts/configure.sh                            # One-time configuration script
 ├── mkdocs.yml                          # Documentation configuration
 └── .github/workflows/                  # CI/CD (validation + docs deployment)
 ```
@@ -62,7 +63,7 @@ rhoai-deploy-gitops/
 A key design decision: **no hardcoded repository URLs or branch names** exist in any ArgoCD manifest. Instead, a single configuration file drives everything:
 
 ```yaml
-# clusters/overlays/dev/cluster-config.yaml
+# bootstrap/overlays/default/cluster-config.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -72,9 +73,9 @@ data:
   targetRevision: "main"
 ```
 
-Kustomize **replacements** in `clusters/overlays/dev/kustomization.yaml` inject these values into every Application and ApplicationSet at build time. This means:
+Kustomize **replacements** in `bootstrap/overlays/default/kustomization.yaml` inject these values into every Application and ApplicationSet at build time. This means:
 
-- Fork the repo, run `./setup.sh`, and all references update automatically
+- Fork the repo, run `./scripts/configure.sh`, and all references update automatically
 - Switch branches by editing one field
 - No find-and-replace across dozens of files
 
@@ -88,7 +89,7 @@ graph TD
   end
 
   subgraph appOfApps ["Phase 2: App-of-Apps (manual, once)"]
-    Human2["oc apply -k clusters/overlays/dev/"] --> BootstrapApp["cluster-bootstrap App"]
+    Human2["oc apply -k bootstrap/overlays/default/"] --> BootstrapApp["cluster-bootstrap App"]
   end
 
   subgraph autoManaged ["Phase 3+: Auto-managed (GitOps forever)"]

@@ -7,19 +7,20 @@ metadata:
     argocd.argoproj.io/compare-options: IgnoreExtraneous
 data:
   # ──────────────────────────────────────────────────────────────────────────────
-  # CLUSTER CONFIGURATION
+  # CLUSTER CONFIGURATION — THE ONLY FILE YOU NEED TO EDIT
   # ──────────────────────────────────────────────────────────────────────────────
-  # This is the ONLY file you need to edit after forking this repository.
-  # All ArgoCD applications and ApplicationSets read their values from here.
+  # After forking this repo, update the values below and push. Then deploy:
   #
-  # After editing, run: oc apply -k clusters/overlays/dev/
+  #   until oc apply -k bootstrap/overlays/default; do sleep 10; done
+  #
+  # That single command installs the GitOps operator, configures ArgoCD, and
+  # bootstraps the entire RHOAI platform. Everything else is automatic.
   # ──────────────────────────────────────────────────────────────────────────────
 
   # Your fork's Git repository URL
   repoURL: "https://github.com/rrbanda/rhoai-deploy-gitops.git"
 
   # Git revision to track (branch name, tag, or commit SHA)
-  # Examples: "main", "v3.5.0-ea2", "release/3.5"
   targetRevision: "main"
 
   # RHOAI operator OLM channel

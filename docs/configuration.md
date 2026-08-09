@@ -1,6 +1,6 @@
 # Configuration
 
-This repository is designed to work with any fork on any cluster. Configuration is centralized in a single file, and the `setup.sh` script handles initial setup.
+This repository is designed to work with any fork on any cluster. Configuration is centralized in a single file — you edit one YAML, push, and deploy with `oc apply -k`. The optional `scripts/configure.sh` helper provides a CLI convenience wrapper.
 
 ## The Configuration System
 
@@ -14,7 +14,7 @@ targetRevision: TARGET_REVISION_PLACEHOLDER
 These are replaced at build time by Kustomize **replacements** that read from a single ConfigMap:
 
 ```yaml
-# clusters/overlays/dev/cluster-config.yaml
+# bootstrap/overlays/default/cluster-config.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -27,12 +27,12 @@ data:
 
 When ArgoCD builds the Kustomize output, every Application and ApplicationSet gets your repository URL and branch injected automatically.
 
-## Using setup.sh
+## Using scripts/configure.sh
 
-The `setup.sh` script updates `cluster-config.yaml` and the RHOAI operator channel:
+The `scripts/configure.sh` script updates `cluster-config.yaml` and the RHOAI operator channel:
 
 ```bash
-./setup.sh --repo https://github.com/YOUR-ORG/rhoai-deploy-gitops.git \
+./scripts/configure.sh --repo https://github.com/YOUR-ORG/rhoai-deploy-gitops.git \
            --branch main \
            --channel beta \
            --overlay full
@@ -49,7 +49,7 @@ The `setup.sh` script updates `cluster-config.yaml` and the RHOAI operator chann
 
 ### What It Changes
 
-1. `clusters/overlays/dev/cluster-config.yaml` -- Updates `repoURL` and `targetRevision`
+1. `bootstrap/overlays/default/cluster-config.yaml` -- Updates `repoURL` and `targetRevision`
 2. `components/operators/rhoai-operator/patch-channel.yaml` -- Updates the operator channel
 
 That is all. Two files. Everything else is derived from these through Kustomize replacements and ArgoCD ApplicationSet templates.
@@ -60,7 +60,7 @@ If you prefer not to use the script, edit the files directly:
 
 ### 1. Set your repository URL
 
-Edit `clusters/overlays/dev/cluster-config.yaml`:
+Edit `bootstrap/overlays/default/cluster-config.yaml`:
 
 ```yaml
 data:
@@ -122,7 +122,7 @@ graph LR
   Replace --> Boot
 ```
 
-The `clusters/overlays/dev/kustomization.yaml` defines replacement rules:
+The `bootstrap/overlays/default/kustomization.yaml` defines replacement rules:
 
 ```yaml
 replacements:
@@ -151,7 +151,7 @@ Before deploying, verify what Kustomize will produce:
 
 ```bash
 # Build the cluster overlay and inspect the output
-kustomize build clusters/overlays/dev/ | grep repoURL
+kustomize build bootstrap/overlays/default/ | grep repoURL
 
 # Should show YOUR repo URL in every Application/ApplicationSet
 ```
@@ -161,18 +161,18 @@ kustomize build clusters/overlays/dev/ | grep repoURL
 For multiple clusters (dev, staging, production), create additional overlays:
 
 ```
-clusters/
+bootstrap/
 ├── base/
-├── overlays/
-│   ├── dev/
-│   │   ├── cluster-config.yaml      # Dev cluster config
-│   │   └── kustomization.yaml
-│   ├── staging/
-│   │   ├── cluster-config.yaml      # Staging cluster config
-│   │   └── kustomization.yaml
-│   └── prod/
-│       ├── cluster-config.yaml      # Prod cluster config
-│       └── kustomization.yaml
+└── overlays/
+    ├── default/
+    │   ├── cluster-config.yaml      # Default cluster config
+    │   └── kustomization.yaml
+    ├── staging/
+    │   ├── cluster-config.yaml      # Staging cluster config
+    │   └── kustomization.yaml
+    └── prod/
+        ├── cluster-config.yaml      # Prod cluster config
+        └── kustomization.yaml
 ```
 
 Each overlay can point to a different branch, use a different DSC profile, or target a different RHOAI channel.
@@ -233,17 +233,17 @@ generators:
 
 ### Enabling a Model or Service
 
-**Option A: Using setup.sh (recommended)**
+**Option A: Using scripts/configure.sh (recommended)**
 
 ```bash
 # Enable a model
-./setup.sh enable-model gemma2-9b-fp8
+./scripts/configure.sh enable-model gemma2-9b-fp8
 
 # Enable a service
-./setup.sh enable-service llm-d-epp
+./scripts/configure.sh enable-service llm-d-epp
 
 # Check what's enabled
-./setup.sh status
+./scripts/configure.sh status
 ```
 
 **Option B: Direct config.json edit**
@@ -265,7 +265,7 @@ After enabling, commit and push. ArgoCD detects the config.json change, generate
 
 ### Disabling a Model or Service
 
-Set `"enabled": "false"` in config.json (or use `./setup.sh disable-model <name>`), then commit and push. Because the ApplicationSets use `prune: true`, ArgoCD will automatically delete the Application and all its child resources from the cluster.
+Set `"enabled": "false"` in config.json (or use `./scripts/configure.sh disable-model <name>`), then commit and push. Because the ApplicationSets use `prune: true`, ArgoCD will automatically delete the Application and all its child resources from the cluster.
 
 ### Why This Pattern?
 
@@ -301,7 +301,7 @@ Set `"enabled": "false"` in config.json (or use `./setup.sh disable-model <name>
 | `toolorchestra-app` | Multi-agent orchestration platform | No |
 
 !!! warning "Services requiring customization"
-    Some services (e.g., `ai-gateway`) contain cluster-specific URLs that must be updated before enabling. The `setup.sh enable-service` command will warn you if customization is needed. Check the `requires_customization` and `customization_note` fields in the service's `config.json`.
+    Some services (e.g., `ai-gateway`) contain cluster-specific URLs that must be updated before enabling. The `scripts/configure.sh enable-service` command will warn you if customization is needed. Check the `requires_customization` and `customization_note` fields in the service's `config.json`.
 
 ### Adding a New Model or Service
 
@@ -342,7 +342,7 @@ export GITOPS_BRANCH="main"
 export RHOAI_CHANNEL="beta"
 export DSC_OVERLAY="full"
 
-./setup.sh --repo "$GITOPS_REPO" \
+./scripts/configure.sh --repo "$GITOPS_REPO" \
            --branch "$GITOPS_BRANCH" \
            --channel "$RHOAI_CHANNEL" \
            --overlay "$DSC_OVERLAY"

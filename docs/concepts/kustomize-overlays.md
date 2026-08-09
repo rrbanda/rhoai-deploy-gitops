@@ -115,7 +115,7 @@ This gives you serving + pipelines without training, workbenches, or model regis
 
 ## Kustomize Replacements (Parameterization)
 
-This repository also uses Kustomize **replacements** to inject configuration values. A single file (`clusters/overlays/dev/cluster-config.yaml`) contains your Git repository URL and branch:
+This repository also uses Kustomize **replacements** to inject configuration values. A single file (`bootstrap/overlays/default/cluster-config.yaml`) contains your Git repository URL and branch:
 
 ```yaml
 apiVersion: v1

@@ -2,24 +2,53 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Cluster Overlay: dev
+# Bootstrap Overlay: default
 # ─────────────────────────────────────────────────────────────────────────────
-# This overlay configures all ArgoCD applications for a specific cluster.
-# Edit cluster-config.yaml with your fork's URL and desired settings,
-# then apply: oc apply -k clusters/overlays/dev/
+# This is the SINGLE ENTRY POINT for deploying RHOAI via GitOps.
+#
+# Deploy with:
+#   until oc apply -k bootstrap/overlays/default; do sleep 10; done
+#
+# What it creates:
+#   1. OpenShift GitOps operator (Subscription)
+#   2. ArgoCD instance (configured for Kustomize + Helm)
+#   3. Cluster configuration (ConfigMap — source of truth for all URLs/branches)
+#   4. AppProjects (platform, usecases — RBAC boundaries)
+#   5. ApplicationSets (operators, instances, models, services — auto-discovery)
+#   6. RHOAI DSC Application (DataScienceCluster)
+#   7. Self-management Application (ArgoCD manages this bootstrap from Git)
+#
+# After apply, ArgoCD takes over. All future changes go through Git.
 # ─────────────────────────────────────────────────────────────────────────────
 
 resources:
-  - cluster-config.yaml
+  # Layer 1: Install OpenShift GitOps operator + cluster-admin RBAC
   - ../../base
-  - bootstrap-app.yaml
+
+  # Layer 2: ArgoCD instance configuration
+  - argocd-instance.yaml
+
+  # Layer 3: Cluster configuration (the only file users edit)
+  - cluster-config.yaml
+
+  # Layer 4: ArgoCD Projects (RBAC boundaries)
+  - ../../../components/argocd/projects
+
+  # Layer 5: ApplicationSets (auto-discovery engines)
+  - ../../../components/argocd/applicationsets
+
+  # Layer 6: Standalone Applications (DSC)
+  - ../../../components/argocd/apps
+
+  # Layer 7: Self-management (ArgoCD manages this directory from Git)
+  - gitops-controller.yaml
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Automatic Value Injection
+# Kustomize Replacements — Automatic Value Injection
 # ─────────────────────────────────────────────────────────────────────────────
-# These replacements read values from cluster-config.yaml and inject them
-# into all ArgoCD ApplicationSets and Applications. You never need to edit
-# the ApplicationSet files directly.
+# These rules read values from cluster-config.yaml and inject them into every
+# ArgoCD Application, ApplicationSet, and AppProject. You never need to edit
+# those files directly — just edit cluster-config.yaml.
 
 replacements:
   # Inject repoURL into all ApplicationSets (generator + template)
@@ -37,6 +66,16 @@ replacements:
           kind: Application
         fieldPaths:
           - spec.source.repoURL
+      - select:
+          kind: AppProject
+          name: platform
+        fieldPaths:
+          - spec.sourceRepos.0
+      - select:
+          kind: AppProject
+          name: usecases
+        fieldPaths:
+          - spec.sourceRepos.0
 
   # Inject targetRevision into all ApplicationSets and Applications
   - source:

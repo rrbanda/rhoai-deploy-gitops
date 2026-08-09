@@ -16,12 +16,13 @@ set -euo pipefail
 # ─────────────────────────────────────────────────────────────────────────────
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # ─── Subcommands ─────────────────────────────────────────────────────────────
 
 cmd_enable_model() {
   local model="$1"
-  local config="$SCRIPT_DIR/usecases/models/$model/profiles/tier1-minimal/config.json"
+  local config="$REPO_ROOT/usecases/models/$model/profiles/tier1-minimal/config.json"
   if [[ ! -f "$config" ]]; then
     echo "Error: Model '$model' not found."
     echo "Available models:"
@@ -39,7 +40,7 @@ cmd_enable_model() {
 
 cmd_disable_model() {
   local model="$1"
-  local config="$SCRIPT_DIR/usecases/models/$model/profiles/tier1-minimal/config.json"
+  local config="$REPO_ROOT/usecases/models/$model/profiles/tier1-minimal/config.json"
   if [[ ! -f "$config" ]]; then
     echo "Error: Model '$model' not found."
     exit 1
@@ -55,7 +56,7 @@ cmd_disable_model() {
 
 cmd_enable_service() {
   local service="$1"
-  local config="$SCRIPT_DIR/usecases/services/$service/profiles/tier1-minimal/config.json"
+  local config="$REPO_ROOT/usecases/services/$service/profiles/tier1-minimal/config.json"
   if [[ ! -f "$config" ]]; then
     echo "Error: Service '$service' not found."
     echo "Available services:"
@@ -83,7 +84,7 @@ cmd_enable_service() {
 
 cmd_disable_service() {
   local service="$1"
-  local config="$SCRIPT_DIR/usecases/services/$service/profiles/tier1-minimal/config.json"
+  local config="$REPO_ROOT/usecases/services/$service/profiles/tier1-minimal/config.json"
   if [[ ! -f "$config" ]]; then
     echo "Error: Service '$service' not found."
     exit 1
@@ -103,7 +104,7 @@ cmd_list_models() {
   echo "─────────────────────────────────────────────────────────────"
   printf "  %-25s %-10s %s\n" "NAME" "STATUS" "DESCRIPTION"
   echo "  ─────────────────────────────────────────────────────────"
-  for config in "$SCRIPT_DIR"/usecases/models/*/profiles/tier1-minimal/config.json; do
+  for config in "$REPO_ROOT"/usecases/models/*/profiles/tier1-minimal/config.json; do
     if [[ -f "$config" ]]; then
       local name desc enabled
       name=$(jq -r '.name' "$config" 2>/dev/null || basename "$(dirname "$(dirname "$(dirname "$config")")")")
@@ -123,7 +124,7 @@ cmd_list_services() {
   echo "─────────────────────────────────────────────────────────────"
   printf "  %-25s %-10s %s\n" "NAME" "STATUS" "DESCRIPTION"
   echo "  ─────────────────────────────────────────────────────────"
-  for config in "$SCRIPT_DIR"/usecases/services/*/profiles/tier1-minimal/config.json; do
+  for config in "$REPO_ROOT"/usecases/services/*/profiles/tier1-minimal/config.json; do
     if [[ -f "$config" ]]; then
       local name desc enabled
       name=$(jq -r '.name' "$config" 2>/dev/null || basename "$(dirname "$(dirname "$(dirname "$config")")")")
@@ -190,7 +191,7 @@ Subcommands:
 Setup options:
   --repo <url>       Your Git repository URL (required for initial setup)
   --branch <ref>     Git branch or tag to track (default: main)
-  --overlay <name>   Cluster overlay to configure (default: dev)
+  --overlay <name>   Bootstrap overlay to configure (default: default)
   --channel <ch>     RHOAI OLM channel: fast|beta|stable (default: beta)
   --dsc <overlay>    DSC overlay: minimal|serving|training|full (default: full)
   --new-overlay      Create a new overlay by copying from dev
@@ -220,7 +221,7 @@ EOF
 # ─── Defaults ───────────────────────────────────────────────────────────────
 REPO_URL=""
 BRANCH="main"
-OVERLAY="dev"
+OVERLAY="default"
 CHANNEL="beta"
 DSC_OVERLAY="full"
 NEW_OVERLAY=false
@@ -260,23 +261,23 @@ if [[ ! " ${valid_overlays[*]} " =~ " ${DSC_OVERLAY} " ]]; then
 fi
 
 # ─── Locate files ──────────────────────────────────────────────────────────
-OVERLAY_DIR="$SCRIPT_DIR/clusters/overlays/$OVERLAY"
+OVERLAY_DIR="$REPO_ROOT/bootstrap/overlays/$OVERLAY"
 CONFIG_FILE="$OVERLAY_DIR/cluster-config.yaml"
 
 # ─── Create new overlay if requested ───────────────────────────────────────
 if $NEW_OVERLAY && [[ ! -d "$OVERLAY_DIR" ]]; then
-  SOURCE_DIR="$SCRIPT_DIR/clusters/overlays/dev"
+  SOURCE_DIR="$REPO_ROOT/bootstrap/overlays/default"
   if $DRY_RUN; then
     echo "[dry-run] Would create new overlay: clusters/overlays/$OVERLAY/"
   else
-    echo "Creating new overlay '$OVERLAY' from dev..."
+    echo "Creating new overlay '$OVERLAY' from default..."
     cp -r "$SOURCE_DIR" "$OVERLAY_DIR"
-    echo "  Created: clusters/overlays/$OVERLAY/"
+    echo "  Created: bootstrap/overlays/$OVERLAY/"
   fi
 fi
 
 if [[ ! -d "$OVERLAY_DIR" ]]; then
-  echo "Error: Overlay directory not found: clusters/overlays/$OVERLAY/"
+  echo "Error: Overlay directory not found: bootstrap/overlays/$OVERLAY/"
   echo "  Run with --new-overlay to create it."
   exit 1
 fi
@@ -284,7 +285,7 @@ fi
 # ─── Display configuration ─────────────────────────────────────────────────
 echo ""
 echo "┌─────────────────────────────────────────────────────────────┐"
-echo "│  Configuring: clusters/overlays/$OVERLAY/"
+echo "│  Configuring: bootstrap/overlays/$OVERLAY/"
 echo "├─────────────────────────────────────────────────────────────┤"
 echo "│  Repository:    $REPO_URL"
 echo "│  Revision:      $BRANCH"
@@ -294,7 +295,7 @@ echo "└───────────────────────�
 echo ""
 
 if $DRY_RUN; then
-  echo "[dry-run] Would write: clusters/overlays/$OVERLAY/cluster-config.yaml"
+  echo "[dry-run] Would write: bootstrap/overlays/$OVERLAY/cluster-config.yaml"
   echo "[dry-run] No files were modified."
   exit 0
 fi
@@ -323,7 +324,7 @@ data:
 EOF
 
 # ─── Update RHOAI operator channel if patch file exists ────────────────────
-CHANNEL_PATCH="$SCRIPT_DIR/components/operators/rhoai-operator/patch-channel.yaml"
+CHANNEL_PATCH="$REPO_ROOT/components/operators/rhoai-operator/patch-channel.yaml"
 if [[ -f "$CHANNEL_PATCH" ]]; then
   cat > "$CHANNEL_PATCH" <<EOF
 - op: replace
@@ -334,22 +335,22 @@ EOF
 fi
 
 # ─── Update DSC app path if rhoai-dsc-app.yaml uses a specific overlay ─────
-DSC_APP="$SCRIPT_DIR/components/argocd/apps/rhoai-dsc-app.yaml"
+DSC_APP="$REPO_ROOT/components/argocd/apps/rhoai-dsc-app.yaml"
 if [[ -f "$DSC_APP" ]]; then
   sed -i.bak "s|path: components/instances/rhoai-instance/overlays/.*|path: components/instances/rhoai-instance/overlays/$DSC_OVERLAY|" "$DSC_APP"
   rm -f "$DSC_APP.bak"
   echo "  Updated: components/argocd/apps/rhoai-dsc-app.yaml (overlay: $DSC_OVERLAY)"
 fi
 
-echo "  Updated: clusters/overlays/$OVERLAY/cluster-config.yaml"
+echo "  Updated: bootstrap/overlays/$OVERLAY/cluster-config.yaml"
 echo ""
 echo "Done! Next steps:"
 echo "  1. Review changes:  git diff"
-echo "  2. Enable models:   ./setup.sh enable-model gemma2-9b-fp8"
-echo "  3. Enable services: ./setup.sh enable-service llm-d-epp"
+echo "  2. Enable models:   ./scripts/configure.sh enable-model gemma2-9b-fp8"
+echo "  3. Enable services: ./scripts/configure.sh enable-service llm-d-epp"
 echo "  4. Commit:          git add -A && git commit -m 'Configure for my cluster'"
 echo "  5. Push:            git push origin main"
-echo "  6. Bootstrap:       oc apply -k clusters/overlays/$OVERLAY/"
+echo "  6. Bootstrap:       until oc apply -k bootstrap/overlays/$OVERLAY; do sleep 10; done"
 echo ""
-echo "Tip: Run './setup.sh status' to see what models and services are enabled."
+echo "Tip: Run './scripts/configure.sh status' to see what models and services are enabled."
 echo ""

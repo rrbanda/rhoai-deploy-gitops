@@ -1,14 +1,18 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cluster-bootstrap
+  name: gitops-controller
   namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
     repoURL: REPO_URL_PLACEHOLDER
     targetRevision: TARGET_REVISION_PLACEHOLDER
-    path: clusters/overlays/dev
+    path: bootstrap/overlays/default
   destination:
     server: https://kubernetes.default.svc
     namespace: openshift-gitops
@@ -19,9 +23,20 @@ spec:
     syncOptions:
       - ServerSideApply=true
       - CreateNamespace=false
+      - RespectIgnoreDifferences=true
     retry:
       limit: 5
       backoff:
         duration: 30s
         maxDuration: 5m0s
         factor: 2
+  ignoreDifferences:
+    - group: argoproj.io
+      kind: Application
+      jsonPointers:
+        - /status
+    - group: ""
+      kind: ConfigMap
+      name: cluster-gitops-config
+      jsonPointers:
+        - /data

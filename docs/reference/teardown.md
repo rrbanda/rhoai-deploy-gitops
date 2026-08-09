@@ -82,7 +82,7 @@ oc delete mutatingwebhookconfigurations -l operator.tekton.dev/operand-name 2>/d
 
 ```bash
 # 13. Delete ArgoCD resources
-oc delete -k clusters/overlays/dev/
+oc delete -k bootstrap/overlays/default/
 oc delete sub openshift-gitops-operator -n openshift-gitops-operator
 oc delete namespace openshift-gitops-operator openshift-gitops
 ```
