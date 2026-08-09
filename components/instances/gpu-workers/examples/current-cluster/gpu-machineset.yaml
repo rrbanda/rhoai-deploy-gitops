@@ -1,3 +1,9 @@
+# ============================================================
+# EXAMPLE ONLY — This MachineSet is specific to a single cluster.
+# CUSTOMIZE THIS: Replace the infra ID (cluster-4l6x6-2qdmp),
+# AMI, subnet, zone, and instance type for your environment.
+# See docs/capabilities/gpu-workers.md for guidance.
+# ============================================================
 apiVersion: machine.openshift.io/v1beta1
 kind: MachineSet
 metadata:

@@ -31,8 +31,8 @@ managed entirely through Git.
 <span class="stat-label">AI Capabilities</span>
 </div>
 <div class="stat-item">
-<span class="stat-number">2</span>
-<span class="stat-label">Commands to Deploy</span>
+<span class="stat-number">1</span>
+<span class="stat-label">Command to Deploy</span>
 </div>
 <div class="stat-item">
 <span class="stat-number">0</span>

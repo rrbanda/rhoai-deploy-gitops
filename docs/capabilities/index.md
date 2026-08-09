@@ -82,7 +82,7 @@ Instead of editing the DSC YAML directly, use a pre-built overlay that enables t
 
 === "GitOps"
 
-    Point the `rhoai-dsc` ArgoCD Application at your chosen overlay. Edit `cluster-config.yaml`:
+    Point the `rhoai-dsc` ArgoCD Application at your chosen overlay. Edit `bootstrap/overlays/default/cluster-config.yaml`:
     ```yaml
     data:
       rhoaiOverlay: "full"   # or: minimal, serving, training, maas

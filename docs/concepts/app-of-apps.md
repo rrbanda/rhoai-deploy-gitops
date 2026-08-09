@@ -15,7 +15,7 @@ graph TD
   end
 
   subgraph argocd ["What ArgoCD Does (Forever)"]
-    BootApp["cluster-bootstrap Application"]
+    BootApp["gitops-controller Application"]
     BootApp --> OperatorsAS["cluster-operators ApplicationSet"]
     BootApp --> InstancesAS["cluster-instances ApplicationSet"]
     BootApp --> ModelsAS["cluster-models ApplicationSet"]
@@ -54,11 +54,11 @@ You run one command:
 oc apply -k bootstrap/overlays/default/
 ```
 
-This creates a single ArgoCD Application called `cluster-bootstrap` that points to the `bootstrap/overlays/default/` directory in Git.
+This creates a single ArgoCD Application called `gitops-controller` that points to the `bootstrap/overlays/default/` directory in Git.
 
 ### Step 2: ArgoCD Discovers ApplicationSets
 
-The `cluster-bootstrap` Application syncs the contents of that directory, which includes four `ApplicationSet` resources. Each ApplicationSet is a template that generates Applications automatically.
+The `gitops-controller` Application syncs the contents of that directory, which includes four `ApplicationSet` resources. Each ApplicationSet is a template that generates Applications automatically.
 
 ### Step 3: ApplicationSets Auto-Discover Content
 
@@ -83,7 +83,7 @@ This is where the pattern truly shines. To add a new operator:
 2. `git push`
 3. Done.
 
-ArgoCD's `cluster-bootstrap` syncs, sees the `cluster-operators` ApplicationSet unchanged, but the ApplicationSet's Git directory generator finds the new directory and creates `operator-my-new-operator` automatically.
+ArgoCD's `gitops-controller` syncs, sees the `cluster-operators` ApplicationSet unchanged, but the ApplicationSet's Git directory generator finds the new directory and creates `operator-my-new-operator` automatically.
 
 No manual ArgoCD configuration. No UI clicks. No imperative commands. Just Git.
 
@@ -92,7 +92,7 @@ No manual ArgoCD configuration. No UI clicks. No imperative commands. Just Git.
 ```mermaid
 graph TD
   subgraph layer1 ["Layer 1: Bootstrap (you create this once)"]
-    CB["cluster-bootstrap"]
+    CB["gitops-controller"]
   end
 
   subgraph layer2 ["Layer 2: ApplicationSets (ArgoCD manages)"]

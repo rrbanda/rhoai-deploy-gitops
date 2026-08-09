@@ -83,16 +83,13 @@ Kustomize **replacements** in `bootstrap/overlays/default/kustomization.yaml` in
 
 ```mermaid
 graph TD
-  subgraph bootstrap ["Phase 1: Bootstrap (manual, once)"]
-    Human["oc apply -k bootstrap/"] --> GitOpsOp["OpenShift GitOps Operator"]
+  subgraph bootstrap ["Phase 1: Bootstrap (single command, once)"]
+    Human["oc apply -k bootstrap/overlays/default/"] --> GitOpsOp["OpenShift GitOps Operator"]
     GitOpsOp --> ArgoCD["ArgoCD Instance"]
+    ArgoCD --> BootstrapApp["gitops-controller App"]
   end
 
-  subgraph appOfApps ["Phase 2: App-of-Apps (manual, once)"]
-    Human2["oc apply -k bootstrap/overlays/default/"] --> BootstrapApp["cluster-bootstrap App"]
-  end
-
-  subgraph autoManaged ["Phase 3+: Auto-managed (GitOps forever)"]
+  subgraph autoManaged ["Phase 2+: Auto-managed (GitOps forever)"]
     BootstrapApp --> OperatorsAS["cluster-operators AppSet"]
     BootstrapApp --> InstancesAS["cluster-instances AppSet"]
     BootstrapApp --> ModelsAS["cluster-models AppSet"]

@@ -9,7 +9,7 @@ The entire platform cascades from a single bootstrap application:
 ```mermaid
 graph TD
   subgraph layer1 ["Layer 1: Bootstrap (you create once)"]
-    Boot["cluster-bootstrap"]
+    Boot["gitops-controller"]
   end
 
   subgraph layer2 ["Layer 2: ApplicationSets + DSC App (ArgoCD manages)"]
@@ -89,7 +89,7 @@ graph TD
 
 | Application | Source | Sync Policy | Purpose |
 |-------------|--------|-------------|---------|
-| `cluster-bootstrap` | `bootstrap/overlays/default/` | Auto (selfHeal) | Self-manages the dev overlay: AppSets, explicit Apps |
+| `gitops-controller` | `bootstrap/overlays/default/` | Auto (selfHeal) | Self-manages the dev overlay: AppSets, explicit Apps |
 | `operator-cert-manager` | `components/operators/cert-manager/` | Auto (selfHeal) | cert-manager operator subscription |
 | `operator-nfd` | `components/operators/nfd/` | Auto (selfHeal) | Node Feature Discovery operator |
 | `operator-gpu-operator` | `components/operators/gpu-operator/` | Auto (selfHeal) | NVIDIA GPU Operator |
@@ -103,7 +103,7 @@ graph TD
 | `instance-cluster-autoscaler` | `components/instances/cluster-autoscaler/` | Auto (selfHeal) | ClusterAutoscaler for GPU node auto-scaling |
 | `instance-kueue-config` | `components/instances/kueue-config/` | Auto (selfHeal) | GPU ResourceFlavors + ClusterQueue |
 | `instance-jobset-instance` | `components/instances/jobset-instance/` | Auto (selfHeal) | JobSet operator instance |
-| `instance-rhoai` | `components/instances/rhoai-instance/overlays/dev/` | Auto (selfHeal, no prune) | DataScienceCluster with ignoreDifferences |
+| `rhoai-dsc` | `components/instances/rhoai-instance/overlays/<configured>` | Auto (selfHeal, no prune) | DataScienceCluster with ignoreDifferences |
 | `instance-dashboard-config` | `components/instances/dashboard-config/` | Auto (selfHeal) | Enables genAiStudio in the RHOAI dashboard |
 | `instance-mcp-servers` | `components/instances/mcp-servers/` | Auto (selfHeal) | Registers MCP servers (GenAI Toolbox, OKP) in the RHOAI dashboard |
 | `model-orchestrator-8b` | `usecases/models/orchestrator-8b/profiles/tier1-minimal/` | Auto (selfHeal, prune) | Nemotron-Orchestrator-8B model serving |
@@ -129,7 +129,7 @@ Download jobs are idempotent (check for `.download_complete` marker) and have no
 
 ## App-of-Apps Bootstrap
 
-The `cluster-bootstrap` Application watches `bootstrap/overlays/default/` and auto-syncs any changes. This means:
+The `gitops-controller` Application watches `bootstrap/overlays/default/` and auto-syncs any changes. This means:
 
 - Adding a new `Application` YAML to `bootstrap/overlays/default/` and pushing to Git automatically creates the new ArgoCD Application
 - Adding a new operator directory to `components/operators/` automatically creates a new operator Application via the `cluster-operators` ApplicationSet
@@ -141,4 +141,4 @@ The only manual `oc apply` ever needed is the initial bootstrap.
 
 1. Create `components/operators/my-operator/kustomization.yaml` with a Subscription resource
 2. Create `components/instances/my-instance/kustomization.yaml` with the instance CR
-3. Push to Git -- `cluster-bootstrap` auto-syncs the AppSets, which auto-discover the new directories and create ArgoCD Applications
+3. Push to Git -- `gitops-controller` auto-syncs the AppSets, which auto-discover the new directories and create ArgoCD Applications

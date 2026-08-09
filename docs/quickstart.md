@@ -49,7 +49,7 @@ graph LR
     ./scripts/configure.sh --repo https://github.com/YOUR-ORG/rhoai-deploy-gitops.git \
                --branch main \
                --channel beta \
-               --overlay full
+               --dsc full
 
     # Commit and push
     git add -A && git commit -m "Configure for my cluster" && git push
@@ -116,7 +116,7 @@ watch oc get applications.argoproj.io -n openshift-gitops
 
 # Expected output (initially):
 # NAME                    SYNC STATUS   HEALTH STATUS   
-# cluster-bootstrap       Synced        Healthy         
+# gitops-controller       Synced        Healthy         
 # operator-cert-manager   Synced        Healthy         
 # operator-nfd            OutOfSync     Progressing     
 # operator-rhoai-operator Synced        Progressing     

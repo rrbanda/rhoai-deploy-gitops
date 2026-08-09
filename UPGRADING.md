@@ -119,7 +119,7 @@ If you want to stay on a specific RHOAI version and not auto-upgrade:
 
 ```bash
 # Pin to a tagged release
-./setup.sh --repo <your-url> --branch v3.5.0-ea2
+./scripts/configure.sh --repo <your-url> --branch v3.5.0-ea2
 
 # Or set installPlanApproval to Manual in the RHOAI subscription
 ```

@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         overlay:
-          - clusters/overlays/dev
+          - bootstrap/overlays/default
           - components/instances/rhoai-instance/overlays/minimal
           - components/instances/rhoai-instance/overlays/serving
           - components/instances/rhoai-instance/overlays/training
@@ -51,7 +51,7 @@ jobs:
       - name: Lint YAML files
         run: |
           yamllint -d '{extends: relaxed, rules: {line-length: {max: 200}}}' \
-            components/ clusters/ bootstrap/
+            components/ bootstrap/
 
   no-hardcoded-values:
     name: Check Portability
@@ -65,7 +65,7 @@ jobs:
           if grep -r --include="*.yaml" --include="*.yml" \
             -E "cluster-[a-z0-9]{5}-[a-z0-9]{5}" \
             --exclude-dir="examples" \
-            components/ clusters/; then
+            components/ bootstrap/; then
             echo "ERROR: Found hardcoded cluster infrastructure IDs!"
             echo "Move cluster-specific files to examples/ directory."
             exit 1

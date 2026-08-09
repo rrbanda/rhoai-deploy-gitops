@@ -91,7 +91,7 @@ Plus the external AI Gateway and RHCL operators. The `maas` DSC overlay enables 
     Use the `maas` DSC overlay:
 
     ```yaml
-    # In cluster-config.yaml
+    # In bootstrap/overlays/default/cluster-config.yaml
     data:
       rhoaiOverlay: "maas"
     ```

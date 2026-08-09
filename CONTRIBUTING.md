@@ -5,7 +5,7 @@ Contributions are welcome. This guide covers the conventions used in this reposi
 ## Getting Started
 
 1. **Fork** the repository and clone your fork
-2. Run `./setup.sh --repo https://github.com/YOURORG/rhoai-deploy-gitops.git` to point all ArgoCD manifests at your fork
+2. Edit `bootstrap/overlays/default/cluster-config.yaml` with your fork's URL (or run `./scripts/configure.sh --repo https://github.com/YOURORG/rhoai-deploy-gitops.git`)
 3. If deploying GPU workers on AWS, customize the MachineSets in `components/instances/gpu-workers/examples/aws/` with your cluster's infra ID, AMI, subnet, etc.
 
 ## Directory Conventions

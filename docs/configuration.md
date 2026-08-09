@@ -35,7 +35,7 @@ The `scripts/configure.sh` script updates `cluster-config.yaml` and the RHOAI op
 ./scripts/configure.sh --repo https://github.com/YOUR-ORG/rhoai-deploy-gitops.git \
            --branch main \
            --channel beta \
-           --overlay full
+           --dsc full
 ```
 
 ### Options
@@ -45,7 +45,7 @@ The `scripts/configure.sh` script updates `cluster-config.yaml` and the RHOAI op
 | `--repo` | (required) | Your fork's Git URL |
 | `--branch` | `main` | Branch ArgoCD should track |
 | `--channel` | `beta` | RHOAI operator channel (beta = Early Access, stable = GA) |
-| `--overlay` | `full` | DSC overlay (minimal, serving, training, maas, full, dev) |
+| `--dsc` | `full` | DSC overlay (minimal, serving, training, maas, full, dev) |
 
 ### What It Changes
 
@@ -109,7 +109,7 @@ graph LR
     AppSet2["cluster-instances ApplicationSet"]
     AppSet3["cluster-models ApplicationSet"]
     AppSet4["cluster-services ApplicationSet"]
-    Boot["cluster-bootstrap Application"]
+    Boot["gitops-controller Application"]
   end
 
   CMdata -->|"source field: data.repoURL"| Replace
@@ -345,5 +345,5 @@ export DSC_OVERLAY="full"
 ./scripts/configure.sh --repo "$GITOPS_REPO" \
            --branch "$GITOPS_BRANCH" \
            --channel "$RHOAI_CHANNEL" \
-           --overlay "$DSC_OVERLAY"
+           --dsc "$DSC_OVERLAY"
 ```

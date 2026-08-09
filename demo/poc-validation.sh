@@ -1,4 +1,10 @@
 #!/bin/bash
+# ============================================================
+# DEMO ONLY — Contains cluster-specific URLs and endpoints.
+# This script was written for a specific demo environment and
+# will NOT work on other clusters without modification.
+# ============================================================
+#
 # PoC Alignment Validation Script
 # Tests all 8 success criteria + bonus capabilities against the live demo environment
 # Usage: ./demo/poc-validation.sh

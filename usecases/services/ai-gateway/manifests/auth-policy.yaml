@@ -1,3 +1,7 @@
+# ============================================================
+# CUSTOMIZE THIS: Replace the issuerUrl below with your
+# cluster's Keycloak/OIDC endpoint.
+# ============================================================
 apiVersion: kuadrant.io/v1
 kind: AuthPolicy
 metadata:

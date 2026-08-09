@@ -1,3 +1,8 @@
+# ============================================================
+# CUSTOMIZE THIS: Replace all cluster-specific hostnames below
+# with your cluster's inference service route.
+# Example: <model>-<ns>.apps.<cluster-domain>
+# ============================================================
 apiVersion: networking.istio.io/v1
 kind: ServiceEntry
 metadata:
