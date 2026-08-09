@@ -9,7 +9,7 @@ spec:
     aigateway:
       managementState: Managed
       batchGateway:
-        managementState: Managed
+        managementState: Removed
     aipipelines:
       argoWorkflowsControllers:
         managementState: Managed
@@ -37,7 +37,7 @@ spec:
     kueue:
       defaultClusterQueueName: default
       defaultLocalQueueName: default
-      managementState: Managed
+      managementState: Unmanaged
     mlflowoperator:
       managementState: Managed
     modelregistry:
