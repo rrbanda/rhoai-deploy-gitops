@@ -11,26 +11,24 @@ spec:
   identifiers:
     - displayName: "NVIDIA L4 GPU"
       identifier: nvidia.com/gpu
-      resourceType: gpu
+      resourceType: Accelerator
       defaultCount: 1
       minCount: 1
       maxCount: 1
     - displayName: "CPU"
       identifier: cpu
-      resourceType: cpu
+      resourceType: CPU
       defaultCount: 8
       minCount: 4
       maxCount: 16
     - displayName: "Memory"
       identifier: memory
-      resourceType: memory
+      resourceType: Memory
       defaultCount: 32Gi
       minCount: 16Gi
       maxCount: 64Gi
   scheduling:
-    type: kueue
-    kueue:
-      localQueueName: default
+    type: Node
     node:
       nodeSelector:
         nvidia.com/gpu.product: NVIDIA-L4

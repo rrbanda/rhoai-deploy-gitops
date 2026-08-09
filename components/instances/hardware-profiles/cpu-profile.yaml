@@ -11,17 +11,17 @@ spec:
   identifiers:
     - displayName: "CPU"
       identifier: cpu
-      resourceType: cpu
+      resourceType: CPU
       defaultCount: 4
       minCount: 1
       maxCount: 8
     - displayName: "Memory"
       identifier: memory
-      resourceType: memory
+      resourceType: Memory
       defaultCount: 16Gi
       minCount: 4Gi
       maxCount: 32Gi
   scheduling:
-    type: kueue
+    type: Queue
     kueue:
       localQueueName: default
