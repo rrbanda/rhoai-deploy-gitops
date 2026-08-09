@@ -27,10 +27,6 @@ managed entirely through Git.
 <span class="stat-label">Operators</span>
 </div>
 <div class="stat-item">
-<span class="stat-number">12+</span>
-<span class="stat-label">AI Capabilities</span>
-</div>
-<div class="stat-item">
 <span class="stat-number">6</span>
 <span class="stat-label">DSC Profiles</span>
 </div>
