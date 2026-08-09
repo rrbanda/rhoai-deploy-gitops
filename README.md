@@ -1,310 +1,243 @@
-<h1 align="center">
-  🚀 OpenShift AI — GitOps Deployment
-</h1>
+# OpenShift AI — GitOps Deployment
 
 <p align="center">
-  <strong>Production-ready Kustomize manifests for deploying Red Hat OpenShift AI on any OpenShift cluster using ArgoCD (GitOps) or manual apply.</strong>
+  <strong>Deploy a production-grade AI/ML platform on any OpenShift cluster using two commands.</strong><br>
+  <em>Declarative. Reproducible. Self-healing. Fully managed through Git.</em>
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License"></a>
-  <a href="https://rrbanda.github.io/rhoai-deploy-gitops/"><img src="https://img.shields.io/badge/docs-GitHub_Pages-blue" alt="Docs"></a>
-  <a href="https://github.com/rrbanda/rhoai-deploy-gitops/releases"><img src="https://img.shields.io/github/v/release/rrbanda/rhoai-deploy-gitops?include_prereleases&label=release" alt="Release"></a>
-  <a href="https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5"><img src="https://img.shields.io/badge/RHOAI-3.5-red" alt="RHOAI"></a>
-  <a href="https://docs.openshift.com/"><img src="https://img.shields.io/badge/OpenShift-4.18+_-red" alt="OpenShift"></a>
-</p>
-
-<p align="center">
-  <a href="#-quick-start-5-minutes">Quick Start</a> •
-  <a href="#-architecture">Architecture</a> •
-  <a href="#-capabilities">Capabilities</a> •
-  <a href="#-version-support">Version Support</a> •
-  <a href="docs/">Documentation</a> •
-  <a href="CONTRIBUTING.md">Contributing</a>
+  <a href="https://rrbanda.github.io/rhoai-deploy-gitops/"><img src="https://img.shields.io/badge/Documentation-blue?style=for-the-badge&logo=readthedocs&logoColor=white" alt="Docs"></a>
+  <a href="https://github.com/rrbanda/rhoai-deploy-gitops/releases"><img src="https://img.shields.io/github/v/release/rrbanda/rhoai-deploy-gitops?include_prereleases&style=for-the-badge&label=Release" alt="Release"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-green?style=for-the-badge" alt="License"></a>
 </p>
 
 ---
 
-## What is this?
+## The Challenge
 
-This repository provides a **complete, declarative, GitOps-driven deployment** of [Red Hat OpenShift AI](https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-ai) (RHOAI) — the enterprise AI/ML platform built on OpenShift.
+Organizations deploying AI on Kubernetes face a recurring pattern:
 
-**One fork. One config edit. Full AI platform.**
+- **Manual installs** that cannot be reproduced — every cluster becomes a snowflake
+- **Configuration drift** — someone changes something, nobody knows what or when
+- **GPU waste** — no governance over who uses expensive accelerators and how much
+- **No audit trail** — compliance teams cannot verify what is deployed
+- **Day-2 fragility** — upgrades and changes require heroics, not automation
+
+## The Solution
+
+This repository provides the entire Red Hat OpenShift AI (RHOAI) platform as **declarative Kustomize manifests**, managed by **ArgoCD**. You describe your desired state in Git. ArgoCD makes it real and keeps it that way.
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│  You edit ONE file:  clusters/overlays/dev/cluster-config.yaml  │
-│                                                                  │
-│  repoURL: "https://github.com/YOU/rhoai-deploy-gitops.git"     │
-│  targetRevision: "main"                                          │
-│  rhoaiChannel: "beta"                                            │
-│  rhoaiOverlay: "full"                                            │
-└───────────────────────────┬─────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────────┐
-│              ArgoCD auto-syncs everything:                        │
-│  ✓ 12+ operators (RHOAI, GPU, Kueue, Service Mesh, ...)        │
-│  ✓ DataScienceCluster with all components                        │
-│  ✓ GPU scheduling & quotas (Kueue + Hardware Profiles)          │
-│  ✓ Model serving (KServe, vLLM, NIM)                            │
-│  ✓ Distributed training (Ray, PyTorch, DeepSpeed)               │
-│  ✓ Models-as-a-Service (MaaS) with governance                   │
-│  ✓ AI Gateway for inference routing                              │
-│  ✓ MLflow experiment tracking                                    │
-│  ✓ TrustyAI for evaluation & guardrails                         │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                                                                       │
+│   Git Repository (this repo)                                         │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  cluster-config.yaml   ←── THE ONLY FILE YOU EDIT           │   │
+│   │                                                              │   │
+│   │  repoURL: https://github.com/your-org/rhoai-deploy-gitops   │   │
+│   │  targetRevision: main                                        │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                              │                                        │
+│                              ▼                                        │
+│   ArgoCD (self-managing, self-healing)                               │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  Discovers 11 operators, instances, workloads from Git      │   │
+│   │  Installs them in dependency order                           │   │
+│   │  Monitors for drift — reverts manual changes automatically  │   │
+│   │  Retries on failure — converges within 15-30 minutes        │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                              │                                        │
+│                              ▼                                        │
+│   OpenShift Cluster                                                  │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │  GPU Scheduling  │  Model Serving   │  Distributed Training │   │
+│   │  Batch Inference │  AI Gateway      │  Workbenches          │   │
+│   │  Model Registry  │  MLflow          │  Pipelines            │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│                                                                       │
+└─────────────────────────────────────────────────────────────────────┘
 ```
+
+**The result:** A fully governed GPU-as-a-Service platform where teams get model serving, training capacity, and notebooks — all managed through Git with zero manual cluster access.
 
 ---
 
-## ⚡ Quick Start (5 minutes)
+## Deploy in 2 Commands
 
-### Prerequisites
-
-| Requirement | Details |
-|-------------|---------|
-| OpenShift cluster | 4.18+ with cluster-admin access |
-| Worker nodes | 2+ nodes with 8 CPU / 32 GiB RAM minimum |
-| Storage | Default StorageClass with dynamic provisioning |
-| GPU nodes | Optional — for model serving and training |
-| Tools | `oc` CLI, `git` |
-
-### Step 1: Fork & Configure
+**Prerequisites:** OpenShift 4.19+ cluster with cluster-admin access.
 
 ```bash
-# Fork this repo on GitHub, then clone your fork
-git clone https://github.com/YOUR_ORG/rhoai-deploy-gitops.git
+# 1. Fork this repo, clone your fork, and configure it
+git clone https://github.com/YOUR-ORG/rhoai-deploy-gitops.git
 cd rhoai-deploy-gitops
-
-# Configure for your fork (updates one file)
-./setup.sh --repo https://github.com/YOUR_ORG/rhoai-deploy-gitops.git
-
-# Commit and push
+./setup.sh --repo https://github.com/YOUR-ORG/rhoai-deploy-gitops.git
 git add -A && git commit -m "Configure for my cluster" && git push
-```
 
-### Step 2: Bootstrap ArgoCD
-
-```bash
-# Install OpenShift GitOps (ArgoCD) if not already present
+# 2. Bootstrap (installs ArgoCD, then ArgoCD manages everything else)
 oc apply -k bootstrap/
-
-# Wait for ArgoCD to be ready
 oc wait --for=condition=Available deployment/openshift-gitops-server \
   -n openshift-gitops --timeout=300s
-```
-
-### Step 3: Deploy
-
-```bash
-# Apply your cluster overlay — ArgoCD takes over from here
 oc apply -k clusters/overlays/dev/
-
-# Watch the magic happen
-watch oc get applications.argoproj.io -n openshift-gitops
 ```
 
-That's it. ArgoCD will install all operators, create instances, deploy the DataScienceCluster, and keep everything in sync with your Git repository.
+**That's it.** ArgoCD discovers all operators, instances, and workloads from Git, installs them in dependency order, and self-heals any drift. The platform converges in 15-30 minutes.
 
-### Step 4: Verify
+From this point forward, every change goes through Git:
+- Need a new model? Add a directory, push.
+- Need to change GPU quotas? Edit `kueue-config/`, push.
+- Need to scale down? Edit the DSC overlay, push.
+
+No more `oc apply`. No more SSH. No more snowflakes.
+
+---
+
+## What Gets Deployed
+
+| Layer | Components | Purpose |
+|-------|-----------|---------|
+| **Operators** | cert-manager, NFD, GPU Operator, Kueue, JobSet, LWS, CMA, ServiceMesh, AI Gateway, RHCL, RHOAI | Infrastructure foundations |
+| **GPU Infrastructure** | Node detection, driver installation, quota management, auto-scaling | Make GPUs schedulable and governed |
+| **AI Platform** | Dashboard, KServe, ModelMesh, Ray, Training Operator, Pipelines, Workbenches, Model Registry, MLflow, TrustyAI, OGX | Full AI/ML capabilities |
+| **Advanced Inference** | Batch Gateway (llm-d), Distributed Inference, Hardware Profiles, AI Gateway | Enterprise model serving at scale |
+| **Governance** | Models-as-a-Service, rate limiting, access control, usage tracking | Multi-tenant GPU sharing |
+
+### Capability Profiles
+
+Choose what to deploy. Each profile is a Kustomize overlay:
+
+| Profile | Enables | Use Case |
+|---------|---------|----------|
+| `minimal` | Dashboard only | Exploring the platform |
+| `serving` | Dashboard + KServe + Model Registry | Model inference |
+| `training` | Dashboard + Ray + Training Operator | Distributed training |
+| `maas` | Dashboard + KServe + AI Gateway + Batch | Models-as-a-Service |
+| **`full`** | **All 12+ components** | **Complete AI platform** |
 
 ```bash
-# Check RHOAI is fully ready (all conditions True)
-oc get datasciencecluster default-dsc \
-  -o jsonpath='{range .status.conditions[*]}{.type}: {.status}{"\n"}{end}'
+./setup.sh --repo <your-url> --overlay full
 ```
 
 ---
 
-## 🏗️ Architecture
+## Architecture
+
+The repository implements an **app-of-apps pattern**: one ArgoCD Application bootstraps everything else through auto-discovery.
 
 ```
 rhoai-deploy-gitops/
-│
-├── bootstrap/                          # OpenShift GitOps operator install
-│
-├── clusters/                           # Per-cluster configuration
-│   ├── base/                           # Shared: includes ArgoCD apps
-│   └── overlays/
-│       ├── dev/                        # Development cluster config
-│       │   ├── cluster-config.yaml     # ← THE ONE FILE YOU EDIT
-│       │   ├── kustomization.yaml      # Wires config into all apps
-│       │   └── bootstrap-app.yaml      # Self-managing bootstrap
-│       └── prod/                       # Production (create with setup.sh)
-│
+├── bootstrap/                     # Step 1: Install ArgoCD
+├── clusters/
+│   └── overlays/dev/
+│       └── cluster-config.yaml    # Step 2: YOUR configuration
 ├── components/
-│   ├── argocd/                         # ArgoCD ApplicationSets
-│   │   ├── apps/                       # Auto-discovers operators & instances
-│   │   └── projects/                   # ArgoCD project definitions
-│   │
-│   ├── operators/                      # OLM subscriptions (one dir per operator)
-│   │   ├── rhoai-operator/            # Red Hat OpenShift AI
-│   │   ├── kueue-operator/            # GPU scheduling & quotas
-│   │   ├── servicemesh/               # Service Mesh (Istio)
-│   │   ├── cma-operator/             # Custom Metrics Autoscaler (KEDA)
-│   │   ├── lws/                       # LeaderWorkerSet
-│   │   ├── rhcl/                      # Red Hat Connectivity Link (Kuadrant)
-│   │   └── ...                         # cert-manager, NFD, GPU, etc.
-│   │
-│   └── instances/                      # Operator instance CRs
-│       ├── rhoai-instance/            # DataScienceCluster (DSC)
-│       │   ├── base/                   # Common DSC configuration
-│       │   └── overlays/              # Composable capability sets
-│       │       ├── minimal/            # Dashboard only
-│       │       ├── serving/            # + KServe model serving
-│       │       ├── training/           # + Ray, Training Operator
-│       │       └── full/               # Everything enabled
-│       ├── kueue-config/              # GPU quotas & scheduling
-│       ├── hardware-profiles/         # GPU/CPU compute profiles
-│       ├── dashboard-config/          # RHOAI dashboard features
-│       ├── maas-gateway/             # Models-as-a-Service gateway
+│   ├── operators/                 # Auto-discovered by cluster-operators AppSet
+│   │   ├── rhoai-operator/
+│   │   ├── gpu-operator/
+│   │   ├── kueue-operator/
+│   │   └── ...                    # Add a directory = ArgoCD auto-deploys it
+│   └── instances/                 # Auto-discovered by cluster-instances AppSet
+│       ├── rhoai-instance/
+│       │   └── overlays/          # Choose your profile here
+│       ├── kueue-config/
 │       └── ...
-│
-├── usecases/                           # Reference deployments
-│   ├── models/                         # LLM model deployments
-│   └── services/                       # AI services (LlamaStack, etc.)
-│
-├── setup.sh                            # One-command configuration
-├── CHANGELOG.md                        # Release history
-└── UPGRADING.md                        # Version upgrade guide
+└── usecases/
+    ├── models/                    # Auto-discovered by cluster-models AppSet
+    └── services/                  # Auto-discovered by cluster-services AppSet
 ```
 
-### How It Works
+**Key design decisions:**
 
-```mermaid
-graph LR
-    A[You push to Git] --> B[ArgoCD detects change]
-    B --> C[ApplicationSets generate apps]
-    C --> D[Operators installed via OLM]
-    D --> E[Instances created]
-    E --> F[DSC reconciles components]
-    F --> G[Platform ready]
-```
-
-1. **You** edit `cluster-config.yaml` and push
-2. **ArgoCD** detects the change and syncs
-3. **ApplicationSets** auto-discover new operators/instances from directory structure
-4. **OLM** installs the operators
-5. **RHOAI Operator** reconciles the DataScienceCluster
-6. **Done** — all AI/ML capabilities are live
+1. **Single configuration file** — `cluster-config.yaml` drives all ArgoCD apps via Kustomize replacements. No find-and-replace across dozens of files.
+2. **Auto-discovery** — Add a new operator directory and push. ArgoCD creates the Application automatically. No manual ArgoCD configuration ever.
+3. **Composable profiles** — The DataScienceCluster uses overlays. Stack capabilities like LEGO bricks without duplicating manifests.
+4. **Portable** — No hardcoded cluster IDs, URLs, or registry paths. Fork it, configure it, deploy it on any OpenShift 4.19+ cluster.
+5. **Self-healing** — Every Application has `selfHeal: true`. Manual changes are reverted. The cluster always converges to Git state.
 
 ---
 
-## 🎛️ Capabilities
+## Documentation
 
-### DSC Overlays — Deploy What You Need
+**Full documentation with concepts, guides, and references:**
 
-| Overlay | What's Included | Use When |
-|---------|----------------|----------|
-| `minimal` | Dashboard | Exploring the UI |
-| `serving` | Dashboard + KServe + Model Registry | Deploying models |
-| `training` | Dashboard + Ray + Training Operator | Training models |
-| `full` | **All components** (recommended) | Production AI platform |
-| `dev` | Same as full + dev settings | Development/testing |
+[**rrbanda.github.io/rhoai-deploy-gitops**](https://rrbanda.github.io/rhoai-deploy-gitops/)
 
-### Component Matrix
+The documentation site includes:
 
-| Component | Description | Overlay |
-|-----------|-------------|---------|
-| Dashboard | Web UI for managing AI workloads | All |
-| KServe | Model serving (vLLM, NIM, custom) | serving, full |
-| Model Cache | Pre-pull models to GPU nodes | full |
-| Models-as-a-Service | Centralized LLM governance | full |
-| AI Gateway | Inference routing + batch inference | full |
-| Ray | Distributed computing framework | training, full |
-| Training Operator | PyTorch/DeepSpeed distributed training | training, full |
-| Kueue | GPU quota management & fair-share scheduling | full |
-| Pipelines | Data Science Pipelines (Argo Workflows) | full |
-| Model Registry | Model versioning & lineage | serving, full |
-| MLflow | Experiment tracking | full |
-| TrustyAI | Model evaluation & guardrails | full |
-| OGX | Orchestration extensions | full |
-| Workbenches | Jupyter notebooks | All |
+| Section | What You'll Learn |
+|---------|------------------|
+| **[Concepts](https://rrbanda.github.io/rhoai-deploy-gitops/concepts/)** | GitOps fundamentals, app-of-apps pattern, Kustomize, GPU scheduling, RHOAI architecture |
+| **[Quick Start](https://rrbanda.github.io/rhoai-deploy-gitops/quickstart/)** | Step-by-step deployment with explanations of what happens at each stage |
+| **[Capabilities](https://rrbanda.github.io/rhoai-deploy-gitops/capabilities/)** | Deep-dive on each AI/ML capability — how to enable, configure, and verify |
+| **[Architecture](https://rrbanda.github.io/rhoai-deploy-gitops/architecture/)** | Repository structure, dependency chains, sync configuration |
+| **[Troubleshooting](https://rrbanda.github.io/rhoai-deploy-gitops/reference/troubleshooting/)** | Common issues with root causes and resolution steps |
 
 ---
 
-## 📋 Version Support
+## Version Support
 
-| Release | RHOAI Version | OCP Version | Branch/Tag | Status |
-|---------|--------------|-------------|------------|--------|
-| v3.5.0-ea2 | 3.5 EA2 | 4.18+ | `main` / `v3.5.0-ea2` | **Current** |
-| v3.4.0 | 3.4 GA | 4.17–4.20 | `archive/v3.4.0` | Archived |
+| RHOAI Version | OpenShift | Tag | Status |
+|--------------|-----------|-----|--------|
+| 3.5 EA2 | 4.19+ | `v3.5.0-ea2` / `main` | **Current** |
+| 3.4 | 4.19+ | `archive/v3.4.0` | Archived |
 
-### Upgrading Between Versions
-
-See [UPGRADING.md](UPGRADING.md) for detailed upgrade instructions.
-
-**Quick version:** Change `rhoaiChannel` in your `cluster-config.yaml` and push.
+Upgrading between versions: change `rhoaiChannel` in your config, push to Git, and ArgoCD handles the operator upgrade. See [UPGRADING.md](UPGRADING.md).
 
 ---
 
-## 🔧 Customization
+## Customization
 
-### Change the RHOAI version
-
-Edit `clusters/overlays/<env>/cluster-config.yaml`:
-```yaml
-data:
-  rhoaiChannel: "fast"   # Change from "beta" to "fast" for GA releases
-```
-
-### Change which components are deployed
-
-```bash
-./setup.sh --repo <your-url> --dsc serving  # Only model serving
-./setup.sh --repo <your-url> --dsc full     # Everything
-```
-
-### Add GPU nodes
-
-See [`components/instances/gpu-workers/README.md`](components/instances/gpu-workers/README.md) for cloud-specific GPU MachineSet examples.
-
-### Add custom operators
-
-Create a new directory under `components/operators/my-operator/` with a `kustomization.yaml` and `subscription.yaml`. The ApplicationSet will auto-discover it on next sync.
-
-### Pin to a specific release
-
-```bash
-./setup.sh --repo <your-url> --branch v3.5.0-ea2
-```
+| I want to... | Do this |
+|-------------|---------|
+| Deploy on my fork | `./setup.sh --repo <url>` |
+| Change the RHOAI version | Edit `rhoaiChannel` in `cluster-config.yaml` |
+| Deploy only model serving | `./setup.sh --overlay serving` |
+| Add a new operator | Create `components/operators/my-op/` with a Subscription |
+| Add a new model | Create `usecases/models/my-model/` with an InferenceService |
+| Change GPU quotas | Edit `components/instances/kueue-config/cluster-queue.yaml` |
+| Add GPU nodes | Copy example from `components/instances/gpu-workers/examples/` |
+| Pin to a specific release | `./setup.sh --branch v3.5.0-ea2` |
 
 ---
 
-## 🛡️ Security
+## How It Compares
 
-- **Pre-commit hooks** — [gitleaks](https://github.com/gitleaks/gitleaks) scans every commit
-- **No real secrets in Git** — all Secret YAMLs use placeholder values
-- **`.gitignore`** blocks `*.pem`, `*.key`, `*.env`, `kubeconfig`
-- See [SECURITY.md](SECURITY.md) for responsible disclosure
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-**Quick ways to contribute:**
-- Add GPU MachineSet examples for Azure/GCP/bare-metal
-- Add new model deployment use cases
-- Improve documentation
-- Report bugs or suggest features
+| Approach | Reproducible | Self-Healing | Audit Trail | Multi-Cluster | Upgrade Path |
+|----------|:---:|:---:|:---:|:---:|:---:|
+| Manual `oc apply` | No | No | No | No | Manual |
+| Shell scripts | Partial | No | No | Manual | Fragile |
+| Helm charts | Yes | No | Partial | Manual | Helm upgrade |
+| **This repo (GitOps)** | **Yes** | **Yes** | **Yes** | **Yes** | **Git push** |
 
 ---
 
-## 📚 References
+## Security
 
-- [RHOAI 3.5 Documentation](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5)
-- [OpenShift GitOps (ArgoCD)](https://docs.openshift.com/gitops/latest/understanding_openshift_gitops/about-redhat-openshift-gitops.html)
+- No real secrets in Git — all Secret manifests use placeholder values
+- Pre-commit scanning with [gitleaks](https://github.com/gitleaks/gitleaks) in CI
+- `.gitignore` blocks `*.pem`, `*.key`, `*.env`, `kubeconfig`
+- See [SECURITY.md](SECURITY.md) for vulnerability reporting
+
+---
+
+## Contributing
+
+Contributions welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+**High-impact contributions:**
+- GPU MachineSet examples for Azure, GCP, or bare-metal
+- New model deployment use cases
+- Documentation improvements
+- Bug reports and feature requests
+
+---
+
+## References
+
+- [RHOAI 3.5 Documentation](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3-latest)
+- [OpenShift GitOps](https://docs.openshift.com/gitops/latest/understanding_openshift_gitops/about-redhat-openshift-gitops.html)
 - [Kueue Documentation](https://kueue.sigs.k8s.io/)
-- [redhat-cop/gitops-catalog](https://github.com/redhat-cop/gitops-catalog) — Kustomize bases for operators
-
----
-
-## ⭐ Star History
-
-If this repo helps you deploy OpenShift AI, consider giving it a star! It helps others discover it.
+- [ArgoCD Documentation](https://argo-cd.readthedocs.io/)
+- [redhat-cop/gitops-catalog](https://github.com/redhat-cop/gitops-catalog)
 
 ---
 
