@@ -19,6 +19,11 @@ managed entirely through Git.
 <a href="concepts/" class="cta-secondary">Learn the Concepts</a>
 </div>
 
+<div class="scroll-hint" markdown>
+<span class="scroll-arrow"></span>
+<span class="scroll-text">Explore below</span>
+</div>
+
 </div>
 
 <div class="grid cards" markdown>
