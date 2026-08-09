@@ -42,45 +42,42 @@ managed entirely through Git.
 
 ---
 
-<div class="journey-section" markdown>
-
 ## Choose Your Journey
 
-<p class="journey-subtitle">
-Whether you are evaluating the platform, deploying for production, or building on top of it — start here.
-</p>
+<div class="grid cards" markdown>
 
-<div class="journey-grid" markdown>
+-   :material-school: **I'm New to GitOps**
 
-<a href="concepts/" class="journey-card">
-<span class="card-icon">:material-school:</span>
-<h3>I'm New to GitOps</h3>
-<p>Understand why Git drives infrastructure, how ArgoCD works, and how this repo is structured — before running a single command.</p>
-<span class="card-tag tag-beginner">Beginner · 30 min</span>
-</a>
+    ---
 
-<a href="quickstart/" class="journey-card">
-<span class="card-icon">:material-rocket-launch:</span>
-<h3>I Want to Deploy Now</h3>
-<p>Two commands bootstrap a self-healing AI platform. Fork, configure, deploy. Every step explained.</p>
-<span class="card-tag tag-intermediate">Intermediate · 15 min</span>
-</a>
+    Understand why Git drives infrastructure, how ArgoCD works, and how this repo is structured — before running a single command.
 
-<a href="capabilities/" class="journey-card">
-<span class="card-icon">:material-puzzle:</span>
-<h3>I Need Specific Capabilities</h3>
-<p>Pick exactly what you need: serving, training, batch inference, MaaS. Deploy only what matters for your use case.</p>
-<span class="card-tag tag-intermediate">Intermediate · 10 min</span>
-</a>
+    [:octicons-arrow-right-24: Learn the Concepts](concepts/)
 
-<a href="architecture/" class="journey-card">
-<span class="card-icon">:material-layers-triple:</span>
-<h3>I'm Evaluating Architecture</h3>
-<p>See how 12 operators (10 via ApplicationSet, 2 via instance CRs), 4 ApplicationSets, and composable overlays create a self-managing AI platform.</p>
-<span class="card-tag tag-advanced">Advanced · 20 min</span>
-</a>
+-   :material-rocket-launch: **I Want to Deploy Now**
 
-</div>
+    ---
+
+    Two commands bootstrap a self-healing AI platform. Fork, configure, deploy. Every step explained.
+
+    [:octicons-arrow-right-24: Quick Start](quickstart/)
+
+-   :material-puzzle: **I Need Specific Capabilities**
+
+    ---
+
+    Pick exactly what you need: serving, training, batch inference, MaaS. Deploy only what matters for your use case.
+
+    [:octicons-arrow-right-24: Capabilities Guide](capabilities/)
+
+-   :material-layers-triple: **I'm Evaluating Architecture**
+
+    ---
+
+    See how 12 operators, 4 ApplicationSets, and composable overlays create a self-managing AI platform.
+
+    [:octicons-arrow-right-24: Repository Architecture](architecture/)
+
 </div>
 
 ---
@@ -89,24 +86,11 @@ Whether you are evaluating the platform, deploying for production, or building o
 
 Most organizations deploying AI on Kubernetes face the same challenges:
 
-<div class="journey-grid" markdown>
-
-<div class="journey-card" style="border-left: 3px solid var(--rh-red);">
-<h3>The Problem</h3>
-<p>Teams run manual installs, forget steps, create snowflake clusters, and cannot reproduce their AI platform. GPU resources are wasted. Nobody knows what changed or when.</p>
-</div>
-
-<div class="journey-card" style="border-left: 3px solid var(--rh-mid-gray);">
-<h3>The Solution</h3>
-<p>Declare your entire AI platform in Git. Push a change, ArgoCD syncs it. Self-healing, auditable, reproducible. Same manifests work on any cluster.</p>
-</div>
-
-<div class="journey-card" style="border-left: 3px solid var(--rh-green);">
-<h3>The Result</h3>
-<p>A fully managed RHOAI platform deployed via GitOps. Teams get model serving, training capacity, and GPU quotas — all governed by Git with zero manual intervention.</p>
-</div>
-
-</div>
+| | Challenge | How GitOps Solves It |
+|---|-----------|---------------------|
+| :material-alert-circle: | Teams run manual installs, forget steps, create snowflake clusters. GPU resources are wasted. Nobody knows what changed. | Declare your entire AI platform in Git. Push a change, ArgoCD syncs it. Self-healing, auditable, reproducible. |
+| :material-check-circle: | A second cluster needs the same setup — nobody remembers all the steps. An audit asks "who changed what?" and there is no answer. | Same manifests work on any cluster. `git log` is your audit trail. `git revert` rolls back any change. |
+| :material-star: | The result: a fully managed RHOAI platform deployed via GitOps. Teams get model serving, training capacity, and GPU quotas — all governed by Git with zero manual intervention. | |
 
 ---
 
@@ -161,33 +145,12 @@ graph LR
 
 ## How It Works
 
-<div class="journey-grid" markdown>
-
-<div class="journey-card">
-<span class="card-icon">:material-numeric-1-circle:</span>
-<h3>Declare</h3>
-<p>Define your desired state in YAML. Choose your profile: minimal, serving, training, full, maas, or dev. Commit to Git.</p>
-</div>
-
-<div class="journey-card">
-<span class="card-icon">:material-numeric-2-circle:</span>
-<h3>Bootstrap</h3>
-<p>Run two commands. ArgoCD installs and begins watching your Git repository for changes.</p>
-</div>
-
-<div class="journey-card">
-<span class="card-icon">:material-numeric-3-circle:</span>
-<h3>Converge</h3>
-<p>ArgoCD auto-discovers operators, instances, and workloads. The platform self-assembles in 15-30 minutes.</p>
-</div>
-
-<div class="journey-card">
-<span class="card-icon">:material-numeric-4-circle:</span>
-<h3>Operate</h3>
-<p>From this point, Git is your interface. Push changes → ArgoCD syncs → cluster updates. Self-healing, auditable, reproducible.</p>
-</div>
-
-</div>
+| Step | Action | What Happens |
+|------|--------|-------------|
+| **1. Declare** | Define your desired state in YAML. Choose your profile: minimal, serving, training, full, maas, or dev. Commit to Git. | Your intent is versioned, reviewable, and reproducible. |
+| **2. Bootstrap** | Run two commands on your cluster. | ArgoCD installs and begins watching your Git repository. |
+| **3. Converge** | Wait 15-30 minutes. | ArgoCD auto-discovers operators, instances, and workloads. The platform self-assembles. |
+| **4. Operate** | Push changes to Git. | ArgoCD syncs the cluster automatically. Self-healing, auditable, reproducible. |
 
 ---
 
