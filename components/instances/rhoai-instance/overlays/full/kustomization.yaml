@@ -3,3 +3,4 @@ kind: Kustomization
 
 resources:
   - datasciencecluster.yaml
+  - gateway-memory-rbac.yaml
