@@ -23,8 +23,8 @@ resources:
   # Inherit the complete bootstrap from default overlay
   - ../../base
 
-  # ArgoCD instance (same as default)
-  - ../default/argocd-instance.yaml
+  # ArgoCD instance
+  - argocd-instance.yaml
 
   # Disconnected-specific cluster configuration
   - cluster-config.yaml
@@ -39,7 +39,7 @@ resources:
   - ../../../components/argocd/apps
 
   # Self-management
-  - ../default/gitops-controller.yaml
+  - gitops-controller.yaml
 
 # Kustomize Replacements — same as default overlay
 replacements:
