@@ -9,28 +9,26 @@ spec:
     applicationsSync: sync
   generators:
     - git:
-        repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
-        revision: rhoai-3.5
+        repoURL: REPO_URL_PLACEHOLDER
+        revision: TARGET_REVISION_PLACEHOLDER
         directories:
           - path: components/instances/*
+          # DSC is managed by a dedicated Application (rhoai-dsc-app.yaml)
           - path: components/instances/rhoai-instance
             exclude: true
+          # GPU operator instance uses gitops-catalog external base
           - path: components/instances/gpu-instance
             exclude: true
-          # GPU workers MachineSet is cluster-specific (AMI, infra ID, etc.)
-          # Each cluster must configure its own or use cluster-autoscaler
+          # GPU MachineSets are cluster-specific — see gpu-workers/README.md
           - path: components/instances/gpu-workers
             exclude: true
-          # OIDC integration references a stale Keycloak from another cluster
-          - path: components/instances/oidc-integration
-            exclude: true
-          # Not needed in current environment
-          - path: components/instances/observability
-            exclude: true
-          - path: components/instances/monitoring-config
-            exclude: true
-          - path: components/instances/vault-dev
-            exclude: true
+          # Optional: uncomment to exclude components not needed in your env
+          # - path: components/instances/oidc-integration
+          #   exclude: true
+          # - path: components/instances/observability
+          #   exclude: true
+          # - path: components/instances/vault-dev
+          #   exclude: true
   template:
     metadata:
       name: 'instance-{{ .path.basename }}'
@@ -38,8 +36,8 @@ spec:
     spec:
       project: platform
       source:
-        repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
-        targetRevision: rhoai-3.5
+        repoURL: REPO_URL_PLACEHOLDER
+        targetRevision: TARGET_REVISION_PLACEHOLDER
         path: '{{ .path.path }}'
       destination:
         server: https://kubernetes.default.svc

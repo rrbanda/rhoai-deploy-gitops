@@ -6,8 +6,8 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
-    targetRevision: rhoai-3.4-ea2
+    repoURL: REPO_URL_PLACEHOLDER
+    targetRevision: TARGET_REVISION_PLACEHOLDER
     path: clusters/overlays/dev
   destination:
     server: https://kubernetes.default.svc

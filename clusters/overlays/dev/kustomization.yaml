@@ -1,7 +1,55 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Cluster Overlay: dev
+# ─────────────────────────────────────────────────────────────────────────────
+# This overlay configures all ArgoCD applications for a specific cluster.
+# Edit cluster-config.yaml with your fork's URL and desired settings,
+# then apply: oc apply -k clusters/overlays/dev/
+# ─────────────────────────────────────────────────────────────────────────────
+
 resources:
+  - cluster-config.yaml
   - ../../base
   - bootstrap-app.yaml
-  - rhoai-instance-app.yaml
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Automatic Value Injection
+# ─────────────────────────────────────────────────────────────────────────────
+# These replacements read values from cluster-config.yaml and inject them
+# into all ArgoCD ApplicationSets and Applications. You never need to edit
+# the ApplicationSet files directly.
+
+replacements:
+  # Inject repoURL into all ApplicationSets (generator + template)
+  - source:
+      kind: ConfigMap
+      name: cluster-gitops-config
+      fieldPath: data.repoURL
+    targets:
+      - select:
+          kind: ApplicationSet
+        fieldPaths:
+          - spec.generators.0.git.repoURL
+          - spec.template.spec.source.repoURL
+      - select:
+          kind: Application
+        fieldPaths:
+          - spec.source.repoURL
+
+  # Inject targetRevision into all ApplicationSets and Applications
+  - source:
+      kind: ConfigMap
+      name: cluster-gitops-config
+      fieldPath: data.targetRevision
+    targets:
+      - select:
+          kind: ApplicationSet
+        fieldPaths:
+          - spec.generators.0.git.revision
+          - spec.template.spec.source.targetRevision
+      - select:
+          kind: Application
+        fieldPaths:
+          - spec.source.targetRevision

@@ -9,10 +9,12 @@ spec:
     applicationsSync: sync
   generators:
     - git:
-        repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
-        revision: rhoai-3.5
+        repoURL: REPO_URL_PLACEHOLDER
+        revision: TARGET_REVISION_PLACEHOLDER
         directories:
           - path: components/operators/*
+          # GPU/NFD operators use gitops-catalog (external kustomize bases)
+          # and are handled by the gpu-instance and nfd-instance CRs
           - path: components/operators/gpu-operator
             exclude: true
           - path: components/operators/nfd
@@ -24,8 +26,8 @@ spec:
     spec:
       project: platform
       source:
-        repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
-        targetRevision: rhoai-3.5
+        repoURL: REPO_URL_PLACEHOLDER
+        targetRevision: TARGET_REVISION_PLACEHOLDER
         path: '{{ .path.path }}'
       destination:
         server: https://kubernetes.default.svc

@@ -1,88 +1,184 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DEFAULT_REPO="https://github.com/rrbanda/rhoai-deploy-gitops.git"
+# ─────────────────────────────────────────────────────────────────────────────
+# setup.sh — Configure this repository for your cluster
+# ─────────────────────────────────────────────────────────────────────────────
+# After forking this repo, run this script to point all ArgoCD applications
+# at your fork. It updates a single ConfigMap that drives everything.
+#
+# Usage:
+#   ./setup.sh --repo https://github.com/YOURORG/rhoai-deploy-gitops.git
+#   ./setup.sh --repo <url> --branch v3.5.0-ea2 --overlay prod --new-overlay
+# ─────────────────────────────────────────────────────────────────────────────
 
 usage() {
   cat <<EOF
-Usage: $0 --repo <git-repo-url>
+Usage: $0 --repo <git-repo-url> [options]
 
-Configure this repository for your fork/clone by replacing the default
-Git repo URL in all ArgoCD ApplicationSets and Applications.
+Configure a cluster overlay for your fork. This updates the single
+cluster-config.yaml that drives all ArgoCD applications via Kustomize
+replacements.
+
+Required:
+  --repo <url>       Your Git repository URL
 
 Options:
-  --repo <url>   Your Git repository URL (must end with .git)
-  --dry-run      Show what would be changed without modifying files
-  --help         Show this help message
+  --branch <ref>     Git branch or tag to track (default: main)
+  --overlay <name>   Cluster overlay to configure (default: dev)
+  --channel <ch>     RHOAI OLM channel: fast|beta|stable (default: beta)
+  --dsc <overlay>    DSC overlay: minimal|serving|training|full (default: full)
+  --new-overlay      Create a new overlay by copying from dev
+  --dry-run          Show what would be changed without modifying files
+  --help             Show this help message
 
-Example:
+Examples:
+  # Basic setup — configure for your fork
   $0 --repo https://github.com/myorg/rhoai-deploy-gitops.git
+
+  # Pin to a specific release tag
+  $0 --repo https://github.com/myorg/rhoai-deploy-gitops.git --branch v3.5.0-ea2
+
+  # Create a production overlay with minimal DSC
+  $0 --repo https://github.com/myorg/rhoai-deploy-gitops.git \\
+     --overlay prod --new-overlay --dsc serving --channel fast
+
+  # Preview changes without writing
+  $0 --repo https://github.com/myorg/rhoai-deploy-gitops.git --dry-run
 EOF
   exit 0
 }
 
+# ─── Defaults ───────────────────────────────────────────────────────────────
 REPO_URL=""
+BRANCH="main"
+OVERLAY="dev"
+CHANNEL="beta"
+DSC_OVERLAY="full"
+NEW_OVERLAY=false
 DRY_RUN=false
 
+# ─── Parse arguments ────────────────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --repo)    REPO_URL="$2"; shift 2 ;;
-    --dry-run) DRY_RUN=true; shift ;;
-    --help)    usage ;;
-    *)         echo "Unknown option: $1"; usage ;;
+    --repo)        REPO_URL="$2"; shift 2 ;;
+    --branch)      BRANCH="$2"; shift 2 ;;
+    --overlay)     OVERLAY="$2"; shift 2 ;;
+    --channel)     CHANNEL="$2"; shift 2 ;;
+    --dsc)         DSC_OVERLAY="$2"; shift 2 ;;
+    --new-overlay) NEW_OVERLAY=true; shift ;;
+    --dry-run)     DRY_RUN=true; shift ;;
+    --help)        usage ;;
+    *)             echo "Error: Unknown option: $1"; echo; usage ;;
   esac
 done
 
 if [[ -z "$REPO_URL" ]]; then
   echo "Error: --repo is required"
+  echo ""
   usage
 fi
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-FILES=(
-  "components/argocd/apps/cluster-models-appset.yaml"
-  "components/argocd/apps/cluster-services-appset.yaml"
-  "components/argocd/apps/cluster-operators-appset.yaml"
-  "components/argocd/apps/cluster-instances-appset.yaml"
-  "components/argocd/projects/base/platform-project.yaml"
-  "components/argocd/projects/base/usecases-project.yaml"
-  "clusters/overlays/dev/bootstrap-app.yaml"
-  "clusters/overlays/dev/rhoai-instance-app.yaml"
-  "clusters/overlays/dev/training-workloads-app.yaml"
-)
-
-echo "Replacing repo URL:"
-echo "  From: $DEFAULT_REPO"
-echo "  To:   $REPO_URL"
-echo ""
-
-changed=0
-for f in "${FILES[@]}"; do
-  filepath="$SCRIPT_DIR/$f"
-  if [[ ! -f "$filepath" ]]; then
-    echo "  SKIP (not found): $f"
-    continue
-  fi
-  if grep -q "$DEFAULT_REPO" "$filepath"; then
-    if $DRY_RUN; then
-      echo "  WOULD UPDATE: $f"
-    else
-      if [[ "$(uname)" == "Darwin" ]]; then
-        sed -i '' "s|$DEFAULT_REPO|$REPO_URL|g" "$filepath"
-      else
-        sed -i "s|$DEFAULT_REPO|$REPO_URL|g" "$filepath"
-      fi
-      echo "  UPDATED: $f"
-    fi
-    changed=$((changed + 1))
-  else
-    echo "  OK (already set): $f"
-  fi
-done
-
-echo ""
-echo "Done. $changed file(s) updated."
-if $DRY_RUN; then
-  echo "(dry-run mode -- no files were modified)"
+# ─── Validate inputs ───────────────────────────────────────────────────────
+if [[ "$CHANNEL" != "fast" && "$CHANNEL" != "beta" && "$CHANNEL" != "stable" ]]; then
+  echo "Error: --channel must be one of: fast, beta, stable"
+  exit 1
 fi
+
+valid_overlays=("minimal" "serving" "training" "full" "dev")
+if [[ ! " ${valid_overlays[*]} " =~ " ${DSC_OVERLAY} " ]]; then
+  echo "Error: --dsc must be one of: ${valid_overlays[*]}"
+  exit 1
+fi
+
+# ─── Locate files ──────────────────────────────────────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+OVERLAY_DIR="$SCRIPT_DIR/clusters/overlays/$OVERLAY"
+CONFIG_FILE="$OVERLAY_DIR/cluster-config.yaml"
+
+# ─── Create new overlay if requested ───────────────────────────────────────
+if $NEW_OVERLAY && [[ ! -d "$OVERLAY_DIR" ]]; then
+  SOURCE_DIR="$SCRIPT_DIR/clusters/overlays/dev"
+  if $DRY_RUN; then
+    echo "[dry-run] Would create new overlay: clusters/overlays/$OVERLAY/"
+  else
+    echo "Creating new overlay '$OVERLAY' from dev..."
+    cp -r "$SOURCE_DIR" "$OVERLAY_DIR"
+    echo "  Created: clusters/overlays/$OVERLAY/"
+  fi
+fi
+
+if [[ ! -d "$OVERLAY_DIR" ]]; then
+  echo "Error: Overlay directory not found: clusters/overlays/$OVERLAY/"
+  echo "  Run with --new-overlay to create it."
+  exit 1
+fi
+
+# ─── Display configuration ─────────────────────────────────────────────────
+echo ""
+echo "┌─────────────────────────────────────────────────────────────┐"
+echo "│  Configuring: clusters/overlays/$OVERLAY/"
+echo "├─────────────────────────────────────────────────────────────┤"
+echo "│  Repository:    $REPO_URL"
+echo "│  Revision:      $BRANCH"
+echo "│  RHOAI Channel: $CHANNEL"
+echo "│  DSC Overlay:   $DSC_OVERLAY"
+echo "└─────────────────────────────────────────────────────────────┘"
+echo ""
+
+if $DRY_RUN; then
+  echo "[dry-run] Would write: clusters/overlays/$OVERLAY/cluster-config.yaml"
+  echo "[dry-run] No files were modified."
+  exit 0
+fi
+
+# ─── Write cluster-config.yaml ─────────────────────────────────────────────
+cat > "$CONFIG_FILE" <<EOF
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-gitops-config
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+data:
+  # ──────────────────────────────────────────────────────────────────────────────
+  # CLUSTER CONFIGURATION
+  # ──────────────────────────────────────────────────────────────────────────────
+  # Generated by: ./setup.sh --repo $REPO_URL --branch $BRANCH
+  # Date: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
+  # ──────────────────────────────────────────────────────────────────────────────
+
+  repoURL: "$REPO_URL"
+  targetRevision: "$BRANCH"
+  rhoaiChannel: "$CHANNEL"
+  rhoaiOverlay: "$DSC_OVERLAY"
+EOF
+
+# ─── Update RHOAI operator channel if patch file exists ────────────────────
+CHANNEL_PATCH="$SCRIPT_DIR/components/operators/rhoai-operator/patch-channel.yaml"
+if [[ -f "$CHANNEL_PATCH" ]]; then
+  cat > "$CHANNEL_PATCH" <<EOF
+- op: replace
+  path: /spec/channel
+  value: $CHANNEL
+EOF
+  echo "  Updated: components/operators/rhoai-operator/patch-channel.yaml"
+fi
+
+# ─── Update DSC app path if rhoai-dsc-app.yaml uses a specific overlay ─────
+DSC_APP="$SCRIPT_DIR/components/argocd/apps/rhoai-dsc-app.yaml"
+if [[ -f "$DSC_APP" ]]; then
+  sed -i.bak "s|path: components/instances/rhoai-instance/overlays/.*|path: components/instances/rhoai-instance/overlays/$DSC_OVERLAY|" "$DSC_APP"
+  rm -f "$DSC_APP.bak"
+  echo "  Updated: components/argocd/apps/rhoai-dsc-app.yaml (overlay: $DSC_OVERLAY)"
+fi
+
+echo "  Updated: clusters/overlays/$OVERLAY/cluster-config.yaml"
+echo ""
+echo "Done! Next steps:"
+echo "  1. Review changes: git diff"
+echo "  2. Commit:         git add -A && git commit -m 'Configure for my cluster'"
+echo "  3. Push:           git push origin main"
+echo "  4. Bootstrap:      oc apply -k clusters/overlays/$OVERLAY/"
+echo ""

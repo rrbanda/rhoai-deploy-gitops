@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-gitops-config
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+data:
+  # ──────────────────────────────────────────────────────────────────────────────
+  # CLUSTER CONFIGURATION
+  # ──────────────────────────────────────────────────────────────────────────────
+  # This is the ONLY file you need to edit after forking this repository.
+  # All ArgoCD applications and ApplicationSets read their values from here.
+  #
+  # After editing, run: oc apply -k clusters/overlays/dev/
+  # ──────────────────────────────────────────────────────────────────────────────
+
+  # Your fork's Git repository URL
+  repoURL: "https://github.com/rrbanda/rhoai-deploy-gitops.git"
+
+  # Git revision to track (branch name, tag, or commit SHA)
+  # Examples: "main", "v3.5.0-ea2", "release/3.5"
+  targetRevision: "main"
+
+  # RHOAI operator OLM channel
+  # Options: "fast" (GA), "beta" (EA/preview), "stable" (LTS)
+  rhoaiChannel: "beta"
+
+  # DataScienceCluster overlay to deploy
+  # Options: "minimal", "serving", "training", "full", "dev"
+  # See components/instances/rhoai-instance/overlays/ for details
+  rhoaiOverlay: "full"

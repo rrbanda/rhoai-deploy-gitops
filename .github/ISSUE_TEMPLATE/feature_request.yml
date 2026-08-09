@@ -1,0 +1,39 @@
+name: Feature Request
+description: Suggest a new capability or improvement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What would you like?
+      description: Clear description of the feature or improvement
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Why is this useful?
+      description: What problem does this solve? Who benefits?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Have you tried any workarounds?
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - New operator support
+        - New cloud provider (GPU MachineSets)
+        - New model/service use case
+        - Documentation
+        - CI/CD
+        - Developer experience
+        - Other

@@ -9,20 +9,10 @@ spec:
     applicationsSync: sync
   generators:
     - git:
-        repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
-        revision: rhoai-3.5
+        repoURL: REPO_URL_PLACEHOLDER
+        revision: TARGET_REVISION_PLACEHOLDER
         directories:
           - path: usecases/services/*/profiles/tier1-minimal
-          # Exclude services not currently deployed (re-enable by removing exclude)
-          - path: usecases/services/toolorchestra-app/profiles/tier1-minimal
-            exclude: true
-          # MaaS services managed by rrbanda/maas-demo via dedicated ArgoCD Application
-          - path: usecases/services/ai-gateway/profiles/tier1-minimal
-            exclude: true
-          - path: usecases/services/guardrails-gateway/profiles/tier1-minimal
-            exclude: true
-          - path: usecases/services/llm-d-epp/profiles/tier1-minimal
-            exclude: true
   template:
     metadata:
       name: 'service-{{ index .path.segments 2 }}'
@@ -30,8 +20,8 @@ spec:
     spec:
       project: usecases
       source:
-        repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
-        targetRevision: rhoai-3.5
+        repoURL: REPO_URL_PLACEHOLDER
+        targetRevision: TARGET_REVISION_PLACEHOLDER
         path: '{{ .path.path }}'
       destination:
         server: https://kubernetes.default.svc
