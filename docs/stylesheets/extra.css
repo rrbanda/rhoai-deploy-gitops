@@ -659,6 +659,114 @@ html {
   scroll-behavior: smooth;
 }
 
+/* ==========================================================================
+   DOT NAVIGATION — Fixed left-side section indicator
+   ========================================================================== */
+
+.dot-nav {
+  position: fixed;
+  left: 1.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.dot-nav__dot {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.dot-nav__dot::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--rh-border);
+  background: transparent;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.dot-nav__dot:hover::before {
+  border-color: var(--rh-red);
+  background: rgba(238, 0, 0, 0.3);
+  transform: scale(1.2);
+}
+
+.dot-nav__dot--active::before {
+  border-color: var(--rh-red);
+  background: var(--rh-red);
+  transform: scale(1.2);
+  box-shadow: 0 0 8px rgba(238, 0, 0, 0.4);
+}
+
+.dot-nav__label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--md-default-fg-color--light);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.dot-nav__dot:hover .dot-nav__label {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.dot-nav__dot--active .dot-nav__label {
+  opacity: 1;
+  transform: translateX(0);
+  color: var(--rh-red);
+}
+
+/* Connecting line between dots */
+.dot-nav__dot + .dot-nav__dot {
+  position: relative;
+}
+
+.dot-nav__dot + .dot-nav__dot::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  bottom: calc(100% + 2px);
+  width: 1px;
+  height: calc(1.2rem - 4px);
+  background: var(--rh-border);
+}
+
+/* ==========================================================================
+   LANDING SECTIONS — Full-height with scroll-snap
+   ========================================================================== */
+
+.snap-section {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem 0;
+  scroll-margin-top: 4rem;
+}
+
+.snap-section--hero {
+  min-height: 60vh;
+  padding-bottom: 1rem;
+}
+
+.snap-section--compact {
+  min-height: auto;
+  padding: 2rem 0;
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 960px) {
   .why-grid {
@@ -668,6 +776,9 @@ html {
     grid-template-columns: 1fr 1fr;
   }
   .step-card + .step-card::after {
+    display: none;
+  }
+  .dot-nav {
     display: none;
   }
 }
@@ -681,5 +792,9 @@ html {
   }
   .step-flow {
     grid-template-columns: 1fr;
+  }
+  .snap-section {
+    min-height: auto;
+    padding: 2rem 0;
   }
 }

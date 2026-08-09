@@ -4,6 +4,28 @@ hide:
   - toc
 ---
 
+<nav class="dot-nav" aria-label="Page sections">
+<a href="#hero" class="dot-nav__dot dot-nav__dot--active" title="Home">
+<span class="dot-nav__label">Home</span>
+</a>
+<a href="#journey" class="dot-nav__dot" title="Choose Your Path">
+<span class="dot-nav__label">Your Path</span>
+</a>
+<a href="#why" class="dot-nav__dot" title="Why GitOps">
+<span class="dot-nav__label">Why GitOps</span>
+</a>
+<a href="#stack" class="dot-nav__dot" title="What Gets Deployed">
+<span class="dot-nav__label">Stack</span>
+</a>
+<a href="#how" class="dot-nav__dot" title="How It Works">
+<span class="dot-nav__label">How It Works</span>
+</a>
+<a href="#start" class="dot-nav__dot" title="Get Started">
+<span class="dot-nav__label">Get Started</span>
+</a>
+</nav>
+
+<div id="hero" class="snap-section snap-section--hero" markdown>
 <div class="hero" markdown>
 
 # Deploy **Red Hat OpenShift AI** with GitOps
@@ -19,12 +41,15 @@ managed entirely through Git.
 <a href="concepts/" class="cta-secondary">Learn the Concepts</a>
 </div>
 
-<div class="scroll-hint" markdown>
+<div class="scroll-hint">
 <span class="scroll-arrow"></span>
 <span class="scroll-text">Explore below</span>
 </div>
 
 </div>
+</div>
+
+<div id="journey" class="snap-section" markdown>
 
 <div class="grid cards" markdown>
 
@@ -62,8 +87,9 @@ managed entirely through Git.
 
 </div>
 
----
+</div>
 
+<div id="why" class="snap-section" markdown>
 <div class="landing-section" markdown>
 
 ## Why GitOps for OpenShift AI?
@@ -101,14 +127,14 @@ managed entirely through Git.
 </div>
 
 </div>
+</div>
 
----
-
+<div id="stack" class="snap-section" markdown>
 <div class="landing-section landing-alt" markdown>
 
 ## What Gets Deployed
 
-<span class="section-subtitle">A single `git push` manages the complete AI/ML stack — from operators to workloads.</span>
+<span class="section-subtitle">A single git push manages the complete AI/ML stack — from operators to workloads.</span>
 
 <div class="stack-layer stack-layer--operators" markdown>
 <span class="stack-label">Operators</span>
@@ -167,9 +193,9 @@ graph LR
 ```
 
 </div>
+</div>
 
----
-
+<div id="how" class="snap-section" markdown>
 <div class="landing-section" markdown>
 
 ## How It Works
@@ -213,8 +239,9 @@ From this point, **Git is your interface**. Push a change, ArgoCD syncs. Self-he
 </div>
 
 </div>
+</div>
 
----
+<div id="start" class="snap-section snap-section--compact" markdown>
 
 !!! info "Prerequisites"
 
@@ -223,8 +250,6 @@ From this point, **Git is your interface**. Push a change, ArgoCD syncs. Self-he
 !!! tip "Version Support"
 
     Defaults to the **`fast` channel** (latest GA release). Switch channels via `configure.sh` or Kustomize patches. See the [Configuration guide](configuration/) and the [official compatibility matrix](https://access.redhat.com/articles/rhoai-supported-configs-3.x).
-
----
 
 <div class="final-cta" markdown>
 
@@ -237,6 +262,8 @@ Start with the concepts to understand the architecture, or jump straight to depl
 <a href="concepts/" class="cta-secondary">Concepts</a>
 <a href="capabilities/" class="cta-secondary">Capabilities</a>
 <a href="usecases/" class="cta-secondary">Use Cases</a>
+</div>
+
 </div>
 
 </div>
