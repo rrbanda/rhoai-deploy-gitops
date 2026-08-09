@@ -7,4 +7,4 @@ resources:
   - cluster-instances-appset.yaml
   - cluster-models-appset.yaml
   - cluster-services-appset.yaml
-  - maas-demo-gateway-app.yaml
+  - rhoai-dsc-app.yaml
