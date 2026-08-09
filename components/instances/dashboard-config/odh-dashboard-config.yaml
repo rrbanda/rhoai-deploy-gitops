@@ -9,9 +9,7 @@ metadata:
 spec:
   dashboardConfig:
     disableKueue: false
-    disableHardwareProfiles: false
     disableDistributedWorkloads: false
-    disableFineTuning: false
     disableLLMd: false
     disableLMEval: false
     genAiStudio: true
@@ -20,5 +18,4 @@ spec:
     observabilityDashboard: true
     vLLMDeploymentOnMaaS: true
     trainingJobs: true
-    mlflow: true
     maasAuthPolicies: true
