@@ -386,50 +386,6 @@
   background: #ffffff;
 }
 
-/* ---------- Stats Bar ---------- */
-.stats-bar {
-  display: flex;
-  justify-content: center;
-  gap: 0;
-  margin: 2.5rem auto;
-  max-width: 600px;
-  flex-wrap: wrap;
-}
-
-.stat-item {
-  text-align: center;
-  padding: 0 2rem;
-  position: relative;
-}
-
-.stat-item + .stat-item::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 15%;
-  height: 70%;
-  width: 1px;
-  background: var(--rh-border);
-}
-
-.stat-number {
-  font-size: 2rem;
-  font-weight: 900;
-  color: var(--rh-red);
-  display: block;
-  line-height: 1.2;
-}
-
-.stat-label {
-  font-size: 0.65rem;
-  color: var(--md-default-fg-color--light);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 600;
-  margin-top: 0.2rem;
-  display: block;
-}
-
 /* ---------- Landing Sections ---------- */
 .landing-section {
   padding: 2.5rem 0;
@@ -722,15 +678,6 @@ html {
   }
   .hero .subtitle {
     font-size: 0.88rem;
-  }
-  .stats-bar {
-    gap: 0;
-  }
-  .stat-item {
-    padding: 0 1.2rem;
-  }
-  .stat-number {
-    font-size: 1.5rem;
   }
   .step-flow {
     grid-template-columns: 1fr;
