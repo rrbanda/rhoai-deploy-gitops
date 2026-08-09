@@ -180,8 +180,6 @@ cmd_mirror() {
 # ─── Subcommand: generate-imageset ──────────────────────────────────────────
 
 cmd_generate_imageset() {
-  local mirror_url="${TARGET_REGISTRY:-registry.example.com:5000}"
-
   echo ""
   echo "# ─────────────────────────────────────────────────────────────────"
   echo "# ImageSetConfiguration for oc-mirror"
