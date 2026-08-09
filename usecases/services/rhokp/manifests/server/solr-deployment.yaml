@@ -22,7 +22,7 @@ spec:
       serviceAccountName: rhokp-sa
       containers:
         - name: solr
-          image: registry.redhat.io/offline-knowledge-portal/rhokp-rhel9:latest
+          image: registry.redhat.io/offline-knowledge-portal/rhokp-rhel9:1
           env:
             - name: ACCESS_KEY
               valueFrom:

@@ -27,7 +27,7 @@ spec:
       serviceAccountName: rhokp-sa
       containers:
         - name: okp-mcp
-          image: quay.io/redhat-user-workloads/rhel-lightspeed-tenant/okp-mcp:latest
+          image: quay.io/redhat-user-workloads/rhel-lightspeed-tenant/okp-mcp:1
           env:
             - name: MCP_TRANSPORT
               value: streamable-http

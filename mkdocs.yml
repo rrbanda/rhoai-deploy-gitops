@@ -130,4 +130,5 @@ nav:
     - Sync Configuration: reference/sync-config.md
     - Troubleshooting: reference/troubleshooting.md
     - Teardown: reference/teardown.md
+    - Network Policies: reference/network-policies.md
     - Known Issues: reference/known-issues.md

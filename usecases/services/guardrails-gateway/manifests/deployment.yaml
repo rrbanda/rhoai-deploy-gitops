@@ -44,7 +44,7 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 10
         - name: orchestrator-proxy
-          image: registry.access.redhat.com/ubi9/python-311:latest
+          image: registry.access.redhat.com/ubi9/python-311:1
           command: ["python3", "/config/orchestrator.py"]
           ports:
             - containerPort: 8085

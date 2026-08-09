@@ -64,3 +64,16 @@ When using `ServerSideApply=true` with the DSC, the `batchGateway` field can pro
 ## 14. LlamaStack and OGX Conflict
 
 The `llamastackoperator` and `ogx` (OpenGenX) DSC components cannot both be `Managed` simultaneously. If you enable OGX, set `llamastackoperator.managementState: Removed`.
+
+## 15. ArgoCD High Availability
+
+The default ArgoCD instance in this repository runs with single replicas for the server, repo-server, and controller components. This is appropriate for development and testing but represents a single point of failure in production.
+
+For production environments, consider:
+
+- Enabling autoscale for the ArgoCD server (`spec.server.autoscale.enabled: true`)
+- Setting `spec.ha.enabled: true` for HA mode with multiple replicas
+- Adding resource limits for Redis (currently configured with 256Mi/128Mi)
+- Using an external Redis instance for large-scale deployments
+
+See the [OpenShift GitOps HA documentation](https://docs.openshift.com/gitops/latest/ha/ha-overview.html) for detailed guidance.

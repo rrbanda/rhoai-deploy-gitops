@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: registry.redhat.io/rhel9/postgresql-16:latest
+          image: registry.redhat.io/rhel9/postgresql-16:1
           imagePullPolicy: Always
           ports:
             - containerPort: 5432

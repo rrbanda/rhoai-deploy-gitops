@@ -48,7 +48,7 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: patch
-              image: registry.redhat.io/openshift4/ose-cli:latest
+              image: registry.redhat.io/openshift4/ose-cli:v4.18
               command:
                 - /bin/bash
                 - -c

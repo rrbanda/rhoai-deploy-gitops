@@ -19,7 +19,7 @@ spec:
       restartPolicy: OnFailure
       containers:
         - name: download
-          image: registry.access.redhat.com/ubi9/python-311:latest
+          image: registry.access.redhat.com/ubi9/python-311:1
           command:
             - bash
             - -ec
