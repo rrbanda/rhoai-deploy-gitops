@@ -1,0 +1,8 @@
+{
+  "enabled": "false",
+  "name": "genai-toolbox",
+  "category": "services",
+  "path": "usecases/services/genai-toolbox/profiles/tier1-minimal",
+  "namespace": "genai-toolbox",
+  "description": "GenAI Toolbox — tool calling infrastructure for function-calling agents"
+}

@@ -177,6 +177,161 @@ clusters/
 
 Each overlay can point to a different branch, use a different DSC profile, or target a different RHOAI channel.
 
+## Deploying Models and Services (Opt-In Pattern)
+
+By default, **no models or services are deployed**. The RHOAI platform (operators, DSC, instances) is fully enabled, but workload deployment is opt-in. This ensures the platform is portable across clusters without deploying cluster-specific workloads.
+
+### How It Works
+
+Each model and service directory contains a `config.json` marker file:
+
+```
+usecases/
+├── models/
+│   ├── gemma2-9b-fp8/
+│   │   └── profiles/tier1-minimal/
+│   │       ├── config.json          ← Opt-in control
+│   │       └── kustomization.yaml   ← Actual manifests
+│   └── qwen25-7b-instruct/
+│       └── profiles/tier1-minimal/
+│           ├── config.json
+│           └── kustomization.yaml
+└── services/
+    ├── llm-d-epp/
+    │   └── profiles/tier1-minimal/
+    │       ├── config.json
+    │       └── kustomization.yaml
+    └── ...
+```
+
+The `config.json` declares whether the workload should be deployed:
+
+```json
+{
+  "enabled": "false",
+  "name": "gemma2-9b-fp8",
+  "category": "models",
+  "path": "usecases/models/gemma2-9b-fp8/profiles/tier1-minimal",
+  "namespace": "models-as-a-service",
+  "description": "Gemma 2 9B FP8 quantized model",
+  "gpu_required": "1x NVIDIA L4/A10G (24GB VRAM)"
+}
+```
+
+The ArgoCD ApplicationSets use a **Git File Generator** with a **post-selector** that only creates Applications for entries where `"enabled": "true"`:
+
+```yaml
+generators:
+  - git:
+      repoURL: ...
+      files:
+        - path: usecases/models/*/profiles/tier1-minimal/config.json
+    selector:
+      matchLabels:
+        enabled: "true"
+```
+
+### Enabling a Model or Service
+
+**Option A: Using setup.sh (recommended)**
+
+```bash
+# Enable a model
+./setup.sh enable-model gemma2-9b-fp8
+
+# Enable a service
+./setup.sh enable-service llm-d-epp
+
+# Check what's enabled
+./setup.sh status
+```
+
+**Option B: Direct config.json edit**
+
+```bash
+# Edit the config.json directly
+vi usecases/models/gemma2-9b-fp8/profiles/tier1-minimal/config.json
+# Change "enabled": "false" → "enabled": "true"
+```
+
+**Option C: Using jq in a pipeline**
+
+```bash
+jq '.enabled = "true"' usecases/models/gemma2-9b-fp8/profiles/tier1-minimal/config.json \
+  > tmp.json && mv tmp.json usecases/models/gemma2-9b-fp8/profiles/tier1-minimal/config.json
+```
+
+After enabling, commit and push. ArgoCD detects the config.json change, generates a new Application for the model, and syncs it.
+
+### Disabling a Model or Service
+
+Set `"enabled": "false"` in config.json (or use `./setup.sh disable-model <name>`), then commit and push. Because the ApplicationSets use `prune: true`, ArgoCD will automatically delete the Application and all its child resources from the cluster.
+
+### Why This Pattern?
+
+| Concern | How it's addressed |
+|---------|-------------------|
+| Portability | Platform deploys on any cluster; workloads are opt-in |
+| No accidental deployments | Models with hardcoded endpoints won't auto-deploy |
+| Self-service | Teams enable models via PR — no ApplicationSet edits needed |
+| Declarative | Everything is in Git — no imperative ArgoCD CLI commands |
+| Metadata | config.json carries description, GPU requirements, namespace |
+| Reversible | Disable and push — ArgoCD prunes everything cleanly |
+
+### Available Models
+
+| Model | GPU Requirement | Description |
+|-------|----------------|-------------|
+| `gemma2-9b-fp8` | 1x L4/A10G | General-purpose instruct (FP8 quantized) |
+| `qwen25-7b-instruct` | 1x L4/A10G | Multilingual reasoning and chat |
+| `qwen-math-7b` | 1x L4/A10G | Mathematical reasoning specialist |
+| `orchestrator-8b` | 1x L4/A10G | Multi-agent orchestration router |
+| `gpt-oss-120b` | 4x A100 80GB | Large-scale model (tensor parallelism) |
+
+### Available Services
+
+| Service | Description | Requires Customization |
+|---------|-------------|----------------------|
+| `ai-gateway` | Kuadrant API gateway with OIDC auth | Yes — needs cluster URLs |
+| `guardrails-gateway` | Content safety input/output filtering | No |
+| `genai-toolbox` | Tool calling infrastructure for agents | No |
+| `llamastack` | Meta LlamaStack inference distribution | No |
+| `llm-d-epp` | Intelligent request routing (EPP) | No |
+| `rhokp` | RAG-as-a-Service knowledge platform | No |
+| `toolorchestra-app` | Multi-agent orchestration platform | No |
+
+!!! warning "Services requiring customization"
+    Some services (e.g., `ai-gateway`) contain cluster-specific URLs that must be updated before enabling. The `setup.sh enable-service` command will warn you if customization is needed. Check the `requires_customization` and `customization_note` fields in the service's `config.json`.
+
+### Adding a New Model or Service
+
+1. Create the directory structure:
+   ```
+   usecases/models/my-new-model/
+   ├── manifests/
+   │   ├── kustomization.yaml
+   │   └── inference-service.yaml
+   └── profiles/
+       └── tier1-minimal/
+           ├── config.json
+           └── kustomization.yaml
+   ```
+
+2. Create `config.json` with `"enabled": "false"`:
+   ```json
+   {
+     "enabled": "false",
+     "name": "my-new-model",
+     "category": "models",
+     "path": "usecases/models/my-new-model/profiles/tier1-minimal",
+     "namespace": "models-as-a-service",
+     "description": "My custom model description",
+     "gpu_required": "1x NVIDIA L4 (24GB VRAM)"
+   }
+   ```
+
+3. The ApplicationSet auto-discovers new `config.json` files — no need to edit any ApplicationSet. When you set `"enabled": "true"` and push, ArgoCD generates and syncs the new Application automatically.
+
 ## Environment Variables (Advanced)
 
 For CI/CD pipelines that configure the repo automatically:

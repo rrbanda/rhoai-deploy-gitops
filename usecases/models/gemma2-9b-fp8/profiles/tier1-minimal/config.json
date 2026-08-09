@@ -1,0 +1,9 @@
+{
+  "enabled": "false",
+  "name": "gemma2-9b-fp8",
+  "category": "models",
+  "path": "usecases/models/gemma2-9b-fp8/profiles/tier1-minimal",
+  "namespace": "models-as-a-service",
+  "description": "Gemma 2 9B FP8 quantized model — general-purpose instruct",
+  "gpu_required": "1x NVIDIA L4/A10G (24GB VRAM)"
+}

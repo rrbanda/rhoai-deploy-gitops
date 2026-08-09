@@ -1,0 +1,8 @@
+{
+  "enabled": "false",
+  "name": "rhokp",
+  "category": "services",
+  "path": "usecases/services/rhokp/profiles/tier1-minimal",
+  "namespace": "rhokp",
+  "description": "Red Hat OpenShift Knowledge Platform — RAG-as-a-Service with document ingestion"
+}

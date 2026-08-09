@@ -1,0 +1,9 @@
+{
+  "enabled": "false",
+  "name": "gpt-oss-120b",
+  "category": "models",
+  "path": "usecases/models/gpt-oss-120b/profiles/tier1-minimal",
+  "namespace": "models-as-a-service",
+  "description": "GPT-OSS 120B — large-scale multi-GPU model (requires TP/PP)",
+  "gpu_required": "4x NVIDIA A100 80GB (tensor parallelism)"
+}

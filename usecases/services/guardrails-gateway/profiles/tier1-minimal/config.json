@@ -1,0 +1,8 @@
+{
+  "enabled": "false",
+  "name": "guardrails-gateway",
+  "category": "services",
+  "path": "usecases/services/guardrails-gateway/profiles/tier1-minimal",
+  "namespace": "guardrails-gateway",
+  "description": "Content safety guardrails gateway — input/output filtering for LLMs"
+}

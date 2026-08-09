@@ -22,9 +22,12 @@ spec:
           # GPU MachineSets are cluster-specific — see gpu-workers/README.md
           - path: components/instances/gpu-workers
             exclude: true
+          # OIDC integration requires cluster-specific Keycloak URLs — disabled
+          # by default. To enable: update authconfig.yaml with your IdP, then
+          # remove or comment out this exclude rule.
+          - path: components/instances/oidc-integration
+            exclude: true
           # Optional: uncomment to exclude components not needed in your env
-          # - path: components/instances/oidc-integration
-          #   exclude: true
           # - path: components/instances/observability
           #   exclude: true
           # - path: components/instances/vault-dev

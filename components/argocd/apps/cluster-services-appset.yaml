@@ -5,26 +5,38 @@ metadata:
   namespace: openshift-gitops
 spec:
   goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
   syncPolicy:
     applicationsSync: sync
   generators:
     - git:
         repoURL: REPO_URL_PLACEHOLDER
         revision: TARGET_REVISION_PLACEHOLDER
-        directories:
-          - path: usecases/services/*/profiles/tier1-minimal
+        files:
+          - path: usecases/services/*/profiles/tier1-minimal/config.json
+      # Only deploy services where config.json has "enabled": "true"
+      # To enable a service, edit its config.json and set enabled to "true"
+      selector:
+        matchLabels:
+          enabled: "true"
   template:
     metadata:
-      name: 'service-{{ index .path.segments 2 }}'
+      name: 'service-{{ .name }}'
       namespace: openshift-gitops
+      labels:
+        app.kubernetes.io/part-of: rhoai-services
+        rhoai.redhat.com/category: '{{ .category }}'
+      annotations:
+        rhoai.redhat.com/description: '{{ .description }}'
     spec:
       project: usecases
       source:
         repoURL: REPO_URL_PLACEHOLDER
         targetRevision: TARGET_REVISION_PLACEHOLDER
-        path: '{{ .path.path }}'
+        path: '{{ .path }}'
       destination:
         server: https://kubernetes.default.svc
+        namespace: '{{ .namespace }}'
       ignoreDifferences:
         - group: serving.kserve.io
           kind: InferenceService

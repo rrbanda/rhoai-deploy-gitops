@@ -1,0 +1,9 @@
+{
+  "enabled": "false",
+  "name": "orchestrator-8b",
+  "category": "models",
+  "path": "usecases/models/orchestrator-8b/profiles/tier1-minimal",
+  "namespace": "models-as-a-service",
+  "description": "Orchestrator 8B — multi-agent orchestration router",
+  "gpu_required": "1x NVIDIA L4/A10G (24GB VRAM)"
+}

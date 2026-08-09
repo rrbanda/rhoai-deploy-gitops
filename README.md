@@ -64,7 +64,7 @@ This repository provides the entire Red Hat OpenShift AI (RHOAI) platform as **d
 
 ## Deploy in 2 Commands
 
-**Prerequisites:** OpenShift 4.19+ cluster with cluster-admin access.
+**Prerequisites:** OpenShift 4.18+ cluster with cluster-admin access.
 
 ```bash
 # 1. Fork this repo, clone your fork, and configure it
@@ -80,12 +80,22 @@ oc wait --for=condition=Available deployment/openshift-gitops-server \
 oc apply -k clusters/overlays/dev/
 ```
 
-**That's it.** ArgoCD discovers all operators, instances, and workloads from Git, installs them in dependency order, and self-heals any drift. The platform converges in 15-30 minutes.
+**That's it.** ArgoCD discovers all operators and platform instances from Git, installs them in dependency order, and self-heals any drift. The platform converges in 15-30 minutes.
+
+> **Note:** Only the RHOAI platform is deployed by default. Models and services are **opt-in** — you choose what to deploy:
+>
+> ```bash
+> ./setup.sh enable-model gemma2-9b-fp8    # Enable a model
+> ./setup.sh enable-service llm-d-epp       # Enable a service
+> ./setup.sh status                          # See what's enabled
+> git add -A && git commit -m "Enable gemma2" && git push
+> ```
 
 From this point forward, every change goes through Git:
-- Need a new model? Add a directory, push.
+- Need a new model? Enable it in `config.json`, push.
 - Need to change GPU quotas? Edit `kueue-config/`, push.
 - Need to scale down? Edit the DSC overlay, push.
+- Need to remove a model? Disable it, push — ArgoCD prunes it.
 
 No more `oc apply`. No more SSH. No more snowflakes.
 
@@ -141,17 +151,24 @@ rhoai-deploy-gitops/
 │       ├── kueue-config/
 │       └── ...
 └── usecases/
-    ├── models/                    # Auto-discovered by cluster-models AppSet
-    └── services/                  # Auto-discovered by cluster-services AppSet
+    ├── models/                    # Opt-in via config.json (cluster-models AppSet)
+    │   └── gemma2-9b-fp8/
+    │       └── profiles/tier1-minimal/
+    │           └── config.json    # "enabled": "true" to deploy
+    └── services/                  # Opt-in via config.json (cluster-services AppSet)
+        └── llm-d-epp/
+            └── profiles/tier1-minimal/
+                └── config.json
 ```
 
 **Key design decisions:**
 
 1. **Single configuration file** — `cluster-config.yaml` drives all ArgoCD apps via Kustomize replacements. No find-and-replace across dozens of files.
-2. **Auto-discovery** — Add a new operator directory and push. ArgoCD creates the Application automatically. No manual ArgoCD configuration ever.
-3. **Composable profiles** — The DataScienceCluster uses overlays. Stack capabilities like LEGO bricks without duplicating manifests.
-4. **Portable** — No hardcoded cluster IDs, URLs, or registry paths. Fork it, configure it, deploy it on any OpenShift 4.19+ cluster.
-5. **Self-healing** — Every Application has `selfHeal: true`. Manual changes are reverted. The cluster always converges to Git state.
+2. **Auto-discovery for platform** — Add a new operator directory and push. ArgoCD creates the Application automatically. No manual ArgoCD configuration ever.
+3. **Opt-in for workloads** — Models and services use `config.json` markers with an ArgoCD post-selector. Nothing deploys unless you explicitly enable it. This keeps the repo portable.
+4. **Composable profiles** — The DataScienceCluster uses overlays. Stack capabilities like LEGO bricks without duplicating manifests.
+5. **Portable** — No hardcoded cluster IDs, URLs, or registry paths. Fork it, configure it, deploy it on any OpenShift 4.18+ cluster.
+6. **Self-healing** — Every Application has `selfHeal: true`. Manual changes are reverted. The cluster always converges to Git state.
 
 ---
 
@@ -177,8 +194,8 @@ The documentation site includes:
 
 | RHOAI Version | OpenShift | Tag | Status |
 |--------------|-----------|-----|--------|
-| 3.5 EA2 | 4.19+ | `v3.5.0-ea2` / `main` | **Current** |
-| 3.4 | 4.19+ | `archive/v3.4.0` | Archived |
+| 3.5 EA2 | 4.18+ | `v3.5.0-ea2` / `main` | **Current** |
+| 3.4 | 4.18+ | `archive/v3.4.0` | Archived |
 
 Upgrading between versions: change `rhoaiChannel` in your config, push to Git, and ArgoCD handles the operator upgrade. See [UPGRADING.md](UPGRADING.md).
 
