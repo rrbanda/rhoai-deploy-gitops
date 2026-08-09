@@ -16,13 +16,12 @@ spec:
       kind: DataScienceCluster
       jsonPointers:
         - /status
-        - /metadata/annotations/force-reconcile
-        - /metadata/annotations/reconcile-trigger
   syncPolicy:
     automated:
       selfHeal: true
       prune: false
     syncOptions:
+      - Replace=true
       - RespectIgnoreDifferences=true
       - CreateNamespace=false
     retry:
