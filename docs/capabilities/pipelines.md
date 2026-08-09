@@ -2,6 +2,49 @@
 
 Data Science Pipelines provide a Kubeflow Pipelines-compatible platform for building and running ML workflows on OpenShift AI. Use pipelines when you need reproducible, automated ML workflows with experiment tracking, scheduling, and artifact management.
 
+## Pipeline Execution Architecture
+
+When a pipeline runs, multiple components coordinate to execute steps as pods, store artifacts, and track metadata:
+
+```mermaid
+graph TD
+  subgraph user ["Pipeline Author"]
+    SDK["KFP v2 Python SDK"]
+    Dashboard["RHOAI Dashboard UI"]
+  end
+
+  subgraph controlPlane ["Pipeline Control Plane (per namespace)"]
+    API["DS Pipeline API Server"]
+    Persist["Persistence Agent"]
+    Sched["Scheduled Workflow Controller"]
+    Argo["Argo Workflows Controller"]
+  end
+
+  subgraph execution ["Step Execution"]
+    Step1["Step Pod 1 (data prep)"]
+    Step2["Step Pod 2 (training)"]
+    Step3["Step Pod 3 (evaluation)"]
+  end
+
+  subgraph storage ["Storage Layer"]
+    S3["S3 (pipeline artifacts, models)"]
+    MetaDB["Metadata DB (run history, metrics)"]
+  end
+
+  SDK -->|"compile + submit"| API
+  Dashboard -->|"create run"| API
+  API -->|"create workflow"| Argo
+  Argo -->|"orchestrate steps in DAG order"| Step1
+  Step1 -->|"output artifacts"| S3
+  Step1 -->|"complete"| Step2
+  Step2 -->|"output artifacts"| S3
+  Step2 -->|"complete"| Step3
+  Step3 -->|"output artifacts"| S3
+  Persist -->|"record run metadata"| MetaDB
+  Sched -->|"trigger scheduled runs"| API
+  API -->|"query history"| MetaDB
+```
+
 ## Dependencies
 
 | Requirement | Type | Path |

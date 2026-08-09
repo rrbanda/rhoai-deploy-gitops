@@ -111,6 +111,40 @@ Plus the external AI Gateway and RHCL operators. The `maas` DSC overlay enables 
     oc apply -k components/instances/rhoai-instance/overlays/maas/
     ```
 
+## End-to-End Request Flow
+
+This sequence shows what happens when a consuming team calls a model through the MaaS gateway:
+
+```mermaid
+sequenceDiagram
+  participant App as Application (Team B)
+  participant GW as AI Gateway (Envoy + Kuadrant)
+  participant Auth as Authorino (OIDC/API Key)
+  participant RL as Rate Limiter
+  participant Router as Model Router
+  participant Model as vLLM Pod (Self-Hosted)
+  participant Ext as External Provider (Optional)
+
+  App->>GW: POST /v1/chat/completions (model: gpt-oss-120b)
+  GW->>Auth: Validate API key / OIDC token
+  Auth-->>GW: Identity: team-b, subscription: gold-tier
+  GW->>RL: Check token quota (MaaSSubscription)
+  alt Quota available
+    RL-->>GW: Allowed (500 tokens/min remaining)
+    GW->>Router: Route by model name
+    alt Self-hosted model
+      Router->>Model: Forward to InferencePool (on-cluster)
+      Model-->>App: Stream response tokens
+    else External model
+      Router->>Ext: Forward to cloud provider (Bedrock/Azure)
+      Ext-->>App: Response
+    end
+    GW->>GW: Record usage (tokens consumed per team)
+  else Quota exhausted
+    RL-->>App: 429 Too Many Requests
+  end
+```
+
 ## The MaaS Workflow
 
 ### For Platform Teams (Providers)

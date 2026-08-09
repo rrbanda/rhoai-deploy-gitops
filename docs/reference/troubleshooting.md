@@ -2,6 +2,30 @@
 
 This guide covers common issues encountered when deploying and operating RHOAI via GitOps. Each issue includes the symptom, root cause explanation, and resolution steps.
 
+## Quick Navigation
+
+Use this decision tree to jump to the right section:
+
+```mermaid
+graph TD
+  Start["What is the symptom?"]
+  Start --> ArgoQ{"ArgoCD app\nnot syncing?"}
+  Start --> OpQ{"Operator pod\ncrashing?"}
+  Start --> GPUQ{"GPUs not\ndetected?"}
+  Start --> DSCQ{"DSC not\nbecoming Ready?"}
+  Start --> ModelQ{"Model stuck\nin Loading?"}
+
+  ArgoQ -->|"OutOfSync forever"| A1["Check: CRD not installed yet\nor ignoreDifferences needed"]
+  ArgoQ -->|"SyncFailed"| A2["Check: Webhook rejection\nor null field error"]
+  OpQ -->|"Exit code 137"| B1["OOMKilled: Increase memory\n(AI Gateway needs 1Gi)"]
+  OpQ -->|"Pending state"| B2["InstallPlan needs approval\nor CSV dependency missing"]
+  GPUQ -->|"No GPU labels"| C1["Check: NFD running?\nGPU Operator ClusterPolicy created?"]
+  GPUQ -->|"Driver install fails"| C2["Kernel mismatch or\nSecure Boot enabled"]
+  DSCQ -->|"Component errors"| D1["Missing dependency operator\nor invalid managementState"]
+  ModelQ -->|"Pod pending"| E1["Insufficient GPU or\nPVC zone affinity conflict"]
+  ModelQ -->|"Container crash"| E2["Model too large for GPU\nor image pull failure"]
+```
+
 ## ArgoCD Issues
 
 ### Application Stuck in OutOfSync

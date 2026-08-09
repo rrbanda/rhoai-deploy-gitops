@@ -10,6 +10,78 @@ Distributed training enables fine-tuning and training of large models across mul
 Both integrate with **Kueue** for GPU quota management and **JobSet** for
 multi-pod job orchestration.
 
+## Training Architecture Overview
+
+Multiple training frameworks are available, all unified through Kueue for GPU quota management:
+
+```mermaid
+graph TD
+  subgraph frameworks ["Training Frameworks (choose one)"]
+    RayJob["RayJob (GRPO, distributed RL)"]
+    PyTorchJob["PyTorchJob (DDP, FSDP)"]
+    TrainJob["TrainJob (Kubeflow Trainer v2)"]
+  end
+
+  subgraph orchestration ["Job Orchestration"]
+    Kueue["Kueue (quota gate)"]
+    JobSet["JobSet (multi-pod coordination)"]
+  end
+
+  subgraph execution ["GPU Execution"]
+    Head["Ray Head / Master Pod"]
+    Worker1["Worker Pod (GPU 1)"]
+    Worker2["Worker Pod (GPU 2)"]
+    WorkerN["Worker Pod (GPU N)"]
+  end
+
+  subgraph storage ["Shared Storage"]
+    PVC["PVC (model weights + checkpoints)"]
+    S3["S3 (datasets, final artifacts)"]
+  end
+
+  RayJob --> Kueue
+  PyTorchJob --> Kueue
+  TrainJob --> Kueue
+  Kueue -->|"admits when quota available"| JobSet
+  JobSet -->|"creates all pods atomically"| Head
+  JobSet --> Worker1
+  JobSet --> Worker2
+  JobSet --> WorkerN
+  Head --> PVC
+  Worker1 --> PVC
+  Worker2 --> PVC
+  WorkerN --> PVC
+  PVC --> S3
+```
+
+## Job Lifecycle
+
+From submission to completion, a training job passes through these stages:
+
+```mermaid
+sequenceDiagram
+  participant User as Data Scientist
+  participant K8s as Kubernetes API
+  participant Kueue as Kueue Controller
+  participant JobSet as JobSet Controller
+  participant Ray as KubeRay Operator
+  participant Pods as GPU Worker Pods
+
+  User->>K8s: Submit RayJob (with queue-name label)
+  K8s->>Kueue: Workload created (job suspended)
+  Kueue->>Kueue: Evaluate quota in ClusterQueue
+  Kueue->>K8s: Admit workload (unsuspend, inject node affinity)
+  K8s->>Ray: RayJob unsuspended
+  Ray->>K8s: Create RayCluster (head + workers)
+  K8s->>JobSet: Coordinate multi-pod creation
+  JobSet->>Pods: Create all pods atomically (gang scheduling)
+  Pods->>Pods: Download model weights from PVC
+  Pods->>Pods: Training loop (gradient sync across GPUs)
+  Pods-->>K8s: Training complete, checkpoints saved
+  K8s-->>Kueue: Release GPU quota
+  Note over Kueue: Quota available for next queued workload
+```
+
 ## Dependencies
 
 | Requirement | Type | Path |

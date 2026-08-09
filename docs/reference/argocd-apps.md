@@ -2,6 +2,89 @@
 
 After bootstrap, ArgoCD manages **25 Applications** across four layers.
 
+## Application Hierarchy
+
+The entire platform cascades from a single bootstrap application:
+
+```mermaid
+graph TD
+  subgraph layer1 ["Layer 1: Bootstrap (you create once)"]
+    Boot["cluster-bootstrap"]
+  end
+
+  subgraph layer2 ["Layer 2: ApplicationSets + DSC App (ArgoCD manages)"]
+    OAS["cluster-operators AppSet"]
+    IAS["cluster-instances AppSet"]
+    MAS["cluster-models AppSet"]
+    SAS["cluster-services AppSet"]
+    DSC["rhoai-dsc App"]
+  end
+
+  subgraph layer3ops ["Layer 3a: Operator Applications (auto-discovered)"]
+    O1["operator-cert-manager"]
+    O2["operator-nfd"]
+    O3["operator-gpu-operator"]
+    O4["operator-kueue-operator"]
+    O5["operator-rhoai-operator"]
+    O6["operator-servicemesh"]
+    O7["operator-jobset-operator"]
+  end
+
+  subgraph layer3inst ["Layer 3b: Instance Applications"]
+    I1["instance-nfd-instance"]
+    I2["instance-gpu-instance"]
+    I3["instance-kueue-config"]
+    I4["instance-mlflow-instance"]
+    I5["instance-maas-gateway"]
+  end
+
+  subgraph layer3wl ["Layer 3c: Workload Applications"]
+    M1["model-orchestrator-8b"]
+    M2["model-gpt-oss-120b"]
+    S1["service-genai-toolbox"]
+    S2["service-toolorchestra-app"]
+  end
+
+  subgraph layer4 ["Layer 4: Kubernetes Resources (actual workloads)"]
+    R1["Subscriptions, OperatorGroups"]
+    R2["ClusterPolicy, NFD CR, Kueue CR"]
+    R3["DataScienceCluster"]
+    R4["InferenceServices, ServingRuntimes"]
+    R5["Deployments, Routes, PVCs"]
+  end
+
+  Boot --> OAS
+  Boot --> IAS
+  Boot --> MAS
+  Boot --> SAS
+  Boot --> DSC
+
+  OAS --> O1
+  OAS --> O2
+  OAS --> O3
+  OAS --> O4
+  OAS --> O5
+  OAS --> O6
+  OAS --> O7
+
+  IAS --> I1
+  IAS --> I2
+  IAS --> I3
+  IAS --> I4
+  IAS --> I5
+
+  MAS --> M1
+  MAS --> M2
+  SAS --> S1
+  SAS --> S2
+
+  DSC --> R3
+  O1 --> R1
+  I1 --> R2
+  M1 --> R4
+  S1 --> R5
+```
+
 ## Application Table
 
 | Application | Source | Sync Policy | Purpose |

@@ -5,6 +5,40 @@ Each workbench is a container running JupyterLab with pre-installed ML
 libraries, persistent storage, and optional GPU access. Workbenches are
 managed through the RHOAI Dashboard.
 
+## How Workbenches Work
+
+```mermaid
+graph TD
+  subgraph user ["Data Scientist"]
+    Browser["Browser (JupyterLab UI)"]
+  end
+
+  subgraph dashboard ["RHOAI Dashboard"]
+    Create["Create Workbench (select image, size, GPU)"]
+  end
+
+  subgraph controller ["Notebook Controller"]
+    NC["Notebook CR reconciler"]
+  end
+
+  subgraph pod ["Workbench Pod (per user)"]
+    Jupyter["JupyterLab Container"]
+    OAuth["OAuth Proxy Sidecar"]
+    GPU["GPU (optional, via nvidia.com/gpu)"]
+  end
+
+  subgraph storage ["Persistent Storage"]
+    PVC["PVC (user home directory)"]
+  end
+
+  Browser --> Create
+  Create -->|"creates Notebook CR"| NC
+  NC -->|"creates StatefulSet"| pod
+  Jupyter --> PVC
+  OAuth -->|"authenticates via OpenShift OAuth"| Browser
+  Jupyter --> GPU
+```
+
 ## Dependencies
 
 | Requirement | Type | Path |

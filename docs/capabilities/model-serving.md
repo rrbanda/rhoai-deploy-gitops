@@ -5,6 +5,67 @@ KServe provides scalable, standards-based model serving on OpenShift AI. It supp
 OpenAI-compatible API. RHOAI ships a validated vLLM runtime for GPU-accelerated
 LLM serving.
 
+## How Inference Requests Flow
+
+When a client sends a request to a model endpoint, this is the path it takes through the platform:
+
+```mermaid
+sequenceDiagram
+  participant Client as Client Application
+  participant Route as OpenShift Route
+  participant GW as Gateway (Envoy/Istio)
+  participant HTTPRoute as HTTPRoute Rules
+  participant EPP as EPP Scheduler (Endpoint Picker)
+  participant vLLM as vLLM Pod (GPU)
+
+  Client->>Route: POST /v1/chat/completions
+  Route->>GW: TLS termination, forward to Gateway
+  GW->>HTTPRoute: Match path to InferencePool
+  HTTPRoute->>EPP: Route to Endpoint Picker Pod
+  Note over EPP: Scores all available vLLM pods:
+  Note over EPP: 1. Prefix Cache Score (KV cache hit?)
+  Note over EPP: 2. Load Score (current utilization)
+  Note over EPP: 3. Queue Depth Score (pending requests)
+  EPP->>vLLM: Forward to highest-scoring pod
+  vLLM-->>Client: Stream response tokens
+```
+
+## Component Architecture
+
+The KServe control plane creates and manages several resources when you deploy a model:
+
+```mermaid
+graph TD
+  subgraph userDefined ["What You Declare in Git"]
+    SR["ServingRuntime (vLLM config)"]
+    IS["InferenceService (model + resources)"]
+  end
+
+  subgraph controlPlane ["What KServe Creates"]
+    Deploy["vLLM Deployment (model server pods)"]
+    Pool["InferencePool (backend pod group)"]
+    Scheduler["EPP Scheduler Deployment"]
+    HR["HTTPRoute (path-based routing)"]
+    GWAttach["Gateway Attachment (external access)"]
+  end
+
+  subgraph dataPlane ["Runtime Communication"]
+    ZMQ["ZMQ Events (cache block creation/eviction)"]
+    HTTP["HTTP Inference Requests"]
+  end
+
+  IS --> Deploy
+  IS --> Pool
+  IS --> Scheduler
+  IS --> HR
+  HR --> GWAttach
+  Deploy -->|"publishes via ZMQ"| ZMQ
+  ZMQ -->|"consumed by"| Scheduler
+  HTTP -->|"routed through"| Scheduler
+  Scheduler -->|"forwards to best pod"| Deploy
+  SR -->|"defines container image + args"| Deploy
+```
+
 ## Dependencies
 
 | Requirement | Type | Path |

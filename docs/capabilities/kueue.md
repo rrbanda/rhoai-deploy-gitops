@@ -61,6 +61,47 @@ oc get resourceflavors
 
 ## How It Works
 
+Kueue uses a three-level resource hierarchy to manage GPU quotas across teams:
+
+```mermaid
+graph TD
+  subgraph flavors ["ResourceFlavors (define GPU hardware types)"]
+    RF1["default-gpu (any NVIDIA GPU)"]
+    RF2["gpu-a100 (NVIDIA A100, 80GB)"]
+    RF3["gpu-l4 (NVIDIA L4, 24GB)"]
+  end
+
+  subgraph clusterQueues ["ClusterQueues (organization-wide GPU budgets)"]
+    CQ["training-cluster-queue"]
+    CQ_quota["Quota: 8 GPUs, 48 CPUs, 192Gi RAM"]
+    CQ_preempt["Preemption: LowerPriority within queue"]
+    CQ --> CQ_quota
+    CQ --> CQ_preempt
+  end
+
+  subgraph localQueues ["LocalQueues (team-scoped, namespace-bound)"]
+    LQ1["team-a-queue (ns: team-a)"]
+    LQ2["team-b-queue (ns: team-b)"]
+    LQ3["training-queue (ns: orchestrator-rhoai)"]
+  end
+
+  subgraph workloads ["Workloads (auto-created per job)"]
+    W1["RayJob: grpo-training"]
+    W2["PyTorchJob: finetune-llama"]
+    W3["Job: batch-eval"]
+  end
+
+  RF1 --> CQ
+  RF2 --> CQ
+  RF3 --> CQ
+  CQ --> LQ1
+  CQ --> LQ2
+  CQ --> LQ3
+  LQ1 --> W1
+  LQ2 --> W2
+  LQ3 --> W3
+```
+
 ### ResourceFlavors
 
 The default configuration uses a generic `default-gpu` ResourceFlavor that works with any NVIDIA GPU:
@@ -120,6 +161,43 @@ Supported workload types (configured in Kueue instance):
 - `jobset.x-k8s.io/v1alpha2.JobSet`
 - `kubeflow.org/v1.PyTorchJob`
 - `trainer.kubeflow.org/v1alpha1.TrainJob`
+
+### Admission Flow
+
+When a job is submitted, Kueue evaluates quota, priority, and topology before admitting or queuing it:
+
+```mermaid
+sequenceDiagram
+  participant User as Data Scientist
+  participant K8s as Kubernetes API
+  participant Kueue as Kueue Controller
+  participant CQ as ClusterQueue
+  participant Sched as Kubernetes Scheduler
+  participant Node as GPU Node
+
+  User->>K8s: Submit RayJob (label: kueue.x-k8s.io/queue-name)
+  K8s->>Kueue: Workload object created (job suspended)
+  Kueue->>Kueue: Map LocalQueue to ClusterQueue
+  Kueue->>CQ: Check quota for requested ResourceFlavor
+  alt Quota available
+    CQ-->>Kueue: Quota reserved
+    Kueue->>Kueue: Topology Aware Scheduling (find optimal node group)
+    Kueue->>K8s: Unsuspend job, inject node affinity labels
+    K8s->>Sched: Pods enter scheduling queue
+    Sched->>Node: Place pods on GPU nodes
+    Node-->>User: Job running
+  else Quota exhausted
+    CQ-->>Kueue: No quota available
+    alt Higher-priority job waiting
+      Kueue->>Kueue: Preempt lower-priority workload
+      Kueue->>K8s: Suspend preempted job
+      Kueue->>K8s: Admit higher-priority job
+    else Same or lower priority
+      Kueue->>Kueue: Queue workload (FIFO or BestEffortFIFO)
+      Note over Kueue: Workload waits until quota frees up
+    end
+  end
+```
 
 ## Customizing Quotas
 

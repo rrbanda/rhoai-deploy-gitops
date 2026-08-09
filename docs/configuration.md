@@ -89,6 +89,39 @@ The `rhoai-dsc` Application points to a specific overlay. To change which profil
 
 ## How Replacements Work
 
+A single ConfigMap is the source of truth. Kustomize injects its values into every ArgoCD Application and ApplicationSet at build time:
+
+```mermaid
+graph LR
+  subgraph source ["Single Source of Truth"]
+    CM["cluster-config.yaml (ConfigMap)"]
+    CMdata["repoURL: github.com/you/repo.git\ntargetRevision: main"]
+    CM --> CMdata
+  end
+
+  subgraph kustomize ["Kustomize Build (at sync time)"]
+    Replace["Replacement Rules"]
+  end
+
+  subgraph targets ["All ArgoCD Resources (auto-injected)"]
+    App1["rhoai-dsc Application"]
+    AppSet1["cluster-operators ApplicationSet"]
+    AppSet2["cluster-instances ApplicationSet"]
+    AppSet3["cluster-models ApplicationSet"]
+    AppSet4["cluster-services ApplicationSet"]
+    Boot["cluster-bootstrap Application"]
+  end
+
+  CMdata -->|"source field: data.repoURL"| Replace
+  CMdata -->|"source field: data.targetRevision"| Replace
+  Replace -->|"inject into spec.source.repoURL"| App1
+  Replace -->|"inject into spec.template.spec.source.repoURL"| AppSet1
+  Replace --> AppSet2
+  Replace --> AppSet3
+  Replace --> AppSet4
+  Replace --> Boot
+```
+
 The `clusters/overlays/dev/kustomization.yaml` defines replacement rules:
 
 ```yaml

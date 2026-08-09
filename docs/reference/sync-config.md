@@ -2,6 +2,25 @@
 
 The ArgoCD ApplicationSets use production-grade sync options validated through testing.
 
+## Sync Lifecycle
+
+ArgoCD continuously reconciles declared state (Git) against live state (cluster). This state diagram shows how applications transition between sync states:
+
+```mermaid
+stateDiagram-v2
+  [*] --> Synced: Initial bootstrap (oc apply -k)
+  Synced --> OutOfSync: Git push changes manifest
+  Synced --> OutOfSync: Manual cluster edit detected (drift)
+  OutOfSync --> Syncing: Auto-sync triggered (selfHeal: true)
+  Syncing --> Synced: All resources applied, healthy
+  Syncing --> SyncFailed: Webhook rejection or resource conflict
+  SyncFailed --> Retrying: Exponential backoff (30s, 60s, 120s...)
+  Retrying --> Syncing: Retry attempt
+  Retrying --> SyncFailed: Max retries exceeded
+  SyncFailed --> OutOfSync: Manual fix pushed to Git
+  OutOfSync --> Synced: Manual sync or auto-sync succeeds
+```
+
 ## Sync Options
 
 | Option | Purpose |

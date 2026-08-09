@@ -68,6 +68,22 @@ After enabling Model Registry in the DSC, configure the external MySQL database 
 
 For detailed configuration steps, see the [official RHOAI documentation on creating a model registry](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3-latest/html/managing_models/managing-model-registry).
 
+## Model Lifecycle
+
+A model progresses through these stages in the registry, from initial registration to production deployment:
+
+```mermaid
+stateDiagram-v2
+  [*] --> Registered: Register model (name, owner, description)
+  Registered --> Versioned: Add ModelVersion (v1.0.0)
+  Versioned --> ArtifactLinked: Attach ModelArtifact (S3 URI, format)
+  ArtifactLinked --> Deployed: Deploy to KServe or ModelMesh
+  Deployed --> Monitoring: Inference endpoint live
+  Monitoring --> Versioned: New version trained (v2.0.0)
+  Monitoring --> Deprecated: Model retired
+  Deprecated --> [*]
+```
+
 ## Usage
 
 1. Open the RHOAI Dashboard

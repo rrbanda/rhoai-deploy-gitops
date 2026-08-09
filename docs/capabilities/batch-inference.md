@@ -121,6 +121,46 @@ oc get datasciencecluster default-dsc -o jsonpath='{.status.components.batchGate
 
 The batch gateway uses **continuous batching** -- new requests are added to in-flight batches as previous tokens complete, maximizing GPU memory and compute utilization.
 
+### Request Lifecycle (Interactive vs. Batch)
+
+The same vLLM pods serve both interactive and batch traffic. The dual-gateway architecture ensures batch never starves interactive requests:
+
+```mermaid
+sequenceDiagram
+  participant Client as Client Application
+  participant ExtGW as External Gateway (Envoy + Kuadrant)
+  participant BatchGW as Batch Gateway (API Server + Processor)
+  participant IntGW as Internal Gateway (ClusterIP)
+  participant EPP as EPP Scheduler
+  participant vLLM as vLLM Pods (shared)
+
+  Note over Client,vLLM: Interactive Path (low latency)
+  Client->>ExtGW: POST /v1/chat/completions
+  ExtGW->>ExtGW: AuthPolicy + RateLimitPolicy enforced
+  ExtGW->>IntGW: Forward with normal priority
+  IntGW->>EPP: Route via HTTPRoute to InferencePool
+  EPP->>vLLM: Forward to optimal pod (prefix cache aware)
+  vLLM-->>Client: Stream response
+
+  Note over Client,vLLM: Batch Path (high throughput)
+  Client->>ExtGW: POST /v1/batches (file of prompts)
+  ExtGW->>BatchGW: Route to Batch Gateway
+  BatchGW->>BatchGW: Store in PostgreSQL, queue in Redis
+  loop AIMD concurrency control
+    BatchGW->>IntGW: Send request (header: batch-sheddable, priority -1)
+    IntGW->>EPP: Route to InferencePool
+    EPP->>vLLM: Forward (lower priority than interactive)
+    alt GPU saturated
+      vLLM-->>BatchGW: 429 (shed batch request)
+      BatchGW->>BatchGW: Multiplicative decrease concurrency
+    else GPU available
+      vLLM-->>BatchGW: Response
+      BatchGW->>BatchGW: Additive increase concurrency
+    end
+  end
+  BatchGW-->>Client: GET /v1/batches/{id} (poll for results)
+```
+
 ## Known Considerations
 
 !!! warning "Memory requirements"

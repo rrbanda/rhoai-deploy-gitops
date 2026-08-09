@@ -81,6 +81,32 @@ The key difference from KServe is `serving.kserve.io/deploymentMode: ModelMesh`,
 which routes the model to the shared ModelMesh pool instead of creating a
 dedicated pod.
 
+## Architecture Comparison: KServe vs ModelMesh
+
+The fundamental difference is resource isolation. KServe gives each model its own pod; ModelMesh packs multiple models into a shared pool:
+
+```mermaid
+graph LR
+  subgraph kserveArch ["KServe: Dedicated Pod per Model"]
+    IS1["InferenceService A"] --> PodA["Pod A (GPU 1)"]
+    IS2["InferenceService B"] --> PodB["Pod B (GPU 2)"]
+    IS3["InferenceService C"] --> PodC["Pod C (GPU 3)"]
+  end
+
+  subgraph modelmeshArch ["ModelMesh: Shared Pod Pool"]
+    IS4["InferenceService D"]
+    IS5["InferenceService E"]
+    IS6["InferenceService F"]
+    IS7["InferenceService G"]
+    IS4 --> Pool["ModelMesh Pool"]
+    IS5 --> Pool
+    IS6 --> Pool
+    IS7 --> Pool
+    Pool --> SharedPod1["Shared Pod (GPU 1, models D+E)"]
+    Pool --> SharedPod2["Shared Pod (GPU 2, models F+G)"]
+  end
+```
+
 ## When to Use ModelMesh vs KServe
 
 | Factor | KServe | ModelMesh |

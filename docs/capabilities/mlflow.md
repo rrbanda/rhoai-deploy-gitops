@@ -184,6 +184,27 @@ Namespace lifecycle is managed outside of MLflow -- creating, updating, or delet
 
 Every MLflow API request is authorized through a Kubernetes `SelfSubjectAccessReview`. The MLflow server takes the caller's bearer token and checks whether it is allowed to perform a given verb on a given resource in the target namespace.
 
+```mermaid
+sequenceDiagram
+  participant SDK as MLflow SDK
+  participant Server as MLflow Tracking Server
+  participant K8s as Kubernetes API (RBAC)
+  participant Store as Backend Store (SQLite/PostgreSQL)
+
+  SDK->>Server: Log metric (Bearer token + workspace namespace)
+  Server->>Server: Extract bearer token from request
+  Server->>K8s: SelfSubjectAccessReview (can token "create" on "experiments" in namespace?)
+  alt Authorized
+    K8s-->>Server: Allowed (user has edit/admin role)
+    Server->>Store: Write metric to backend
+    Store-->>Server: Success
+    Server-->>SDK: 200 OK
+  else Unauthorized
+    K8s-->>Server: Denied (insufficient RBAC)
+    Server-->>SDK: 403 Forbidden
+  end
+```
+
 The checked resources belong to the `mlflow.kubeflow.org` API group. These are **pseudo-resources** used solely for RBAC policy evaluation -- they are not CRDs and no corresponding objects exist on the cluster.
 
 | Pseudo-resource | Controls access to |
