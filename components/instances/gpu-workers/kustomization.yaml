@@ -1,5 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-resources:
-  - gpu-machineset.yaml
+# GPU MachineSet is cluster-specific.
+# Copy a MachineSet template from examples/ and customize for your cluster.
+# Uncomment the resource below once you have a cluster-specific machineset:
+# resources:
+#   - gpu-machineset.yaml

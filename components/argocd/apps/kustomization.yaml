@@ -8,3 +8,5 @@ resources:
   - cluster-models-appset.yaml
   - cluster-services-appset.yaml
   - rhoai-dsc-app.yaml
+  # maas-demo-gateway-app.yaml is managed by a separate repo (rrbanda/maas-demo)
+  # Only include if using the maas-demo app alongside this platform config

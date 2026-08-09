@@ -1,26 +1,26 @@
-# GPU Worker Nodes
+# GPU Workers
 
-GPU node provisioning is **cloud-provider specific**. This directory contains no default resources -- you must configure GPU workers for your environment.
+This directory manages GPU MachineSet resources for the cluster.
 
-## AWS
+## Setup for a new cluster
 
-Example MachineSets for AWS are in `examples/aws/`. Before applying, you **must** edit these files to match your cluster:
+1. Export an existing GPU MachineSet from your cluster:
+   ```bash
+   oc get machineset -n openshift-machine-api -o yaml <your-gpu-machineset>
+   ```
 
-| Value | Where to find it |
-|-------|-------------------|
-| Cluster infrastructure ID (e.g. `ocp-2qkbk`) | `oc get -o jsonpath='{.status.infrastructureName}' infrastructure cluster` |
-| AMI ID | `oc get machineset -n openshift-machine-api -o jsonpath='{.items[0].spec.template.spec.providerSpec.value.ami.id}'` |
-| Region and AZ | `oc get machineset -n openshift-machine-api -o jsonpath='{.items[0].spec.template.spec.providerSpec.value.placement.region}'` |
-| Subnet, security groups, IAM profile | Copy from an existing worker MachineSet in your cluster |
+2. Or create one from the examples in `examples/aws/`.
 
-Then apply:
+3. Place the resulting `gpu-machineset.yaml` in this directory.
 
-```bash
-oc apply -k examples/aws/
-```
+4. Adjust `replicas` to control GPU node count (0 = scaled down).
 
-## Azure / GCP / Bare Metal
+## Important fields to customize per cluster
 
-Create your own MachineSets or provision GPU nodes manually. The only requirement is that nodes have NVIDIA GPUs and the GPU Operator installed (handled by `components/operators/gpu-operator/`).
-
-If using bare metal or pre-provisioned nodes, no MachineSets are needed -- just ensure the nodes are labeled and joined to the cluster.
+- `metadata.name` — must match `<cluster-infra-id>-worker-gpu-<az>`
+- `machine.openshift.io/cluster-api-cluster` labels — must match cluster infra ID
+- `spec.template.spec.providerSpec.value.ami.id` — must match cluster's CoreOS AMI
+- `spec.template.spec.providerSpec.value.iamInstanceProfile.id` — must match cluster's worker IAM profile
+- `spec.template.spec.providerSpec.value.placement` — region and AZ
+- `spec.template.spec.providerSpec.value.securityGroups` — cluster-specific SG
+- `spec.template.spec.providerSpec.value.subnet` — cluster-specific subnet
