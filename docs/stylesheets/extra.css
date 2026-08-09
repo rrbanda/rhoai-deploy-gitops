@@ -47,8 +47,22 @@
   --md-primary-fg-color--dark: #A30000;
   --md-accent-fg-color: #CC0000;
   --md-default-bg-color: #ffffff;
+  --md-default-fg-color: #151515;
+  --md-default-fg-color--light: #4d4d4d;
+  --md-default-fg-color--lighter: #6c6c6c;
+  --md-default-fg-color--lightest: #e0e0e0;
   --md-code-bg-color: #f6f8fa;
+  --md-code-fg-color: #151515;
+  --md-typeset-color: #151515;
   --md-typeset-a-color: #CC0000;
+  --md-footer-bg-color: #151515;
+  --md-footer-bg-color--dark: #0a0a0a;
+  --rh-border: #d2d2d2;
+  --rh-surface: #f6f8fa;
+  --rh-surface-alt: #eef0f2;
+  --rh-text: #151515;
+  --rh-text-muted: #4d4d4d;
+  --rh-section-bg: #f2f2f2;
 }
 
 /* ---------- Typography ---------- */
@@ -87,6 +101,55 @@
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
   border-bottom: 3px solid var(--rh-red);
+  color: #151515;
+}
+
+[data-md-color-scheme="default"] .md-header__title {
+  color: #151515;
+}
+
+[data-md-color-scheme="default"] .md-header .md-header__button {
+  color: #151515;
+}
+
+[data-md-color-scheme="default"] .md-tabs {
+  border-bottom: 1px solid #d2d2d2;
+}
+
+[data-md-color-scheme="default"] .md-tabs__link {
+  color: #4d4d4d;
+}
+
+[data-md-color-scheme="default"] .md-tabs__link--active,
+[data-md-color-scheme="default"] .md-tabs__link:hover {
+  color: var(--rh-red);
+}
+
+[data-md-color-scheme="default"] .md-search__input {
+  background-color: #f2f2f2;
+  color: #151515;
+}
+
+[data-md-color-scheme="default"] .md-typeset table:not([class]) {
+  border-color: #d2d2d2;
+}
+
+[data-md-color-scheme="default"] .md-typeset table:not([class]) th {
+  background: #f2f2f2;
+}
+
+[data-md-color-scheme="default"] .md-typeset table:not([class]) td,
+[data-md-color-scheme="default"] .md-typeset table:not([class]) th {
+  border-color: #d2d2d2;
+}
+
+[data-md-color-scheme="default"] .md-typeset pre {
+  border-color: #d2d2d2;
+}
+
+[data-md-color-scheme="default"] .cta-secondary {
+  border-color: #d2d2d2;
+  background: #ffffff;
 }
 
 .md-header__title {
@@ -339,8 +402,5 @@ html {
   }
   .stat-number {
     font-size: 1.4rem;
-  }
-  .journey-grid {
-    grid-template-columns: 1fr;
   }
 }

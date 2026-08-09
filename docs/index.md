@@ -21,6 +21,42 @@ managed entirely through Git.
 
 </div>
 
+<div class="grid cards" markdown>
+
+-   :material-school: **I'm New to GitOps**
+
+    ---
+
+    Understand why Git drives infrastructure, how ArgoCD works, and how this repo is structured.
+
+    [:octicons-arrow-right-24: Learn the Concepts](concepts/)
+
+-   :material-rocket-launch: **I Want to Deploy Now**
+
+    ---
+
+    Two commands bootstrap a self-healing AI platform. Fork, configure, deploy.
+
+    [:octicons-arrow-right-24: Quick Start](quickstart/)
+
+-   :material-puzzle: **I Need Specific Capabilities**
+
+    ---
+
+    Pick exactly what you need: serving, training, batch inference, MaaS.
+
+    [:octicons-arrow-right-24: Capabilities Guide](capabilities/)
+
+-   :material-layers-triple: **I'm Evaluating Architecture**
+
+    ---
+
+    See how 12 operators, 4 ApplicationSets, and composable overlays work.
+
+    [:octicons-arrow-right-24: Repository Architecture](architecture/)
+
+</div>
+
 <div class="stats-bar" markdown>
 <div class="stat-item">
 <span class="stat-number">12</span>
@@ -38,46 +74,6 @@ managed entirely through Git.
 <span class="stat-number">0</span>
 <span class="stat-label">Manual Steps After</span>
 </div>
-</div>
-
----
-
-## Choose Your Journey
-
-<div class="grid cards" markdown>
-
--   :material-school: **I'm New to GitOps**
-
-    ---
-
-    Understand why Git drives infrastructure, how ArgoCD works, and how this repo is structured — before running a single command.
-
-    [:octicons-arrow-right-24: Learn the Concepts](concepts/)
-
--   :material-rocket-launch: **I Want to Deploy Now**
-
-    ---
-
-    Two commands bootstrap a self-healing AI platform. Fork, configure, deploy. Every step explained.
-
-    [:octicons-arrow-right-24: Quick Start](quickstart/)
-
--   :material-puzzle: **I Need Specific Capabilities**
-
-    ---
-
-    Pick exactly what you need: serving, training, batch inference, MaaS. Deploy only what matters for your use case.
-
-    [:octicons-arrow-right-24: Capabilities Guide](capabilities/)
-
--   :material-layers-triple: **I'm Evaluating Architecture**
-
-    ---
-
-    See how 12 operators, 4 ApplicationSets, and composable overlays create a self-managing AI platform.
-
-    [:octicons-arrow-right-24: Repository Architecture](architecture/)
-
 </div>
 
 ---
