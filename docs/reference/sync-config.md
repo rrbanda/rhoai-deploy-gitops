@@ -110,7 +110,7 @@ ignoreDifferences:
 
 The higher retry count for instances and use cases gives operators time to install their CRDs before ArgoCD attempts to apply instance resources.
 
-## RHOAI 3.5 Specifics
+## Version-Specific Notes
 
 | Setting | Value | Notes |
 |---------|-------|-------|

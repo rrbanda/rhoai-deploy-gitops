@@ -2,6 +2,10 @@
 
 GPU infrastructure provides the foundation for all GPU-accelerated workloads on OpenShift. This includes Node Feature Discovery (NFD) for detecting GPU hardware, the NVIDIA GPU Operator for installing drivers and container toolkit, and MachineSets for provisioning GPU worker nodes. Deploy this before any capability that requires GPU acceleration.
 
+!!! info "Default State"
+    **Always deployed** as separate operator subscriptions (NFD + GPU Operator). Not controlled by the DSC overlay — GPU infrastructure is independent of the RHOAI DataScienceCluster.  
+    Deploy whenever GPU-accelerated workloads are needed.
+
 ## How the GPU Stack Works
 
 Each layer builds on the one below it. Without any layer, the layers above cannot function:

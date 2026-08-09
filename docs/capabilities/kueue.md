@@ -2,6 +2,14 @@
 
 Kueue provides job queuing and GPU quota management for OpenShift AI training workloads. It controls which jobs can run, how many GPUs they consume, and supports preemption for priority-based scheduling. Use Kueue when you need to share GPU resources across multiple teams or workloads with fair scheduling.
 
+!!! info "Default State"
+    **Included in:** `full`, `serving`, `training`, `maas`, `dev` overlays as `Unmanaged` (integrated with the standalone Red Hat build of Kueue Operator).  
+    **Removed in:** `minimal` overlay.  
+    To change, edit `rhoaiOverlay` in `cluster-config.yaml` or create a [custom overlay](../concepts/kustomize-overlays.md).
+
+!!! warning "Managed state deprecated"
+    The Managed state for Kueue is deprecated. RHOAI requires Unmanaged mode, which integrates with the standalone Red Hat build of Kueue Operator. See the [official documentation](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3.5/html/managing_openshift_ai/managing-workloads-with-kueue).
+
 ## Dependencies
 
 | Requirement | Type | Path |
@@ -13,11 +21,11 @@ Kueue provides job queuing and GPU quota management for OpenShift AI training wo
 | GPU Infrastructure | Operator + Instance | See [gpu-infrastructure.md](gpu-infrastructure.md) |
 
 !!! info "cert-manager is required"
-    The official RHOAI 3.5 documentation lists cert-manager as a dependency for Kueue-based workloads. Install it before deploying the Kueue Operator.
+    The official RHOAI documentation lists cert-manager as a dependency for Kueue-based workloads. Install it before deploying the Kueue Operator.
 
 ## Why Standalone?
 
-RHOAI 3.5 includes a Kueue component in the DSC, but the standalone Red Hat
+RHOAI includes a Kueue component in the DSC, but the standalone Red Hat
 Build of Kueue Operator provides newer features and independent lifecycle
 management. Setting `kueue: Unmanaged` in the DSC tells RHOAI not to install
 its own Kueue -- the standalone operator takes over.

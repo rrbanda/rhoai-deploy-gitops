@@ -1,6 +1,11 @@
 # Batch Inference
 
-Batch inference processes large volumes of requests asynchronously, optimizing for throughput rather than latency. RHOAI 3.5 introduces the **Batch Gateway** powered by llm-d, which queues inference requests and processes them efficiently using available GPU capacity.
+Batch inference processes large volumes of requests asynchronously, optimizing for throughput rather than latency. RHOAI introduces the **Batch Gateway** powered by llm-d, which queues inference requests and processes them efficiently using available GPU capacity.
+
+!!! info "Default State"
+    **Enabled in:** `full`, `dev` overlays.  
+    **Disabled in:** `minimal`, `serving`, `training`, `maas` overlays.  
+    To change, edit `rhoaiOverlay` in `cluster-config.yaml` or create a [custom overlay](../concepts/kustomize-overlays.md).
 
 ## When to Use Batch vs. Real-Time
 
@@ -88,7 +93,7 @@ This is already enabled in the `full`, `dev`, and `maas` overlays.
     # 1. Install required operators
     oc apply -k components/operators/cert-manager/
     oc apply -k components/operators/servicemesh/
-    oc apply -k components/operators/lws-operator/
+    oc apply -k components/operators/lws/
     oc apply -k components/operators/rhoai-operator/
 
     # 2. Wait for operators

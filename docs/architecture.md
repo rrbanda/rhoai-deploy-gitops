@@ -2,6 +2,8 @@
 
 This repository implements a fully declarative, GitOps-driven installation of Red Hat OpenShift AI (RHOAI) on OpenShift. The entire platform -- from GPU drivers to AI model serving -- is expressed as Kubernetes manifests managed by ArgoCD via an **app-of-apps pattern**. The repo tracks the latest RHOAI release by default (`fast` channel) and supports switching to `beta` (EA) or `stable` (LTS) via configuration.
 
+This page describes **this repository's structure** — how the GitOps manifests, ArgoCD Applications, and Kustomize overlays are organized. For an overview of RHOAI the product's internal architecture, see [RHOAI Architecture](concepts/rhoai-architecture.md).
+
 !!! tip "New to these concepts?"
     If terms like "app-of-apps", "ApplicationSet", or "Kustomize overlay" are unfamiliar, read the [Concepts](concepts/index.md) section first. This page assumes familiarity with those foundations.
 
@@ -39,27 +41,27 @@ rhoai-deploy-gitops/
 │   │   ├── rhoai-operator/
 │   │   └── servicemesh/
 │   └── instances/                      # Operator instance CRs
-│       ├── cluster-autoscaler/
-│       ├── dashboard-config/
-│       ├── evalhub/
-│       ├── external-secrets-config/
-│       ├── gpu-instance/
+│       ├── cluster-autoscaler/         # ClusterAutoscaler CR
+│       ├── dashboard-config/           # RHOAI Dashboard customization
+│       ├── evalhub/                    # Model evaluation hub
+│       ├── external-secrets-config/    # SecretStore + ExternalSecret wiring
+│       ├── gpu-instance/               # NVIDIA ClusterPolicy CR
 │       ├── gpu-workers/                # GPU MachineSets (cloud-specific examples)
-│       ├── hardware-profiles/
-│       ├── jobset-instance/
+│       ├── hardware-profiles/          # HardwareProfile CRs for model serving
+│       ├── jobset-instance/            # JobSet operator instance
 │       ├── kueue-config/               # ResourceFlavors + ClusterQueue
-│       ├── kueue-instance/
-│       ├── lws-instance/
-│       ├── maas-dns-patch/
-│       ├── maas-gateway/
-│       ├── maas-postgres/
-│       ├── mcp-servers/
-│       ├── mlflow-instance/
-│       ├── monitoring-config/
-│       ├── nfd-instance/
-│       ├── observability/
-│       ├── oidc-integration/
-│       ├── rhcl-instance/
+│       ├── kueue-instance/             # Kueue operator instance
+│       ├── lws-instance/               # LeaderWorkerSet operator instance
+│       ├── maas-dns-patch/             # DNS configuration patch for MaaS routes
+│       ├── maas-gateway/               # API gateway configuration for MaaS
+│       ├── maas-postgres/              # PostgreSQL database for Models-as-a-Service
+│       ├── mcp-servers/                # MCP server deployments
+│       ├── mlflow-instance/            # MLflow tracking server
+│       ├── monitoring-config/          # Enables user workload monitoring
+│       ├── nfd-instance/               # NodeFeatureDiscovery CR
+│       ├── observability/              # ServiceMonitors + Grafana dashboards
+│       ├── oidc-integration/           # OIDC AuthConfig for MaaS authentication
+│       ├── rhcl-instance/              # Red Hat Connectivity Link instance
 │       └── rhoai-instance/             # DataScienceCluster with composable overlays
 │           ├── base/                   # Full DSC (all components enabled)
 │           └── overlays/               # dev, minimal, serving, training, full, maas
@@ -191,6 +193,38 @@ graph LR
 | AI Gateway | `beta` | API gateway for models | MaaS |
 | RHCL | `stable` | Connectivity link | AI Gateway |
 | **RHOAI** | `beta` | Core AI platform | Everything |
+
+## Instances Deployed
+
+Each instance is auto-discovered by the `cluster-instances` ApplicationSet. They configure operator CRs, platform services, and supporting infrastructure:
+
+| Instance | Purpose |
+|----------|---------|
+| `cluster-autoscaler` | ClusterAutoscaler CR for node auto-scaling |
+| `dashboard-config` | RHOAI Dashboard configuration and customization |
+| `evalhub` | Model evaluation hub for benchmarking and comparison |
+| `external-secrets-config` | SecretStore and ExternalSecret wiring for external secrets management (e.g., HashiCorp Vault) |
+| `gpu-instance` | NVIDIA ClusterPolicy CR — installs GPU drivers and toolkit |
+| `gpu-workers` | GPU MachineSets for cloud provider GPU node provisioning |
+| `hardware-profiles` | HardwareProfile CRs defining GPU/CPU resource shapes for model serving |
+| `jobset-instance` | JobSet operator instance CR |
+| `kueue-config` | ResourceFlavors, ClusterQueue, and quota policies for GPU scheduling |
+| `kueue-instance` | Kueue operator instance CR |
+| `lws-instance` | LeaderWorkerSet operator instance CR for distributed inference |
+| `maas-dns-patch` | DNS configuration patch for Models-as-a-Service routes |
+| `maas-gateway` | API gateway configuration for MaaS endpoint routing |
+| `maas-postgres` | PostgreSQL database instance for Models-as-a-Service metadata |
+| `mcp-servers` | MCP (Model Context Protocol) server deployments |
+| `mlflow-instance` | MLflow tracking server for experiment and model registry |
+| `monitoring-config` | Enables user workload monitoring on OpenShift (`ConfigMap` in `openshift-user-workload-monitoring`) |
+| `nfd-instance` | NodeFeatureDiscovery CR — detects hardware features on nodes |
+| `observability` | ServiceMonitors and Grafana dashboards for RHOAI platform monitoring |
+| `oidc-integration` | OIDC/AuthConfig for MaaS authentication via Keycloak or external IdP |
+| `rhcl-instance` | Red Hat Connectivity Link instance CR |
+| `vault-dev` | Development-mode HashiCorp Vault instance (for testing external secrets) |
+
+!!! note "DSC is separate"
+    The `rhoai-instance` (DataScienceCluster) is **not** managed by the `cluster-instances` ApplicationSet. It has its own dedicated Application (`rhoai-dsc`) due to special sync requirements. See below.
 
 ## Why the DSC Has Its Own Application
 

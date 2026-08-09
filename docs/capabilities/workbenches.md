@@ -5,6 +5,11 @@ Each workbench is a container running JupyterLab with pre-installed ML
 libraries, persistent storage, and optional GPU access. Workbenches are
 managed through the RHOAI Dashboard.
 
+!!! info "Default State"
+    **Enabled in:** `full`, `serving`, `training`, `maas`, `dev` overlays.  
+    **Disabled in:** `minimal` overlay.  
+    To change, edit `rhoaiOverlay` in `cluster-config.yaml` or create a [custom overlay](../concepts/kustomize-overlays.md).
+
 ## How Workbenches Work
 
 ```mermaid

@@ -2,6 +2,11 @@
 
 MLflow provides experiment tracking, model registry, dataset management, and tracing for ML workflows. RHOAI deploys a single shared MLflow instance that provides namespace-based isolation through the workspaces feature -- each data science project (Kubernetes namespace) maps to its own MLflow workspace.
 
+!!! info "Default State"
+    **Enabled in:** `full`, `serving`, `maas`, `dev` overlays.  
+    **Disabled in:** `minimal`, `training` overlays.  
+    To change, edit `rhoaiOverlay` in `cluster-config.yaml` or create a [custom overlay](../concepts/kustomize-overlays.md).
+
 !!! info "Support level"
 
     | RHOAI version | MLflow version | Support level |
@@ -87,25 +92,25 @@ After deployment the MLflow UI appears in the **Applications** drop-down in the 
 
 ### Install the SDK
 
-=== "RHOAI 3.2 / 3.3 (Red Hat fork)"
+=== "Red Hat fork (legacy)"
 
     ```bash
     pip install "git+https://github.com/red-hat-data-services/mlflow@rhoai-3.3"
     ```
 
-=== "RHOAI 3.5 EA1 (Red Hat fork)"
+=== "Red Hat fork"
 
     ```bash
     pip install "git+https://github.com/red-hat-data-services/mlflow@rhoai-3.4-ea.1"
     ```
 
-=== "RHOAI 3.5 EA1/EA2 (upstream SDK 3.10+)"
+=== "Upstream SDK 3.10+"
 
     ```bash
     pip install "mlflow>=3.10"
     ```
 
-=== "RHOAI 3.5 GA / MLflow SDK 3.11+"
+=== "MLflow SDK 3.11+"
 
     ```bash
     pip install "mlflow>=3.11"
@@ -122,14 +127,14 @@ export MLFLOW_TRACKING_INSECURE_TLS=true
 
 ### Authentication
 
-=== "Manual Token (RHOAI 3.2/3.3 or upstream SDK 3.10+)"
+=== "Manual Token (upstream SDK 3.10+)"
 
     ```bash
     export MLFLOW_TRACKING_TOKEN=$(oc whoami --show-token)
     export MLFLOW_WORKSPACE=<namespace>
     ```
 
-=== "Kubernetes Plugin (RHOAI 3.5 EA1/EA2, Red Hat fork)"
+=== "Kubernetes Plugin (Red Hat fork)"
 
     ```bash
     export MLFLOW_TRACKING_AUTH=kubernetes
@@ -137,7 +142,7 @@ export MLFLOW_TRACKING_INSECURE_TLS=true
 
     Reads credentials from the mounted service-account token (in-pod) or `~/.kube/config` (workstation).
 
-=== "Built-in Plugin (MLflow SDK 3.11+, RHOAI 3.5 GA)"
+=== "Built-in Plugin (MLflow SDK 3.11+)"
 
     ```bash
     export MLFLOW_TRACKING_AUTH=kubernetes-namespaced
@@ -217,7 +222,7 @@ The checked resources belong to the `mlflow.kubeflow.org` API group. These are *
 
 ### RBAC for Service Accounts
 
-For interactive users, the OpenShift `admin`, `edit`, and `view` roles already include the necessary permissions. For service accounts (RHOAI 3.5 EA2+), bind the `mlflow-integration` ClusterRole:
+For interactive users, the OpenShift `admin`, `edit`, and `view` roles already include the necessary permissions. For service accounts, bind the `mlflow-integration` ClusterRole:
 
 ```bash
 oc -n <namespace> create rolebinding my-component-mlflow \

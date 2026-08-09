@@ -2,6 +2,11 @@
 
 The Model Registry provides a central catalog for tracking ML model versions, metadata, and artifacts. Use it when you need governance over which models are deployed, version history, and programmatic access to model metadata across your organization.
 
+!!! info "Default State"
+    **Enabled in:** `full`, `serving`, `maas`, `dev` overlays.  
+    **Disabled in:** `minimal`, `training` overlays.  
+    To change, edit `rhoaiOverlay` in `cluster-config.yaml` or create a [custom overlay](../concepts/kustomize-overlays.md).
+
 ## Dependencies
 
 | Requirement | Type | Path |
@@ -12,7 +17,7 @@ The Model Registry provides a central catalog for tracking ML model versions, me
 | S3-compatible object storage | External service | Provisioned outside the cluster |
 
 !!! warning "External database and storage required"
-    The official RHOAI 3.5 documentation requires an external MySQL database (version 5.x or later, 8.x recommended) and S3-compatible object storage for Model Registry. RHOAI 3.5 EA also adds a default database solution for testing (not for production). These are **not** provisioned by the RHOAI Operator for production use -- you must set them up before enabling this component. Model Registry does not require GPU infrastructure.
+    The official RHOAI documentation requires an external MySQL database (version 5.x or later, 8.x recommended) and S3-compatible object storage for Model Registry. RHOAI also adds a default database solution for testing (not for production). These are **not** provisioned by the RHOAI Operator for production use -- you must set them up before enabling this component. Model Registry does not require GPU infrastructure.
 
 ## Enable It
 

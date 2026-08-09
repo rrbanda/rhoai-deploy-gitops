@@ -15,7 +15,7 @@ graph LR
   end
 
   subgraph argocdDoes ["What ArgoCD Does (15-30 min)"]
-    Operators["Install 11 operators"]
+    Operators["Install 12 operators"]
     Instances["Configure GPU, Kueue, NFD"]
     DSC["Deploy DataScienceCluster"]
     Models["Deploy AI models"]
@@ -27,7 +27,7 @@ graph LR
 !!! warning "Prerequisites"
     Before starting, verify:
 
-    - OpenShift 4.18+ cluster with at least 2 worker nodes (8 CPU, 32 GiB each)
+    - OpenShift 4.19+ cluster with at least 2 worker nodes (8 CPU, 32 GiB each)
     - `oc` CLI authenticated as cluster-admin
     - Default StorageClass with dynamic provisioning
     - Identity provider configured (not kubeadmin)

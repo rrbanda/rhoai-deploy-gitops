@@ -2,6 +2,11 @@
 
 Data Science Pipelines provide a Kubeflow Pipelines-compatible platform for building and running ML workflows on OpenShift AI. Use pipelines when you need reproducible, automated ML workflows with experiment tracking, scheduling, and artifact management.
 
+!!! info "Default State"
+    **Enabled in:** `full`, `serving`, `training`, `maas`, `dev` overlays.  
+    **Disabled in:** `minimal` overlay.  
+    To change, edit `rhoaiOverlay` in `cluster-config.yaml` or create a [custom overlay](../concepts/kustomize-overlays.md).
+
 ## Pipeline Execution Architecture
 
 When a pipeline runs, multiple components coordinate to execute steps as pods, store artifacts, and track metadata:

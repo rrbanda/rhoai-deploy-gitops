@@ -2,6 +2,11 @@
 
 Distributed training enables fine-tuning and training of large models across multiple GPU nodes. This capability uses KubeRay for Ray-based distributed workloads and the Kubeflow Training Operator for PyTorchJob and TrainJob resources. Use this when your model training needs more GPU memory or compute than a single node can provide. RHOAI provides distributed training through two components:
 
+!!! info "Default State"
+    **Enabled in:** `full`, `training`, `dev` overlays.  
+    **Disabled in:** `minimal`, `serving`, `maas` overlays.  
+    To change, edit `rhoaiOverlay` in `cluster-config.yaml` or create a [custom overlay](../concepts/kustomize-overlays.md).
+
 - **Ray (KubeRay)** -- distributed compute framework for RayJob workloads
   (used for GRPO reinforcement learning in this repo)
 - **Training Operator** -- Kubeflow Training Operator for PyTorchJob, TrainJob,
@@ -97,7 +102,7 @@ sequenceDiagram
 | GPU Infrastructure | Operator + Instance | See [gpu-infrastructure.md](gpu-infrastructure.md) |
 
 !!! info "cert-manager is required"
-    The official RHOAI 3.5 documentation lists cert-manager as a dependency for Kueue-based workloads (training, Ray). Install the cert-manager Operator before deploying training workloads.
+    The official RHOAI documentation lists cert-manager as a dependency for Kueue-based workloads (training, Ray). Install the cert-manager Operator before deploying training workloads.
 
 ## Enable It
 

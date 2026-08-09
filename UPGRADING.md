@@ -95,7 +95,7 @@ In `components/operators/servicemesh/subscription.yaml`:
 #### 6. Push and verify
 
 ```bash
-git add -A && git commit -m "Upgrade to RHOAI 3.5" && git push
+git add -A && git commit -m "Upgrade RHOAI channel" && git push
 
 # Monitor the upgrade
 watch oc get datasciencecluster default-dsc \

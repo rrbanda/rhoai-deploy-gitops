@@ -5,6 +5,11 @@ KServe provides scalable, standards-based model serving on OpenShift AI. It supp
 OpenAI-compatible API. RHOAI ships a validated vLLM runtime for GPU-accelerated
 LLM serving.
 
+!!! info "Default State"
+    **Enabled in:** `full`, `serving`, `maas`, `dev` overlays.  
+    **Disabled in:** `minimal`, `training` overlays.  
+    To change, edit `rhoaiOverlay` in `cluster-config.yaml` or create a [custom overlay](../concepts/kustomize-overlays.md).
+
 ## How Inference Requests Flow
 
 When a client sends a request to a model endpoint, this is the path it takes through the platform:

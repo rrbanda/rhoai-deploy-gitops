@@ -1,6 +1,6 @@
 # Red Hat OpenShift AI — GitOps Deployment
 
-Production-grade, GitOps-driven deployment of [Red Hat OpenShift AI](https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-ai) on any OpenShift 4.18+ cluster. One configuration file, one command, fully self-healing.
+Production-grade, GitOps-driven deployment of [Red Hat OpenShift AI](https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-ai) on any OpenShift 4.19+ cluster. One configuration file, one command, fully self-healing.
 
 [![CI](https://github.com/rrbanda/rhoai-deploy-gitops/actions/workflows/validate.yml/badge.svg)](https://github.com/rrbanda/rhoai-deploy-gitops/actions/workflows/validate.yml)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
@@ -69,7 +69,7 @@ oc get datasciencecluster default-dsc \
 
 | Requirement | Details |
 |---|---|
-| OpenShift | 4.18+ with cluster-admin access |
+| OpenShift | 4.19+ with cluster-admin access |
 | Worker nodes | 2+ nodes, 8 CPU / 32 GiB each (minimum) |
 | Storage | Default StorageClass with dynamic provisioning |
 | GPU | NVIDIA GPU nodes for inference/training workloads |

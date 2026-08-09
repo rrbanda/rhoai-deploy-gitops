@@ -8,7 +8,7 @@ RHOAI upgrades are driven by the **operator channel**. The RHOAI operator subscr
 
 | Channel | Delivers | Use Case |
 |---------|---------|----------|
-| `beta` | Early Access releases (3.5 EA1, EA2, ...) | Testing new features |
+| `beta` | Early Access / preview releases | Testing new features |
 | `stable` | GA releases | Production deployments |
 | `fast` | Rapid release cycle | When available |
 
@@ -40,7 +40,7 @@ OLM handles the operator binary upgrade. The operator itself handles upgrading a
 
 Before upgrading, read the release notes for the target version:
 
-- [RHOAI 3.5 Release Notes](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3-latest/html/release_notes)
+- [RHOAI Release Notes](https://docs.redhat.com/en/documentation/red_hat_openshift_ai_self-managed/3-latest/html/release_notes)
 - Check for breaking changes, deprecated features, and new requirements
 
 ### 2. Update the Channel
@@ -73,15 +73,15 @@ spec:
 New RHOAI versions may require additional operators. Check the release notes and add any new operator subscriptions:
 
 ```bash
-# Example: RHOAI 3.5 requires LeaderWorkerSet for batch inference
-components/operators/lws-operator/
+# Example: RHOAI requires LeaderWorkerSet for batch inference
+components/operators/lws/
 ```
 
 ### 5. Commit and Push
 
 ```bash
 git add -A
-git commit -m "Upgrade RHOAI to 3.5 EA2"
+git commit -m "Upgrade RHOAI to latest"
 git push
 ```
 
@@ -114,10 +114,9 @@ watch "oc get applications.argoproj.io -n openshift-gitops"
 
 1. **Add new operator directories:**
    ```
-   components/operators/lws-operator/
+   components/operators/lws/
    components/operators/cma-operator/
-   components/operators/ai-gateway-operator/
-   components/operators/rhcl-operator/
+   components/operators/rhcl/
    ```
 
 2. **Update DSC overlay:** Change `kueue.managementState` from `Managed` to `Unmanaged`
@@ -179,5 +178,5 @@ spec:
 
 | RHOAI Version | OpenShift | GPU Operator | Kueue | cert-manager |
 |--------------|-----------|--------------|-------|-------------|
-| 3.5 EA2 | 4.18, 4.19, 4.20 | 25.x | 1.4 | 1.x |
+| 3.5 EA2 | 4.19, 4.20 | 25.x | 1.4 | 1.x |
 | 3.4 EA | 4.18, 4.19 | 24.x, 25.x | 1.2 | 1.x |

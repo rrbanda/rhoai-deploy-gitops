@@ -9,7 +9,7 @@ hide:
 # Deploy Red Hat OpenShift AI with GitOps
 
 <p class="subtitle">
-A production-ready, fully declarative deployment of RHOAI 3.5 on OpenShift — 
+A production-ready, fully declarative deployment of Red Hat OpenShift AI on OpenShift — 
 model serving, distributed training, batch inference, and GPU quota management — 
 managed entirely through Git.
 </p>
@@ -23,7 +23,7 @@ managed entirely through Git.
 
 <div class="stats-bar" markdown>
 <div class="stat-item">
-<span class="stat-number">11</span>
+<span class="stat-number">12</span>
 <span class="stat-label">Operators Managed</span>
 </div>
 <div class="stat-item">
@@ -76,7 +76,7 @@ Whether you are evaluating the platform, deploying for production, or building o
 <a href="architecture/" class="journey-card">
 <span class="card-icon">:material-layers-triple:</span>
 <h3>I'm Evaluating Architecture</h3>
-<p>See how 11 operators, 4 ApplicationSets, and composable overlays create a self-managing AI platform.</p>
+<p>See how 12 operators, 4 ApplicationSets, and composable overlays create a self-managing AI platform.</p>
 <span class="card-tag tag-advanced">Advanced · 20 min</span>
 </a>
 
@@ -123,7 +123,7 @@ graph LR
     O3["GPU Operator"]
     O4["Kueue"]
     O5["RHOAI"]
-    O6["+ 6 more"]
+    O6["+ 7 more"]
   end
 
   subgraph platform ["AI Platform"]
@@ -152,7 +152,7 @@ graph LR
 
 | Layer | What You Get |
 |-------|-------------|
-| **Operators** | cert-manager, ServiceMesh, NFD, GPU, Kueue, JobSet, LWS, CMA, AI Gateway, RHCL, RHOAI |
+| **Operators** | cert-manager, ServiceMesh, NFD, GPU Operator, Kueue, JobSet, LWS, CMA, External Secrets, RHDH, RHCL, RHOAI |
 | **Platform** | Dashboard, KServe, ModelMesh, Ray, Training, Pipelines, Workbenches, Registry, MLflow, TrustyAI |
 | **Advanced** | Batch Gateway (llm-d), Distributed Inference, Hardware Profiles, MaaS |
 | **Infrastructure** | GPU node detection, driver installation, quota management, auto-scaling |
@@ -195,7 +195,7 @@ graph LR
 
 !!! warning "Verify before deploying"
 
-    - **OpenShift 4.18+** with at least 2 worker nodes (8 CPU, 32 GiB each)
+    - **OpenShift 4.19+** with at least 2 worker nodes (8 CPU, 32 GiB each)
     - **GPU nodes** available for inference/training (NVIDIA L4, L40S, A100, or H100)
     - `oc` CLI authenticated as cluster-admin
     - Default StorageClass with dynamic provisioning
@@ -206,10 +206,13 @@ graph LR
 
 ## Version Support
 
-| Version | Tag | Status |
-|---------|-----|--------|
-| RHOAI 3.5 EA2 | `v3.5.0-ea2` | **Current** |
-| RHOAI 3.4 | `archive/v3.4.0` | Archived |
+| Channel | Release Stream | Use Case |
+|---------|---------------|----------|
+| `fast` | Latest GA release | **Default** — production deployments |
+| `beta` | Early Access / preview | Testing upcoming features |
+| `stable` | Long Term Support | Regulated environments |
+
+For the latest version compatibility matrix, see the [official supported configurations](https://access.redhat.com/articles/rhoai-supported-configs-3.x).
 
 ---
 

@@ -2,6 +2,11 @@
 
 Models-as-a-Service is a platform capability that provides centralized governance, routing, and access control for AI models across an organization. Instead of each team deploying their own models independently, MaaS offers a curated catalog of models accessible through a unified API gateway.
 
+!!! info "Default State"
+    **Enabled in:** `full`, `maas`, `dev` overlays (aigateway Managed).  
+    **Disabled in:** `minimal`, `training` overlays (aigateway Removed). Partially available in `serving` (aigateway kept but batchGateway removed).  
+    To change, edit `rhoaiOverlay` in `cluster-config.yaml` or create a [custom overlay](../concepts/kustomize-overlays.md).
+
 ## The Problem MaaS Solves
 
 Without MaaS, organizations face:
@@ -103,8 +108,7 @@ Plus the external AI Gateway and RHCL operators. The `maas` DSC overlay enables 
     ```bash
     # Install operators
     oc apply -k components/operators/cert-manager/
-    oc apply -k components/operators/ai-gateway-operator/
-    oc apply -k components/operators/rhcl-operator/
+    oc apply -k components/operators/rhcl/
     oc apply -k components/operators/rhoai-operator/
 
     # Deploy MaaS-focused DSC

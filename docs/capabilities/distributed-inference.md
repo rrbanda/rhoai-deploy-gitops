@@ -1,6 +1,11 @@
 # Distributed Inference
 
-Distributed inference splits a single large model across multiple GPUs or nodes, enabling you to serve models that do not fit in a single GPU's memory. RHOAI 3.5 provides this through the `advancedkserve` component, which uses the **llm-d** framework for tensor parallelism and pipeline parallelism.
+Distributed inference splits a single large model across multiple GPUs or nodes, enabling you to serve models that do not fit in a single GPU's memory. RHOAI provides this through the `kserve` component (advanced features), which uses the **llm-d** framework for tensor parallelism and pipeline parallelism.
+
+!!! info "Default State"
+    **Enabled in:** `full`, `serving`, `maas`, `dev` overlays.  
+    **Disabled in:** `minimal`, `training` overlays.  
+    To change, edit `rhoaiOverlay` in `cluster-config.yaml` or create a [custom overlay](../concepts/kustomize-overlays.md).
 
 ## When You Need Distributed Inference
 
@@ -66,8 +71,8 @@ For very large models, combine both: tensor parallelism within a node (fast NVLi
 | DSC `advancedkserve: Managed` | DSC component | Enables distributed inference |
 | GPU Infrastructure | Operators + Instances | Multi-GPU nodes |
 
-!!! warning "OpenShift 4.19+ required"
-    Distributed inference with llm-d requires OpenShift 4.19 or later for the LeaderWorkerSet API.
+!!! warning "OpenShift 4.20+ required"
+    Distributed inference with llm-d requires OpenShift 4.20 or later for the LeaderWorkerSet API.
 
 ## Enable It
 
@@ -91,8 +96,8 @@ This is enabled in the `full` and `dev` overlays.
     ```bash
     # Install required operators
     oc apply -k components/operators/cert-manager/
-    oc apply -k components/operators/lws-operator/
-    oc apply -k components/operators/rhcl-operator/
+    oc apply -k components/operators/lws/
+    oc apply -k components/operators/rhcl/
     oc apply -k components/operators/rhoai-operator/
 
     # Deploy DSC with advancedkserve enabled

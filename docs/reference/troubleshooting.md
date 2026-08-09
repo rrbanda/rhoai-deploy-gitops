@@ -209,7 +209,7 @@ oc logs deployment/rhods-operator -n redhat-ods-operator --tail=100
     - Fix: Install the missing operator (e.g., cert-manager for KServe, ServiceMesh for batch gateway)
 
 2. **Component validation failure** -- Invalid managementState value.
-    - Fix: In RHOAI 3.5, `kueue.managementState: Managed` is not supported. Use `Unmanaged`.
+    - Fix: `kueue.managementState: Managed` is deprecated and not supported. Use `Unmanaged`.
 
 3. **Stale reconciliation** -- Operator has not re-checked the DSC.
     - Fix: Trigger reconciliation:

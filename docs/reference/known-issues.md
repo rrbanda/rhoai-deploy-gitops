@@ -10,7 +10,7 @@ Model download jobs share RWO PVCs with predictor pods. Sync waves (download at 
 
 ## 3. DataScienceCluster (DSC) API Version -- v2
 
-This repository uses the **v2 API** (`datasciencecluster.opendatahub.io/v2`), which is the required API for RHOAI 3.5. The v2 API uses component names like `aipipelines` (instead of v1's `datasciencepipelines`), drops `modelmeshserving` and `codeflare`, and adds fields like `argoWorkflowsControllers`, `registriesNamespace`, `workbenchNamespace`, `defaultClusterQueueName`, and `defaultLocalQueueName`.
+This repository uses the **v2 API** (`datasciencecluster.opendatahub.io/v2`), which is the required API for RHOAI. The v2 API uses component names like `aipipelines` (instead of v1's `datasciencepipelines`), drops `modelmeshserving` and `codeflare`, and adds fields like `argoWorkflowsControllers`, `registriesNamespace`, `workbenchNamespace`, `defaultClusterQueueName`, and `defaultLocalQueueName`.
 
 ## 4. No Upgrade Path from RHOAI 2.x to 3.x
 
@@ -51,7 +51,7 @@ oc delete job <name> -n <namespace>
 
 ## 11. Kueue managementState in 3.5
 
-In RHOAI 3.5, setting `kueue.managementState: Managed` in the DSC is **not supported** and will be rejected by the admission webhook. The standalone Red Hat Build of Kueue Operator must be used instead. Always set `kueue.managementState: Unmanaged`.
+Setting `kueue.managementState: Managed` in the DSC is **not supported** and will be rejected by the admission webhook. The standalone Red Hat Build of Kueue Operator must be used instead. Always set `kueue.managementState: Unmanaged`.
 
 ## 12. AI Gateway / Batch Gateway OOMKilled
 
@@ -63,4 +63,4 @@ When using `ServerSideApply=true` with the DSC, the `batchGateway` field can pro
 
 ## 14. LlamaStack and OGX Conflict
 
-The `llamastackoperator` and `ogx` (OpenGenX) DSC components cannot both be `Managed` simultaneously in RHOAI 3.5 EA2. If you enable OGX, set `llamastackoperator.managementState: Removed`.
+The `llamastackoperator` and `ogx` (OpenGenX) DSC components cannot both be `Managed` simultaneously. If you enable OGX, set `llamastackoperator.managementState: Removed`.

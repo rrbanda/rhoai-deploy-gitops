@@ -2,6 +2,11 @@
 
 Hardware Profiles are RHOAI's abstraction for defining GPU resource bundles. Instead of requiring data scientists to know Kubernetes resource specs, node selectors, and tolerations, they select a named profile like "Large GPU (4x NVIDIA L40S)" from a dropdown in the Dashboard.
 
+!!! info "Default State"
+    **Available when:** Dashboard is enabled (all overlays except `minimal` include Dashboard via base).  
+    Hardware Profiles are a Dashboard feature, not a standalone DSC component.  
+    To change, edit `rhoaiOverlay` in `cluster-config.yaml` or create a [custom overlay](../concepts/kustomize-overlays.md).
+
 ## The Problem They Solve
 
 Without Hardware Profiles:

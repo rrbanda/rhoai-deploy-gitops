@@ -1,5 +1,7 @@
 # RHOAI Architecture
 
+This page describes **RHOAI the product's internal architecture** — how the operator, DSC components, and sub-operators work together. For how this GitOps repository is structured, see [Repository Architecture](../architecture.md).
+
 Red Hat OpenShift AI (RHOAI) is a platform that installs and manages a complete AI/ML stack on OpenShift. Understanding its architecture -- what it installs, what it manages internally, and what this repository controls -- is crucial for operating it effectively.
 
 ## It Is Operators All the Way Down
@@ -182,7 +184,7 @@ sequenceDiagram
 
 ## The DSC API (v2)
 
-RHOAI 3.5 uses the **v2 API** (`datasciencecluster.opendatahub.io/v2`). Key differences from v1:
+RHOAI uses the **v2 API** (`datasciencecluster.opendatahub.io/v2`). Key differences from v1:
 
 - Component name `datasciencepipelines` became `aipipelines`
 - Component `modelmeshserving` may be removed in future versions
