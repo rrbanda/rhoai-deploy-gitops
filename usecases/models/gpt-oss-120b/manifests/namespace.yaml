@@ -4,5 +4,7 @@ metadata:
   name: gpt-oss-120b
   labels:
     opendatahub.io/dashboard: "true"
+    app.kubernetes.io/part-of: gpt-oss-120b
   annotations:
     openshift.io/display-name: "GPT-OSS-120B Model"
+    argocd.argoproj.io/sync-wave: "0"

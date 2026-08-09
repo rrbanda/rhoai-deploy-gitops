@@ -47,7 +47,7 @@ See existing models (`orchestrator-8b`, `qwen-math-7b`, `gpt-oss-120b`) for work
 3. Create `usecases/services/<name>/profiles/tier1-minimal/kustomization.yaml`
 4. Push to Git -- the `cluster-services` ApplicationSet creates a `service-<name>` Application
 
-See the [Use Cases documentation](https://rrbanda.github.io/rhoai-deploy-gitops/usecases/) for details.
+See the [Use Cases documentation](usecases/) in the `docs/` directory for details.
 
 ## Pull Request Guidelines
 

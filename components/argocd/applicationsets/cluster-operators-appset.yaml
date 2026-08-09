@@ -5,6 +5,7 @@ metadata:
   namespace: openshift-gitops
 spec:
   goTemplate: true
+  preserveResourcesOnDeletion: true
   syncPolicy:
     applicationsSync: sync
   generators:
@@ -23,6 +24,11 @@ spec:
     metadata:
       name: 'operator-{{ .path.basename }}'
       namespace: openshift-gitops
+      annotations:
+        argocd.argoproj.io/sync-wave: "1"
+      labels:
+        app.kubernetes.io/part-of: rhoai-gitops
+        app.kubernetes.io/component: operator
     spec:
       project: platform
       source:

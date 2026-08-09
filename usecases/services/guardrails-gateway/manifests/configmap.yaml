@@ -35,7 +35,8 @@ data:
     import urllib.request
     import os
 
-    VLLM_URL = os.environ.get("VLLM_URL", "https://qwen25-7b-instruct-kserve-workload-svc.llm-inference.svc:8000")
+    # CUSTOMIZE THIS: Update default URL to your cluster's model serving endpoint
+    VLLM_URL = os.environ.get("VLLM_URL", "https://CHANGE_ME-kserve-workload-svc.llm-inference.svc:8000")
 
     class OrchestratorHandler(http.server.BaseHTTPRequestHandler):
         def do_POST(self):

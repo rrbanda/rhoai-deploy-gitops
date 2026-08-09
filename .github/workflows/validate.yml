@@ -11,6 +11,7 @@ jobs:
     name: Kustomize Build
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         overlay:
           - bootstrap/overlays/default
@@ -18,6 +19,8 @@ jobs:
           - components/instances/rhoai-instance/overlays/serving
           - components/instances/rhoai-instance/overlays/training
           - components/instances/rhoai-instance/overlays/full
+          - components/instances/rhoai-instance/overlays/dev
+          - components/instances/rhoai-instance/overlays/maas
     steps:
       - uses: actions/checkout@v4
 
@@ -26,6 +29,49 @@ jobs:
 
       - name: Build ${{ matrix.overlay }}
         run: kustomize build ${{ matrix.overlay }}
+
+  kustomize-build-usecases:
+    name: Kustomize Build (Usecases)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kustomize
+        uses: imranismail/setup-kustomize@v2
+
+      - name: Build all model profiles
+        run: |
+          failed=0
+          for dir in usecases/models/*/profiles/tier1-minimal; do
+            if [ -f "$dir/kustomization.yaml" ]; then
+              echo "Building $dir..."
+              if ! kustomize build "$dir"; then
+                echo "FAILED: $dir"
+                failed=1
+              fi
+            fi
+          done
+          for dir in usecases/services/*/profiles/tier1-minimal; do
+            if [ -f "$dir/kustomization.yaml" ]; then
+              echo "Building $dir..."
+              if ! kustomize build "$dir"; then
+                echo "FAILED: $dir"
+                failed=1
+              fi
+            fi
+          done
+          exit $failed
+
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint shell scripts
+        run: |
+          shellcheck scripts/configure.sh
+          shellcheck demo/*.sh
 
   gitleaks:
     name: Secret Scan
@@ -49,9 +95,7 @@ jobs:
         run: pip install yamllint
 
       - name: Lint YAML files
-        run: |
-          yamllint -d '{extends: relaxed, rules: {line-length: {max: 200}}}' \
-            components/ bootstrap/
+        run: yamllint -c .yamllint components/ bootstrap/ usecases/
 
   no-hardcoded-values:
     name: Check Portability
@@ -61,7 +105,6 @@ jobs:
 
       - name: Check for hardcoded cluster IDs
         run: |
-          # Fail if any file (outside examples/) contains likely cluster-specific values
           if grep -r --include="*.yaml" --include="*.yml" \
             -E "cluster-[a-z0-9]{5}-[a-z0-9]{5}" \
             --exclude-dir="examples" \
@@ -71,3 +114,12 @@ jobs:
             exit 1
           fi
           echo "No hardcoded cluster IDs found."
+
+      - name: Check for placeholder values in cluster-config
+        run: |
+          if grep -q 'YOUR-ORG' bootstrap/overlays/default/cluster-config.yaml; then
+            echo "INFO: cluster-config.yaml still has YOUR-ORG placeholder (expected in upstream repo)."
+          fi
+          if grep -q 'CHANGE_ME' components/; then
+            echo "INFO: Found CHANGE_ME placeholders (expected for secrets)."
+          fi

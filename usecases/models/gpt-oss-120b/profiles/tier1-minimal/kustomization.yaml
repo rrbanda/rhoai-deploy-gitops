@@ -6,4 +6,5 @@ resources:
 
 labels:
   - pairs:
+      app.kubernetes.io/part-of: gpt-oss-120b
       tier: "1"

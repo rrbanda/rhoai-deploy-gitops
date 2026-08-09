@@ -4,7 +4,11 @@ metadata:
   name: platform
   namespace: openshift-gitops
 spec:
-  description: RHOAI platform operators and instances
+  description: >-
+    RHOAI platform operators and instances. Requires broad permissions because
+    it creates OLM Subscriptions, cluster-scoped CRs (ClusterPolicy,
+    NodeFeatureDiscovery, DataScienceCluster), ClusterRoles, and namespaces
+    across multiple operator namespaces.
   sourceRepos:
     - REPO_URL_PLACEHOLDER
     - https://github.com/redhat-cop/gitops-catalog.git

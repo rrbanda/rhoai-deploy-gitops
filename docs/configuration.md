@@ -34,7 +34,7 @@ The `scripts/configure.sh` script updates `cluster-config.yaml` and the RHOAI op
 ```bash
 ./scripts/configure.sh --repo https://github.com/YOUR-ORG/rhoai-deploy-gitops.git \
            --branch main \
-           --channel beta \
+           --channel fast \
            --dsc full
 ```
 
@@ -44,7 +44,7 @@ The `scripts/configure.sh` script updates `cluster-config.yaml` and the RHOAI op
 |------|---------|-------------|
 | `--repo` | (required) | Your fork's Git URL |
 | `--branch` | `main` | Branch ArgoCD should track |
-| `--channel` | `beta` | RHOAI operator channel (beta = Early Access, stable = GA) |
+| `--channel` | `fast` | RHOAI operator channel (fast = GA, beta = EA, stable = LTS) |
 | `--dsc` | `full` | DSC overlay (minimal, serving, training, maas, full, dev) |
 
 ### What It Changes
@@ -75,13 +75,13 @@ Edit `components/operators/rhoai-operator/patch-channel.yaml`:
 ```yaml
 - op: replace
   path: /spec/channel
-  value: beta
+  value: fast
 ```
 
 Channel options:
-- `beta` -- RHOAI 3.5 Early Access releases
-- `stable` -- RHOAI GA releases (when available)
-- `fast` -- Rapid release cycle (when available)
+- `fast` -- RHOAI GA (General Availability) releases
+- `beta` -- RHOAI EA (Early Access / preview) releases
+- `stable` -- RHOAI LTS (Long Term Support) releases
 
 ### 3. Choose your DSC overlay
 
@@ -339,7 +339,7 @@ For CI/CD pipelines that configure the repo automatically:
 ```bash
 export GITOPS_REPO="https://github.com/YOUR-ORG/rhoai-deploy-gitops.git"
 export GITOPS_BRANCH="main"
-export RHOAI_CHANNEL="beta"
+export RHOAI_CHANNEL="fast"
 export DSC_OVERLAY="full"
 
 ./scripts/configure.sh --repo "$GITOPS_REPO" \

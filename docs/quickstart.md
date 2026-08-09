@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-This guide deploys Red Hat OpenShift AI (RHOAI) 3.5 on your OpenShift cluster using GitOps. Every step includes an explanation of what is happening and why, so you are never just running commands blindly.
+This guide deploys Red Hat OpenShift AI (RHOAI) on your OpenShift cluster using GitOps. The repo tracks the latest RHOAI release by default. Every step includes an explanation of what is happening and why, so you are never just running commands blindly.
 
 **Time estimate:** 5 minutes of setup, 15-30 minutes for convergence.
 
@@ -48,7 +48,7 @@ graph LR
     # Run the setup script
     ./scripts/configure.sh --repo https://github.com/YOUR-ORG/rhoai-deploy-gitops.git \
                --branch main \
-               --channel beta \
+               --channel fast \
                --dsc full
 
     # Commit and push
@@ -60,7 +60,7 @@ graph LR
     Clone directly -- no fork needed since you will not use ArgoCD:
 
     ```bash
-    git clone https://github.com/rrbanda/rhoai-deploy-gitops.git
+    git clone https://github.com/YOUR-ORG/rhoai-deploy-gitops.git
     cd rhoai-deploy-gitops
     ```
 
@@ -105,6 +105,29 @@ graph LR
         - `cluster-services` → creates an app for each AI service
 
     Within minutes, ArgoCD is managing 20+ Applications. Each one syncs its respective directory from Git and deploys resources to the cluster.
+
+## Step 3: Enable Models and Services (Optional)
+
+By default, **no models or services are deployed** -- only the platform infrastructure (operators, instances, DSC). Models and services use an opt-in pattern controlled by `config.json` marker files.
+
+To enable a model or service:
+
+```bash
+# Enable a model
+./scripts/configure.sh enable-model gemma2-9b-fp8
+
+# Enable a service
+./scripts/configure.sh enable-service llm-d-epp
+
+# Check what's currently enabled
+./scripts/configure.sh status
+```
+
+Alternatively, edit the `config.json` file directly (set `"enabled": "true"`) under the relevant `usecases/models/<name>/profiles/tier1-minimal/` or `usecases/services/<name>/profiles/tier1-minimal/` directory.
+
+After enabling, commit and push. ArgoCD will auto-discover the change and deploy the workload.
+
+See [Configuration > Deploying Models and Services](configuration.md#deploying-models-and-services-opt-in-pattern) for details on available models, services, and the opt-in mechanism.
 
 ## Step 4: Monitor Convergence
 

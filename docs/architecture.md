@@ -1,6 +1,6 @@
 # Architecture and Repository Structure
 
-This repository implements a fully declarative, GitOps-driven installation of Red Hat OpenShift AI (RHOAI) 3.5 on OpenShift. The entire platform -- from GPU drivers to AI model serving -- is expressed as Kubernetes manifests managed by ArgoCD via an **app-of-apps pattern**.
+This repository implements a fully declarative, GitOps-driven installation of Red Hat OpenShift AI (RHOAI) on OpenShift. The entire platform -- from GPU drivers to AI model serving -- is expressed as Kubernetes manifests managed by ArgoCD via an **app-of-apps pattern**. The repo tracks the latest RHOAI release by default (`fast` channel) and supports switching to `beta` (EA) or `stable` (LTS) via configuration.
 
 !!! tip "New to these concepts?"
     If terms like "app-of-apps", "ApplicationSet", or "Kustomize overlay" are unfamiliar, read the [Concepts](concepts/index.md) section first. This page assumes familiarity with those foundations.
@@ -27,27 +27,41 @@ rhoai-deploy-gitops/
 │   │   └── apps/                       # Standalone Applications (DSC)
 │   ├── operators/                      # OLM operator subscriptions
 │   │   ├── cert-manager/
-│   │   ├── servicemesh/
-│   │   ├── nfd/
-│   │   ├── gpu-operator/
-│   │   ├── kueue-operator/
-│   │   ├── jobset-operator/
-│   │   ├── lws-operator/
 │   │   ├── cma-operator/
-│   │   ├── ai-gateway-operator/
-│   │   ├── rhcl-operator/
-│   │   └── rhoai-operator/
+│   │   ├── external-secrets/
+│   │   ├── gpu-operator/
+│   │   ├── jobset-operator/
+│   │   ├── kueue-operator/
+│   │   ├── lws/
+│   │   ├── nfd/
+│   │   ├── rhcl/
+│   │   ├── rhdh/
+│   │   ├── rhoai-operator/
+│   │   └── servicemesh/
 │   └── instances/                      # Operator instance CRs
-│       ├── nfd-instance/
+│       ├── cluster-autoscaler/
+│       ├── dashboard-config/
+│       ├── evalhub/
+│       ├── external-secrets-config/
 │       ├── gpu-instance/
 │       ├── gpu-workers/                # GPU MachineSets (cloud-specific examples)
-│       ├── cluster-autoscaler/
-│       ├── kueue-instance/
-│       ├── kueue-config/               # ResourceFlavors + ClusterQueue
+│       ├── hardware-profiles/
 │       ├── jobset-instance/
-│       ├── dashboard-config/
+│       ├── kueue-config/               # ResourceFlavors + ClusterQueue
+│       ├── kueue-instance/
+│       ├── lws-instance/
+│       ├── maas-dns-patch/
+│       ├── maas-gateway/
+│       ├── maas-postgres/
+│       ├── mcp-servers/
+│       ├── mlflow-instance/
+│       ├── monitoring-config/
+│       ├── nfd-instance/
+│       ├── observability/
+│       ├── oidc-integration/
+│       ├── rhcl-instance/
 │       └── rhoai-instance/             # DataScienceCluster with composable overlays
-│           ├── base/                   # Minimal DSC (Dashboard only)
+│           ├── base/                   # Full DSC (all components enabled)
 │           └── overlays/               # dev, minimal, serving, training, full, maas
 ├── usecases/
 │   ├── models/                         # Model deployments

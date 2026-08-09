@@ -17,17 +17,20 @@ data:
   # bootstraps the entire RHOAI platform. Everything else is automatic.
   # ──────────────────────────────────────────────────────────────────────────────
 
-  # Your fork's Git repository URL
-  repoURL: "https://github.com/rrbanda/rhoai-deploy-gitops.git"
+  # Your fork's Git repository URL (REQUIRED — update after forking)
+  repoURL: "https://github.com/YOUR-ORG/rhoai-deploy-gitops.git"
 
   # Git revision to track (branch name, tag, or commit SHA)
   targetRevision: "main"
 
   # RHOAI operator OLM channel
-  # Options: "fast" (GA), "beta" (EA/preview), "stable" (LTS)
-  rhoaiChannel: "beta"
+  # Options: "fast" (latest GA), "beta" (EA/preview), "stable" (LTS)
+  # NOTE: To change the channel, also update:
+  #   components/operators/rhoai-operator/patch-channel.yaml
+  # Or use: ./scripts/configure.sh --repo <url> --channel <channel>
+  rhoaiChannel: "fast"
 
-  # DataScienceCluster overlay to deploy
-  # Options: "minimal", "serving", "training", "full", "dev"
+  # DataScienceCluster overlay to deploy (injected into rhoai-dsc Application)
+  # Options: "minimal", "serving", "training", "full", "dev", "maas"
   # See components/instances/rhoai-instance/overlays/ for details
   rhoaiOverlay: "full"

@@ -92,3 +92,20 @@ replacements:
           kind: Application
         fieldPaths:
           - spec.source.targetRevision
+
+  # Inject rhoaiOverlay into the DSC Application path
+  # Replaces the overlay name segment in:
+  #   components/instances/rhoai-instance/overlays/<overlay>
+  - source:
+      kind: ConfigMap
+      name: cluster-gitops-config
+      fieldPath: data.rhoaiOverlay
+    targets:
+      - select:
+          kind: Application
+          name: rhoai-dsc
+        fieldPaths:
+          - spec.source.path
+        options:
+          delimiter: "/"
+          index: 4

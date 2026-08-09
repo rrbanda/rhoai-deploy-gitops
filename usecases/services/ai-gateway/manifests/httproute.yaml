@@ -25,7 +25,7 @@ spec:
           requestHeaderModifier:
             set:
               - name: Host
-                value: qwen25-7b-inference-llm-inference.apps.cluster-4l6x6.4l6x6.sandbox1213.opentlc.com
+                value: CHANGE_ME.apps.CHANGE_ME_CLUSTER_DOMAIN
       backendRefs:
         - name: inference-backend
           port: 443

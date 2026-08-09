@@ -36,7 +36,7 @@ In `components/operators/rhoai-operator/patch-channel.yaml`:
 ```yaml
 - op: replace
   path: /spec/channel
-  value: beta    # or "fast" for GA releases
+  value: fast    # fast = latest GA, beta = EA/preview, stable = LTS
 ```
 
 #### 2. Update the DataScienceCluster

@@ -5,10 +5,13 @@ metadata:
   namespace: openshift-gitops
   annotations:
     argocd.argoproj.io/sync-wave: "10"
+  labels:
+    app.kubernetes.io/part-of: rhoai-gitops
+    app.kubernetes.io/component: bootstrap
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: default
+  project: platform
   source:
     repoURL: REPO_URL_PLACEHOLDER
     targetRevision: TARGET_REVISION_PLACEHOLDER

@@ -222,7 +222,7 @@ EOF
 REPO_URL=""
 BRANCH="main"
 OVERLAY="default"
-CHANNEL="beta"
+CHANNEL="fast"
 DSC_OVERLAY="full"
 NEW_OVERLAY=false
 DRY_RUN=false

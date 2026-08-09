@@ -5,6 +5,7 @@ metadata:
   namespace: openshift-gitops
 spec:
   goTemplate: true
+  preserveResourcesOnDeletion: true
   syncPolicy:
     applicationsSync: sync
   generators:
@@ -27,15 +28,21 @@ spec:
           # remove or comment out this exclude rule.
           - path: components/instances/oidc-integration
             exclude: true
+          # vault-dev is for development only — excluded by default
+          - path: components/instances/vault-dev
+            exclude: true
           # Optional: uncomment to exclude components not needed in your env
           # - path: components/instances/observability
-          #   exclude: true
-          # - path: components/instances/vault-dev
           #   exclude: true
   template:
     metadata:
       name: 'instance-{{ .path.basename }}'
       namespace: openshift-gitops
+      annotations:
+        argocd.argoproj.io/sync-wave: "2"
+      labels:
+        app.kubernetes.io/part-of: rhoai-gitops
+        app.kubernetes.io/component: instance
     spec:
       project: platform
       source:

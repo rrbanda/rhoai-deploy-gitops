@@ -3,6 +3,11 @@ kind: Application
 metadata:
   name: rhoai-dsc
   namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+  labels:
+    app.kubernetes.io/part-of: rhoai-gitops
+    app.kubernetes.io/component: datasciencecluster
 spec:
   project: platform
   source:
@@ -24,6 +29,7 @@ spec:
       - Replace=true
       - RespectIgnoreDifferences=true
       - CreateNamespace=false
+      - SkipDryRunOnMissingResource=true
     retry:
       limit: 5
       backoff:

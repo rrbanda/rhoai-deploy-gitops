@@ -12,7 +12,7 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
-  host: qwen25-7b-inference-llm-inference.apps.cluster-4l6x6.4l6x6.sandbox1213.opentlc.com
+  host: CHANGE_ME.apps.CHANGE_ME_CLUSTER_DOMAIN
   trafficPolicy:
     tls:
       mode: SIMPLE

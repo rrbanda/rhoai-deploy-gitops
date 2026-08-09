@@ -14,7 +14,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   hosts:
-    - qwen25-7b-inference-llm-inference.apps.cluster-4l6x6.4l6x6.sandbox1213.opentlc.com
+    - CHANGE_ME.apps.CHANGE_ME_CLUSTER_DOMAIN
   location: MESH_EXTERNAL
   ports:
     - number: 443
@@ -33,7 +33,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   type: ExternalName
-  externalName: qwen25-7b-inference-llm-inference.apps.cluster-4l6x6.4l6x6.sandbox1213.opentlc.com
+  externalName: CHANGE_ME.apps.CHANGE_ME_CLUSTER_DOMAIN
   ports:
     - port: 443
       targetPort: 443

@@ -4,7 +4,11 @@ metadata:
   name: usecases
   namespace: openshift-gitops
 spec:
-  description: AI use case applications deployed on RHOAI
+  description: >-
+    AI use case applications (models and services) deployed on RHOAI.
+    Restricted to Namespace creation for cluster resources. Namespace
+    destinations are broad because model/service namespaces vary per
+    deployment.
   sourceRepos:
     - REPO_URL_PLACEHOLDER
   destinations:
@@ -13,6 +17,10 @@ spec:
   clusterResourceWhitelist:
     - group: ''
       kind: Namespace
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
   namespaceResourceWhitelist:
     - group: '*'
       kind: '*'

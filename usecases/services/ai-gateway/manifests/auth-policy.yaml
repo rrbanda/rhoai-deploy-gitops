@@ -18,4 +18,4 @@ spec:
     authentication:
       keycloak-jwt:
         jwt:
-          issuerUrl: https://keycloak-keycloak.apps.cluster-6crhb.6crhb.sandbox1011.opentlc.com/realms/ai-bridge
+          issuerUrl: https://CHANGE_ME.apps.CHANGE_ME_CLUSTER_DOMAIN/realms/ai-bridge

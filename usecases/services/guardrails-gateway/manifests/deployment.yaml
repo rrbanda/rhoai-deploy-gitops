@@ -50,8 +50,9 @@ spec:
             - containerPort: 8085
               name: orchestrator
           env:
+            # CUSTOMIZE THIS: Update to your cluster's model serving endpoint
             - name: VLLM_URL
-              value: "https://qwen25-7b-instruct-kserve-workload-svc.llm-inference.svc:8000"
+              value: "https://CHANGE_ME-kserve-workload-svc.llm-inference.svc:8000"
           volumeMounts:
             - name: orchestrator-script
               mountPath: /config

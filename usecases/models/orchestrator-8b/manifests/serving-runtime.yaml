@@ -6,6 +6,7 @@ metadata:
     app.kubernetes.io/name: orchestrator-8b
     app.kubernetes.io/component: serving-runtime
   annotations:
+    argocd.argoproj.io/sync-wave: "0"
     opendatahub.io/template-name: vllm-cuda-runtime-template
     prometheus.io/path: /metrics
     prometheus.io/port: "8080"

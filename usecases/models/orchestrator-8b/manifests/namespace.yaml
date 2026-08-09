@@ -7,3 +7,5 @@ metadata:
     opendatahub.io/dashboard: "true"
     app.kubernetes.io/name: orchestrator-8b
     app.kubernetes.io/part-of: orchestrator-8b
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"

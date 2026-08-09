@@ -8,6 +8,7 @@
 <p align="center">
   <a href="https://rrbanda.github.io/rhoai-deploy-gitops/"><img src="https://img.shields.io/badge/Documentation-blue?style=for-the-badge&logo=readthedocs&logoColor=white" alt="Docs"></a>
   <a href="https://github.com/rrbanda/rhoai-deploy-gitops/releases"><img src="https://img.shields.io/github/v/release/rrbanda/rhoai-deploy-gitops?include_prereleases&style=for-the-badge&label=Release" alt="Release"></a>
+  <a href="https://github.com/rrbanda/rhoai-deploy-gitops/actions/workflows/validate.yml"><img src="https://img.shields.io/github/actions/workflow/status/rrbanda/rhoai-deploy-gitops/validate.yml?style=for-the-badge&label=CI" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-green?style=for-the-badge" alt="License"></a>
 </p>
 
@@ -82,8 +83,8 @@ vi bootstrap/overlays/default/cluster-config.yaml
 data:
   repoURL: "https://github.com/YOUR-ORG/rhoai-deploy-gitops.git"
   targetRevision: "main"
-  rhoaiChannel: "beta"       # beta = EA, fast = GA, stable = LTS
-  rhoaiOverlay: "full"       # minimal | serving | training | full
+  rhoaiChannel: "fast"       # fast = latest GA, beta = EA/preview, stable = LTS
+  rhoaiOverlay: "full"       # minimal | serving | training | full | maas
 ```
 
 ### 3. Push & Deploy
@@ -219,10 +220,17 @@ until oc apply -k bootstrap/overlays/prod; do sleep 10; done
 
 ## Version Support
 
-| RHOAI Version | OpenShift | Tag | Status |
-|--------------|-----------|-----|--------|
-| 3.5 EA2 | 4.18+ | `v3.5.0-ea2` / `main` | **Current** |
-| Future | 4.18+ | `release/X.Y` | Planned |
+This repo tracks the latest RHOAI release by default (`fast` channel). Switch channels in `cluster-config.yaml` to target a specific release stream:
+
+| Channel | What It Tracks | Use Case |
+|---------|---------------|----------|
+| `fast` | Latest GA release | **Default** — production deployments |
+| `beta` | Early Access / preview | Testing upcoming features |
+| `stable` | Long Term Support | Conservative / regulated environments |
+
+| OpenShift | Status |
+|-----------|--------|
+| 4.18+ | Supported |
 
 ---
 
