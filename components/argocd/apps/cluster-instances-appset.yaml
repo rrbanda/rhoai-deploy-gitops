@@ -15,8 +15,6 @@ spec:
           - path: components/instances/*
           - path: components/instances/rhoai-instance
             exclude: true
-          - path: components/instances/gpu-workers
-            exclude: true
           - path: components/instances/gpu-instance
             exclude: true
           # MaaS resources managed by rrbanda/maas-demo via dedicated ArgoCD Application
