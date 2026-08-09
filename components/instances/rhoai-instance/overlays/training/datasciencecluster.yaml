@@ -22,6 +22,10 @@ spec:
       managementState: Managed
       modelCache:
         managementState: Managed
+        cacheSize: "50Gi"
+        nodeSelector:
+          matchLabels:
+            nvidia.com/gpu.present: "true"
       modelsAsService:
         managementState: Managed
       nim:
