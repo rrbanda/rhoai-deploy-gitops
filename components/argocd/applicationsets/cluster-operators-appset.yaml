@@ -14,11 +14,8 @@ spec:
         revision: TARGET_REVISION_PLACEHOLDER
         directories:
           - path: components/operators/*
-          # GPU/NFD operators use gitops-catalog (external kustomize bases)
-          # and are handled by the gpu-instance and nfd-instance CRs
+          # GPU operator uses gitops-catalog (external kustomize base)
           - path: components/operators/gpu-operator
-            exclude: true
-          - path: components/operators/nfd
             exclude: true
   template:
     metadata:
