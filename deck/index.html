@@ -1048,6 +1048,7 @@
     if(k==='Home'){e.preventDefault();goTo(1);cb();return;}
     if(k==='End'){e.preventDefault();goTo(TOTAL);cb();return;}
     if(k==='Escape'){e.preventDefault();toggleOv();cb();return;}
+    if(k==='P'&&e.shiftKey){e.preventDefault();openPresWin();cb();return;}
     if(k==='p'||k==='P'){e.preventDefault();toggleN();cb();return;}
     if(/^[0-9]$/.test(k)){e.preventDefault();db+=k;if(dt)clearTimeout(dt);if(db.length===2){goTo(+db);cb();return;}dt=setTimeout(function(){var n=+db;if(n>=1&&n<=9)goTo(n);cb();},600);}
   }
@@ -1060,8 +1061,55 @@
   function openOv(){S.ovOpen=true;ov.hidden=false;var a=ov.querySelector('.overview-thumb[data-goto="'+S.cur+'"]');if(a)a.focus();}
   function closeOv(){S.ovOpen=false;ov.hidden=true;deck.focus();}
   function toggleN(){if(!notes)return;S.nOpen=!S.nOpen;notes.hidden=!S.nOpen;if(S.nOpen)nb.textContent=getNotes(S.cur)||'(No notes)';}
+
+  /* ---- Presenter Window (Shift+P) ---- */
+  var presWin=null;
+  function getSlideTitle(n){var s=deck.querySelector('.slide[data-slide="'+n+'"]');if(!s)return'';var h=s.querySelector('h1,h2');return h?h.textContent.trim():'';}
+  function getNextTitle(n){return n<TOTAL?getSlideTitle(n+1):'';}
+  function updatePresWin(){
+    if(!presWin||presWin.closed){presWin=null;return;}
+    var d=presWin.document;
+    d.getElementById('pw-slide').textContent='Slide '+S.cur+' / '+TOTAL;
+    d.getElementById('pw-title').textContent=getSlideTitle(S.cur);
+    var raw=getNotes(S.cur)||'(No notes for this slide)';
+    var parts=raw.split(/---\s*pause\s*---/i);
+    d.getElementById('pw-notes').innerHTML=parts.map(function(p){return '<p>'+p.trim().replace(/"/g,'')+'</p>';}).join('<hr style="border:0;border-top:1px dashed #444;margin:1em 0;">');
+    var nt=getNextTitle(S.cur);
+    d.getElementById('pw-next').textContent=nt?'Next: '+nt:'(Last slide)';
+  }
+  function openPresWin(){
+    if(presWin&&!presWin.closed){presWin.focus();return;}
+    presWin=window.open('','_blank','width=700,height=700');
+    var d=presWin.document;
+    d.open();
+    d.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Presenter Notes</title>'+
+      '<link rel="preconnect" href="https://fonts.googleapis.com">'+
+      '<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;700;900&family=Red+Hat+Text:wght@400;500&family=Red+Hat+Mono:wght@400;500&display=swap" rel="stylesheet">'+
+      '<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#151515;color:#d2d2d2;font-family:"Red Hat Text",sans-serif;padding:2rem;display:flex;flex-direction:column;height:100vh}'+
+      '#pw-slide{font-family:"Red Hat Mono",monospace;font-size:0.8rem;color:#EE0000;letter-spacing:0.15em;text-transform:uppercase}'+
+      '#pw-title{font-family:"Red Hat Display",sans-serif;font-size:1.6rem;font-weight:700;color:#fff;margin:0.5rem 0 1rem}'+
+      '#pw-notes{flex:1;overflow-y:auto;font-size:1.05rem;line-height:1.8;padding:1.5rem;background:#1a1a1a;border:1px solid #333;border-radius:10px}'+
+      '#pw-notes p{margin-bottom:0.8em}'+
+      '#pw-next{margin-top:1rem;padding:0.75rem 1rem;background:#1a1a1a;border:1px solid #333;border-radius:8px;font-family:"Red Hat Mono",monospace;font-size:0.8rem;color:#8a8a8a}'+
+      '#pw-nav{margin-top:0.75rem;display:flex;gap:0.75rem}#pw-nav button{flex:1;padding:0.6rem;background:#252525;border:1px solid #444;border-radius:6px;color:#d2d2d2;font-family:"Red Hat Display",sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer}#pw-nav button:hover{background:#333}'+
+      '</style></head><body>'+
+      '<div id="pw-slide"></div><div id="pw-title"></div><div id="pw-notes"></div><div id="pw-next"></div>'+
+      '<div id="pw-nav"><button id="pw-prev">&larr; Previous</button><button id="pw-nextbtn">Next &rarr;</button></div>'+
+      '</body></html>');
+    d.close();
+    d.getElementById('pw-prev').addEventListener('click',function(){prev();updatePresWin();});
+    d.getElementById('pw-nextbtn').addEventListener('click',function(){next();updatePresWin();});
+    presWin.addEventListener('keydown',function(e){
+      if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();next();updatePresWin();}
+      if(e.key==='ArrowLeft'||e.key==='Backspace'){e.preventDefault();prev();updatePresWin();}
+    });
+    updatePresWin();
+  }
+  var origRender=render;
+  render=function(){origRender();updatePresWin();};
+
   document.addEventListener('DOMContentLoaded',function(){S.cur=readH();render();window.addEventListener('hashchange',function(){S.cur=readH();render();});});
-  window.__deck={goTo:goTo,next:next,prev:prev,state:S};
+  window.__deck={goTo:goTo,next:next,prev:prev,state:S,openPresenter:openPresWin};
 }());
 </script>
 </body>
