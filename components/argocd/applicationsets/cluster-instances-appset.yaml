@@ -60,6 +60,11 @@ spec:
           kind: NodeFeatureDiscovery
           jsonPointers:
             - /status
+        - group: ""
+          kind: Secret
+          jsonPointers:
+            - /data
+            - /stringData
       syncPolicy:
         automated:
           selfHeal: true

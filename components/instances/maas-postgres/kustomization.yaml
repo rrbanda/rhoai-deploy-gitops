@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - secret.yaml
+  - maas-api-secret.yaml
   - statefulset.yaml
   - service.yaml
   - pdb.yaml
