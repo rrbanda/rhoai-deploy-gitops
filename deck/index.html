@@ -734,62 +734,70 @@
     </div>
   </section>
 
-  <!-- ===== SLIDE 14: KNOWN ISSUES ===== -->
+  <!-- ===== SLIDE 14: LESSONS LEARNED ===== -->
   <section class="slide" data-slide="17" role="group" aria-label="Issues" aria-hidden="true">
     <div class="slide-inner">
-      <div class="slide-eyebrow anim-fade-up" style="--index:0">TROUBLESHOOTING</div>
-      <h2 class="display-lg anim-fade-up" style="--index:1">9 Issues Encountered &amp; Fixed</h2>
-      <div class="card-grid cols-3 anim-fade-up" style="--index:2; font-size:0.78rem;" data-stagger>
-        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-red); --index:0;">
-          <span class="card-tag" style="background:rgba(238,0,0,0.12); color:var(--rh-red);">ArgoCD</span>
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">LESSONS LEARNED</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">What We Hit &amp; What You Won&rsquo;t</h2>
+      <p class="lead anim-fade-up" style="--index:2">9 issues discovered during the first deployment. <strong style="color:var(--rh-green);">7 are permanently fixed</strong> in the repo &mdash; you&rsquo;ll never see them. <strong style="color:var(--rh-orange);">2 are platform behaviors</strong> to be aware of.</p>
+
+      <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--rh-green); text-transform:uppercase; letter-spacing:0.15em; margin-top:1rem; margin-bottom:0.5rem;" class="anim-fade-up" style="--index:3">&#10003; FIXED IN REPO &mdash; WON&rsquo;T RECUR</div>
+      <div class="card-grid cols-4 anim-fade-up" style="--index:3; font-size:0.78rem;" data-stagger>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-green); --index:0;">
+          <span class="card-tag" style="background:rgba(62,134,53,0.12); color:var(--rh-green);">ArgoCD</span>
           <div class="card-title">preserveResourcesOnDeletion</div>
-          <div class="card-body">Not in ArgoCD CRD schema. <strong>Blocked ALL AppSet updates.</strong><br>Fix: Removed from all 4 ApplicationSets.</div>
+          <div class="card-body">Not in ArgoCD CRD schema. Removed from all 4 ApplicationSets.</div>
         </div>
-        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-red); --index:1;">
-          <span class="card-tag" style="background:rgba(238,0,0,0.12); color:var(--rh-red);">ArgoCD</span>
-          <div class="card-title">ExternalSecretsConfig wave 0</div>
-          <div class="card-body">CRD not yet installed when CR applied.<br>Fix: Added <code>sync-wave: "3"</code> after operator.</div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-green); --index:1;">
+          <span class="card-tag" style="background:rgba(62,134,53,0.12); color:var(--rh-green);">Sync Wave</span>
+          <div class="card-title">ExternalSecretsConfig timing</div>
+          <div class="card-body">CR applied before CRD existed. Now at <code>sync-wave: "3"</code>.</div>
         </div>
-        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-purple); --index:2;">
-          <span class="card-tag" style="background:rgba(103,83,172,0.12); color:var(--rh-purple);">Operator</span>
-          <div class="card-title">NFD excluded but instance not</div>
-          <div class="card-body">NFD operator excluded from AppSet but nfd-instance expected it.<br>Fix: Removed NFD exclusion from operators AppSet.</div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-green); --index:2;">
+          <span class="card-tag" style="background:rgba(62,134,53,0.12); color:var(--rh-green);">Alignment</span>
+          <div class="card-title">NFD operator/instance mismatch</div>
+          <div class="card-body">Operator excluded but instance expected it. Exclusion removed.</div>
         </div>
-        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-orange); --index:3;">
-          <span class="card-tag" style="background:rgba(244,180,0,0.12); color:var(--rh-orange);">Secret</span>
-          <div class="card-title">maas-db-config wrong namespace</div>
-          <div class="card-body">Secret in <code>maas-db</code>, RHOAI expects <code>redhat-ods-applications</code> with key <code>DB_CONNECTION_URL</code>.<br>Fix: Placeholder YAML + ignoreDifferences.</div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-green); --index:3;">
+          <span class="card-tag" style="background:rgba(62,134,53,0.12); color:var(--rh-green);">Secret</span>
+          <div class="card-title">maas-db-config namespace &amp; key</div>
+          <div class="card-body">Corrected to <code>redhat-ods-applications</code> with <code>DB_CONNECTION_URL</code> key.</div>
         </div>
-        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-teal); --index:4;">
-          <span class="card-tag" style="background:rgba(0,149,150,0.12); color:var(--rh-teal);">CRD</span>
-          <div class="card-title">Backstage .replicas invalid</div>
-          <div class="card-body"><code>.spec.application.replicas</code> not in v1alpha5 CRD. Retried 5+ times.<br>Fix: Removed field; operator defaults.</div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-green); --index:4;">
+          <span class="card-tag" style="background:rgba(62,134,53,0.12); color:var(--rh-green);">CRD</span>
+          <div class="card-title">Backstage .replicas removed</div>
+          <div class="card-body"><code>.spec.application.replicas</code> not in v1alpha5 schema. Field removed.</div>
         </div>
-        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-teal); --index:5;">
-          <span class="card-tag" style="background:rgba(0,149,150,0.12); color:var(--rh-teal);">CRD</span>
-          <div class="card-title">EvalHub CRD missing</div>
-          <div class="card-body">CRD not shipped in RHOAI 3.5 EA2.<br>Fix: Excluded evalhub from instances AppSet.</div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-green); --index:5;">
+          <span class="card-tag" style="background:rgba(62,134,53,0.12); color:var(--rh-green);">EA2</span>
+          <div class="card-title">EvalHub CRD not shipped</div>
+          <div class="card-body">CRD absent in 3.5 EA2. Instance excluded from AppSet.</div>
         </div>
-        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-orange); --index:6;">
-          <span class="card-tag" style="background:rgba(244,180,0,0.12); color:var(--rh-orange);">Dependency</span>
-          <div class="card-title">external-secrets-config &rarr; vault-dev</div>
-          <div class="card-body">ExternalSecretsConfig instance depends on <code>vault-dev</code> namespace (excluded).<br>Fix: Excluded external-secrets-config from instances AppSet.</div>
-        </div>
-        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-red); --index:7;">
-          <span class="card-tag" style="background:rgba(238,0,0,0.12); color:var(--rh-red);">Runtime</span>
-          <div class="card-title">maas-api CrashLoopBackOff</div>
-          <div class="card-body">Pod crashed looking for <code>maas-db-config</code> secret with wrong key in wrong NS.<br>Fix: Created placeholder, patched real value on-cluster.</div>
-        </div>
-        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-blue); --index:8;">
-          <span class="card-tag" style="background:rgba(0,102,204,0.12); color:var(--rh-blue-light);">Timing</span>
-          <div class="card-title">AppSet discovery delay</div>
-          <div class="card-body">ApplicationSets showed 0 child apps initially. Repo-server was still starting.<br>Fix: Wait ~60s for repo-server; apps auto-populated.</div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-green); --index:6;">
+          <span class="card-tag" style="background:rgba(62,134,53,0.12); color:var(--rh-green);">Dependency</span>
+          <div class="card-title">external-secrets-config &rarr; vault</div>
+          <div class="card-body">Depends on excluded vault-dev namespace. Instance excluded.</div>
         </div>
       </div>
-      <div class="callout anim-fade-up" style="--index:3">
-        <p><strong>4 Git commits fixed the repo:</strong> <code>7b07bee</code>, <code>0d39ebc</code>, <code>2337349</code>, <code>d9f21aa</code>. These fixes are now committed and reusable for any future deployment.</p>
+
+      <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--rh-orange); text-transform:uppercase; letter-spacing:0.15em; margin-top:1.25rem; margin-bottom:0.5rem;" class="anim-fade-up" style="--index:4">&#9888; PLATFORM BEHAVIORS &mdash; BE AWARE</div>
+      <div class="card-grid cols-2 anim-fade-up" style="--index:4; font-size:0.78rem;" data-stagger>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-orange); --index:0;">
+          <span class="card-tag" style="background:rgba(244,180,0,0.12); color:var(--rh-orange);">Every Deploy</span>
+          <div class="card-title">MaaS DB secret must be patched</div>
+          <div class="card-body">The repo provides a placeholder. After ArgoCD creates it, <code>oc patch</code> the real DB connection URL on-cluster. This is by design &mdash; secrets never go in Git.</div>
+        </div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-orange); --index:1;">
+          <span class="card-tag" style="background:rgba(244,180,0,0.12); color:var(--rh-orange);">Every Deploy</span>
+          <div class="card-title">AppSet discovery takes ~60s</div>
+          <div class="card-body">After bootstrap, ApplicationSets show 0 child apps while the ArgoCD repo-server starts. Wait ~60 seconds &mdash; apps auto-populate. This is normal ArgoCD behavior.</div>
+        </div>
       </div>
-      <div class="slide-notes">"This is the slide that makes this deck different from a marketing presentation. Nine real issues, encountered during a real deployment, with real fixes." "Let me walk you through the categories. The ArgoCD issues — preserveResourcesOnDeletion wasn't in the CRD schema for the installed ArgoCD version. This is a newer feature that the OpenShift GitOps 1.21 operator doesn't support yet. It BLOCKED all ApplicationSet updates — nothing could sync until we removed it from all four AppSets." "ExternalSecretsConfig at wave 0 is a classic CRD timing issue. The ExternalSecretsConfig Custom Resource was deployed before the External Secrets operator installed the CRD. Moving it to wave 3 fixed it." "Operator dependency mismatches — NFD was excluded from the operators AppSet but nfd-instance still expected it. Two components out of alignment." "Secret management was the trickiest. The MaaS API pod was CrashLoopBackOff because it expected a secret called maas-db-config in redhat-ods-applications with a specific key: DB_CONNECTION_URL. The repo had the secret in the wrong namespace with the wrong key." "CRD compatibility — Backstage's v1alpha5 schema doesn't accept replicas. EvalHub's CRD doesn't ship in EA2 at all." --- pause --- "Four Git commits fixed everything: 7b07bee, 0d39ebc, 2337349, d9f21aa. These fixes are now baked into the repo — anyone deploying after us won't hit these issues." "Let me show you how we handle the secret problem long-term."</div>
+
+      <div class="callout anim-fade-up" style="--index:5">
+        <p><strong>4 commits hardened the repo:</strong> <code>7b07bee</code>, <code>0d39ebc</code>, <code>2337349</code>, <code>d9f21aa</code>. Anyone deploying from this repo today gets a clean run &mdash; only the 2 platform behaviors above require attention.</p>
+      </div>
+      <div class="slide-notes">"This is the transparency slide. We hit 9 issues during the first deployment. But here's the key message: 7 of them are permanently fixed in the Git repo. If you deploy from this repo today, you will never see them." --- pause --- "The green cards are the fixed issues. Things like preserveResourcesOnDeletion not being in the ArgoCD CRD schema — we removed it. ExternalSecretsConfig deploying before its CRD existed — we added a sync wave. NFD operator-instance misalignment — we fixed the exclusion. Backstage schema incompatibilities, missing EA2 CRDs, dependency on excluded namespaces — all resolved in 4 commits." --- pause --- "The orange cards are platform behaviors. These happen on every deployment, and they're by design. First, the MaaS database secret. The repo provides a placeholder with REPLACE_ME — ArgoCD creates the Secret object, then you patch the real connection URL on-cluster. Secrets never go in Git, so this manual step is intentional." "Second, the AppSet discovery delay. After bootstrap, you'll see zero child apps for about 60 seconds while the ArgoCD repo-server initializes. Don't panic. It auto-populates." --- pause --- "The bottom line: 4 commits hardened this repo. A clean deployment today only requires awareness of those 2 platform behaviors. Let me show you the secret management pattern in detail."</div>
     </div>
   </section>
 
@@ -969,7 +977,7 @@
       <button class="overview-thumb" data-goto="14"><span class="num">14</span><span class="ttl">14 Operator Subscriptions</span><span class="beat">OPERATORS</span></button>
       <button class="overview-thumb" data-goto="15"><span class="num">15</span><span class="ttl">Sync Waves &amp; Ordering</span><span class="beat">ORDERING</span></button>
       <button class="overview-thumb" data-goto="16"><span class="num">16</span><span class="ttl">DSC Profiles</span><span class="beat">PROFILES</span></button>
-      <button class="overview-thumb" data-goto="17"><span class="num">17</span><span class="ttl">9 Issues Fixed</span><span class="beat">TROUBLESHOOTING</span></button>
+      <button class="overview-thumb" data-goto="17"><span class="num">17</span><span class="ttl">What We Hit &amp; What You Won&rsquo;t</span><span class="beat">LESSONS</span></button>
       <button class="overview-thumb" data-goto="18"><span class="num">18</span><span class="ttl">Secret Management Pattern</span><span class="beat">SECURITY</span></button>
       <button class="overview-thumb" data-goto="19"><span class="num">19</span><span class="ttl">Final Deployment State</span><span class="beat">RESULT</span></button>
       <button class="overview-thumb" data-goto="20"><span class="num">20</span><span class="ttl">Day-2 Operations</span><span class="beat">OPERATIONS</span></button>
