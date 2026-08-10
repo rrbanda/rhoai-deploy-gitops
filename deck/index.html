@@ -175,14 +175,8 @@
       <div style="position: absolute; top: -100px; right: -100px; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(238,0,0,0.2) 0%, transparent 70%); pointer-events: none;"></div>
       <div class="anim-fade-up" style="--index:0"><div class="slide-eyebrow">RHOAI 3.5 EA2 &middot; GITOPS</div></div>
       <h1 class="display-xl anim-fade-up" style="--index:1">Deploying Red Hat OpenShift AI<br>with <span class="accent">GitOps</span></h1>
-      <p class="lead anim-fade-up" style="--index:2">One ConfigMap. One <code>oc apply</code>. A fully self-healing AI platform &mdash; from bare cluster to 14 operators, 26 deployments, and 30 ArgoCD applications.</p>
-      <div class="stat-strip anim-fade-up" style="--index:3">
-        <div class="stat-item"><div class="stat-value" style="color:var(--rh-red);">14</div><div class="stat-label">Operators Deployed</div></div>
-        <div class="stat-item"><div class="stat-value">26</div><div class="stat-label">Deployments in RHOAI</div></div>
-        <div class="stat-item"><div class="stat-value" style="color:var(--rh-teal);">30</div><div class="stat-label">ArgoCD Applications</div></div>
-        <div class="stat-item"><div class="stat-value" style="color:var(--rh-green);">23</div><div class="stat-label">DSC Conditions True</div></div>
-      </div>
-      <div style="margin-top:2rem; font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted); --index:4;" class="anim-fade-up">
+      <p class="lead anim-fade-up" style="--index:2">A real, end-to-end walkthrough of deploying Red Hat OpenShift AI on a live cluster using ArgoCD &mdash; every dependency, every failure, every fix.</p>
+      <div style="margin-top:2rem; font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted); --index:3;" class="anim-fade-up">
         OCP 4.19.40 &middot; AWS us-east-2 &middot; Channel: beta &middot; Profile: full
       </div>
       <div class="slide-notes">"Thank you all for being here. What I'm about to walk you through isn't a theory deck or a product overview. This is a real deployment — one I did from scratch on a live AWS cluster." --- pause --- "Red Hat OpenShift AI is one of the most complex operator ecosystems in the Kubernetes world. 14 operators. 26 internal deployments. 50+ CRDs. And here's the thing — we deployed all of it with a single ConfigMap and one oc apply command. Everything after that was Git-driven." --- pause --- "In the next 20 slides, I'll show you exactly how — every dependency, every failure, every fix. This is battle-tested. Let me start with why this is hard in the first place."</div>
