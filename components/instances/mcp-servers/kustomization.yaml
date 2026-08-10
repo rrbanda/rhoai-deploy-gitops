@@ -3,3 +3,6 @@ kind: Kustomization
 
 resources:
   - gen-ai-aa-mcp-servers.yaml
+  - openshift-mcp-server-rbac.yaml
+  - openshift-mcp-server-config.yaml
+  - openshift-mcp-server.yaml
