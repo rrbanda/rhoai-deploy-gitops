@@ -397,8 +397,33 @@
     </div>
   </section>
 
-  <!-- ===== SLIDE 6: REPO ARCHITECTURE ===== -->
-  <section class="slide" data-slide="8" role="group" aria-label="Repo" aria-hidden="true">
+  <!-- ===== SLIDE 8: SECTION DIVIDER — THE GITOPS ENGINE ===== -->
+  <section class="slide" data-slide="8" role="group" aria-label="GitOps Engine" aria-hidden="true">
+    <div class="slide-inner" style="display:flex; flex-direction:column; justify-content:center; min-height:80vh; position:relative;">
+      <div style="position:absolute; top:-80px; left:-80px; width:400px; height:400px; border-radius:50%; background:radial-gradient(circle, rgba(0,149,150,0.15) 0%, transparent 70%); pointer-events:none;"></div>
+      <div class="anim-fade-up" style="--index:0"><div class="slide-eyebrow">SECTION 2</div></div>
+      <h2 class="display-xl anim-fade-up" style="--index:1">The GitOps<br><span style="color:var(--rh-teal);">Engine</span></h2>
+      <p class="lead anim-fade-up" style="--index:2">The cluster is ready. Now let&rsquo;s look at the repository, the patterns, and the bootstrap process that deploy and manage the entire AI platform through Git.</p>
+      <div style="margin-top:2.5rem; display:flex; gap:2rem; flex-wrap:wrap;" class="anim-fade-up" data-stagger>
+        <div class="anim-fade-up" style="--index:0; padding:0.75rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-teal); border-radius:0 8px 8px 0;">
+          <div style="font-size:0.9rem; color:var(--text-primary); font-weight:600;">Repository Architecture</div>
+          <div style="font-size:0.75rem; color:var(--text-muted);">3 directories, 1 ConfigMap</div>
+        </div>
+        <div class="anim-fade-up" style="--index:1; padding:0.75rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-blue-light); border-radius:0 8px 8px 0;">
+          <div style="font-size:0.9rem; color:var(--text-primary); font-weight:600;">App-of-Apps Pattern</div>
+          <div style="font-size:0.75rem; color:var(--text-muted);">4 ApplicationSets</div>
+        </div>
+        <div class="anim-fade-up" style="--index:2; padding:0.75rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-purple); border-radius:0 8px 8px 0;">
+          <div style="font-size:0.9rem; color:var(--text-primary); font-weight:600;">Bootstrap Process</div>
+          <div style="font-size:0.75rem; color:var(--text-muted);">7 layers, 1 command</div>
+        </div>
+      </div>
+      <div class="slide-notes">"We've finished the prerequisites — the cluster is assessed, the version is right. Now we shift gears." --- pause --- "This section is about the GitOps machinery itself: how the repository is structured, how ArgoCD auto-discovers resources, and what happens when you run that single bootstrap command. Three topics — repo architecture, the App-of-Apps pattern, and the bootstrap sequence. Let's start with the repo."</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 9: REPO ARCHITECTURE ===== -->
+  <section class="slide" data-slide="9" role="group" aria-label="Repo" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">REPO STRUCTURE</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">Repository Architecture</h2>
@@ -436,7 +461,7 @@
   </section>
 
   <!-- ===== SLIDE 7: APP-OF-APPS ===== -->
-  <section class="slide" data-slide="9" role="group" aria-label="App of Apps" aria-hidden="true">
+  <section class="slide" data-slide="10" role="group" aria-label="App of Apps" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">PATTERN</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">The App-of-Apps Pattern</h2>
@@ -506,7 +531,7 @@
   </section>
 
   <!-- ===== SLIDE 8: BOOTSTRAP ===== -->
-  <section class="slide" data-slide="10" role="group" aria-label="Bootstrap" aria-hidden="true">
+  <section class="slide" data-slide="11" role="group" aria-label="Bootstrap" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">PHASE 4</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">Bootstrap: 7 Layers in One Command</h2>
@@ -528,7 +553,7 @@
   </section>
 
   <!-- ===== SLIDE 9: OPERATOR DEPENDENCY CHAIN ===== -->
-  <section class="slide" data-slide="11" role="group" aria-label="Dependencies" aria-hidden="true">
+  <section class="slide" data-slide="12" role="group" aria-label="Dependencies" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">DEEP DIVE</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">Operator Dependency Chain</h2>
@@ -586,7 +611,7 @@
   </section>
 
   <!-- ===== SLIDE 10: RHOAI INTERNALS ===== -->
-  <section class="slide" data-slide="12" role="group" aria-label="RHOAI Internals" aria-hidden="true">
+  <section class="slide" data-slide="13" role="group" aria-label="RHOAI Internals" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">DEEP DIVE</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">What RHOAI Deploys Inside the Cluster</h2>
@@ -625,7 +650,7 @@
   </section>
 
   <!-- ===== SLIDE 11: OPERATORS TABLE ===== -->
-  <section class="slide" data-slide="13" role="group" aria-label="Operators" aria-hidden="true">
+  <section class="slide" data-slide="14" role="group" aria-label="Operators" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">ALL 14 OPERATORS</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">Operator Subscription Details</h2>
@@ -653,7 +678,7 @@
   </section>
 
   <!-- ===== SLIDE 12: SYNC WAVES ===== -->
-  <section class="slide" data-slide="14" role="group" aria-label="Sync Waves" aria-hidden="true">
+  <section class="slide" data-slide="15" role="group" aria-label="Sync Waves" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">ORDERING</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">Sync Waves &amp; Dependency Ordering</h2>
@@ -676,7 +701,7 @@
   </section>
 
   <!-- ===== SLIDE 13: DSC PROFILES ===== -->
-  <section class="slide" data-slide="15" role="group" aria-label="Profiles" aria-hidden="true">
+  <section class="slide" data-slide="16" role="group" aria-label="Profiles" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">PROFILES</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">DSC Profiles &mdash; Choose Your Platform</h2>
@@ -709,7 +734,7 @@
   </section>
 
   <!-- ===== SLIDE 14: KNOWN ISSUES ===== -->
-  <section class="slide" data-slide="16" role="group" aria-label="Issues" aria-hidden="true">
+  <section class="slide" data-slide="17" role="group" aria-label="Issues" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">TROUBLESHOOTING</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">9 Issues Encountered &amp; Fixed</h2>
@@ -768,7 +793,7 @@
   </section>
 
   <!-- ===== SLIDE 15: SECRET MANAGEMENT ===== -->
-  <section class="slide" data-slide="17" role="group" aria-label="Secrets" aria-hidden="true">
+  <section class="slide" data-slide="18" role="group" aria-label="Secrets" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">SECURITY</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">Secret Management Pattern</h2>
@@ -807,7 +832,7 @@
   </section>
 
   <!-- ===== SLIDE 16: FINAL STATE ===== -->
-  <section class="slide" data-slide="18" role="group" aria-label="Final State" aria-hidden="true">
+  <section class="slide" data-slide="19" role="group" aria-label="Final State" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">RESULT</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">Final Deployment State</h2>
@@ -855,7 +880,7 @@
   </section>
 
   <!-- ===== SLIDE 17: DAY-2 OPS ===== -->
-  <section class="slide" data-slide="19" role="group" aria-label="Day 2" aria-hidden="true">
+  <section class="slide" data-slide="20" role="group" aria-label="Day 2" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">OPERATIONS</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">Day-2 Operations</h2>
@@ -891,7 +916,7 @@
   </section>
 
   <!-- ===== SLIDE 18: KEY TAKEAWAYS ===== -->
-  <section class="slide" data-slide="20" role="group" aria-label="Takeaways" aria-hidden="true">
+  <section class="slide" data-slide="21" role="group" aria-label="Takeaways" aria-hidden="true">
     <div class="slide-inner" style="display:flex; flex-direction:column; justify-content:center; min-height:80vh;">
       <div style="position: absolute; top:-100px; left:-100px; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle, rgba(238,0,0,0.15) 0%, transparent 70%); pointer-events:none;"></div>
       <div class="slide-eyebrow anim-fade-up" style="--index:0">TAKEAWAYS</div>
@@ -934,19 +959,20 @@
       <button class="overview-thumb" data-goto="5"><span class="num">05</span><span class="ttl">Cluster Readiness</span><span class="beat">PHASE 1</span></button>
       <button class="overview-thumb" data-goto="6"><span class="num">06</span><span class="ttl">Version Compatibility</span><span class="beat">BLOCKER</span></button>
       <button class="overview-thumb" data-goto="7"><span class="num">07</span><span class="ttl">OCP Upgrade 4.18 &rarr; 4.19</span><span class="beat">PHASE 2</span></button>
-      <button class="overview-thumb" data-goto="8"><span class="num">08</span><span class="ttl">Repository Architecture</span><span class="beat">STRUCTURE</span></button>
-      <button class="overview-thumb" data-goto="9"><span class="num">09</span><span class="ttl">App-of-Apps Pattern</span><span class="beat">PATTERN</span></button>
-      <button class="overview-thumb" data-goto="10"><span class="num">10</span><span class="ttl">Bootstrap 7 Layers</span><span class="beat">PHASE 4</span></button>
-      <button class="overview-thumb" data-goto="11"><span class="num">11</span><span class="ttl">Operator Dependency Chain</span><span class="beat">DEEP DIVE</span></button>
-      <button class="overview-thumb" data-goto="12"><span class="num">12</span><span class="ttl">RHOAI Internal Architecture</span><span class="beat">DEEP DIVE</span></button>
-      <button class="overview-thumb" data-goto="13"><span class="num">13</span><span class="ttl">14 Operator Subscriptions</span><span class="beat">OPERATORS</span></button>
-      <button class="overview-thumb" data-goto="14"><span class="num">14</span><span class="ttl">Sync Waves &amp; Ordering</span><span class="beat">ORDERING</span></button>
-      <button class="overview-thumb" data-goto="15"><span class="num">15</span><span class="ttl">DSC Profiles</span><span class="beat">PROFILES</span></button>
-      <button class="overview-thumb" data-goto="16"><span class="num">16</span><span class="ttl">9 Issues Fixed</span><span class="beat">TROUBLESHOOTING</span></button>
-      <button class="overview-thumb" data-goto="17"><span class="num">17</span><span class="ttl">Secret Management Pattern</span><span class="beat">SECURITY</span></button>
-      <button class="overview-thumb" data-goto="18"><span class="num">18</span><span class="ttl">Final Deployment State</span><span class="beat">RESULT</span></button>
-      <button class="overview-thumb" data-goto="19"><span class="num">19</span><span class="ttl">Day-2 Operations</span><span class="beat">OPERATIONS</span></button>
-      <button class="overview-thumb" data-goto="20"><span class="num">20</span><span class="ttl">Key Takeaways</span><span class="beat">TAKEAWAYS</span></button>
+      <button class="overview-thumb" data-goto="8"><span class="num">08</span><span class="ttl">The GitOps Engine</span><span class="beat">SECTION</span></button>
+      <button class="overview-thumb" data-goto="9"><span class="num">09</span><span class="ttl">Repository Architecture</span><span class="beat">STRUCTURE</span></button>
+      <button class="overview-thumb" data-goto="10"><span class="num">10</span><span class="ttl">App-of-Apps Pattern</span><span class="beat">PATTERN</span></button>
+      <button class="overview-thumb" data-goto="11"><span class="num">11</span><span class="ttl">Bootstrap 7 Layers</span><span class="beat">PHASE 4</span></button>
+      <button class="overview-thumb" data-goto="12"><span class="num">12</span><span class="ttl">Operator Dependency Chain</span><span class="beat">DEEP DIVE</span></button>
+      <button class="overview-thumb" data-goto="13"><span class="num">13</span><span class="ttl">RHOAI Internal Architecture</span><span class="beat">DEEP DIVE</span></button>
+      <button class="overview-thumb" data-goto="14"><span class="num">14</span><span class="ttl">14 Operator Subscriptions</span><span class="beat">OPERATORS</span></button>
+      <button class="overview-thumb" data-goto="15"><span class="num">15</span><span class="ttl">Sync Waves &amp; Ordering</span><span class="beat">ORDERING</span></button>
+      <button class="overview-thumb" data-goto="16"><span class="num">16</span><span class="ttl">DSC Profiles</span><span class="beat">PROFILES</span></button>
+      <button class="overview-thumb" data-goto="17"><span class="num">17</span><span class="ttl">9 Issues Fixed</span><span class="beat">TROUBLESHOOTING</span></button>
+      <button class="overview-thumb" data-goto="18"><span class="num">18</span><span class="ttl">Secret Management Pattern</span><span class="beat">SECURITY</span></button>
+      <button class="overview-thumb" data-goto="19"><span class="num">19</span><span class="ttl">Final Deployment State</span><span class="beat">RESULT</span></button>
+      <button class="overview-thumb" data-goto="20"><span class="num">20</span><span class="ttl">Day-2 Operations</span><span class="beat">OPERATIONS</span></button>
+      <button class="overview-thumb" data-goto="21"><span class="num">21</span><span class="ttl">Key Takeaways</span><span class="beat">TAKEAWAYS</span></button>
     </div>
   </div>
 
@@ -980,8 +1006,9 @@
     <li><button role="tab" data-goto="18" aria-label="Slide 18"></button></li>
     <li><button role="tab" data-goto="19" aria-label="Slide 19"></button></li>
     <li><button role="tab" data-goto="20" aria-label="Slide 20"></button></li>
+    <li><button role="tab" data-goto="21" aria-label="Slide 21"></button></li>
   </ol>
-  <span class="deck-counter">01 / 20</span>
+  <span class="deck-counter">01 / 21</span>
   <button class="btn-next" aria-label="Next slide">&rarr;</button>
 </nav>
 
