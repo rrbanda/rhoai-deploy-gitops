@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RHOAI 3.5 EA2 — GitOps Deployment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;700;900&family=Red+Hat+Text:wght@400;500;700&family=Red+Hat+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-canvas:      #151515;
+      --bg-elevated:    #1a1a1a;
+      --bg-card:        #202020;
+      --text-primary:   #ffffff;
+      --text-secondary: #d2d2d2;
+      --text-muted:     #8a8a8a;
+      --rh-red:         #EE0000;
+      --rh-red-dark:    #A30000;
+      --rh-teal:        #009596;
+      --rh-blue:        #0066CC;
+      --rh-blue-light:  #4394e5;
+      --rh-purple:      #6753AC;
+      --rh-green:       #3E8635;
+      --rh-orange:      #F4B400;
+      --border-subtle:  #333333;
+      --border-muted:   #444444;
+      --font-sans: "Red Hat Display", -apple-system, system-ui, sans-serif;
+      --font-text: "Red Hat Text", -apple-system, system-ui, sans-serif;
+      --font-mono: "Red Hat Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      --fs-display-xl: 3.4rem;
+      --fs-display-lg: 2.4rem;
+      --fs-h2:         1.8rem;
+      --fs-body-lead:  1.35rem;
+      --fs-body:       1.1rem;
+      --fs-label:      0.82rem;
+      --fs-small:      0.72rem;
+      --content-max: 1320px;
+      --stagger-delay:    80ms;
+      --transition-exit:  220ms;
+      --transition-enter: 350ms;
+      --ease-out-pop:     cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background: var(--bg-canvas); color: var(--text-primary);
+      font-family: var(--font-sans); font-size: var(--fs-body); line-height: 1.55;
+      -webkit-font-smoothing: antialiased; overflow: hidden;
+    }
+    main.deck { position: relative; width: 100vw; height: 100vh; overflow: hidden; background: var(--bg-canvas); }
+    .slide {
+      position: absolute; inset: 0; width: 100%; min-height: 100vh;
+      padding: 3rem 5rem; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow-y: auto;
+      opacity: 0; visibility: hidden; pointer-events: none; transform: scale(0.96);
+      transition: opacity var(--transition-exit) ease-in, transform var(--transition-exit) ease-in, visibility 0s linear var(--transition-exit);
+    }
+    .slide-inner { max-width: var(--content-max); width: 100%; margin: 0 auto; }
+    .slide-notes { display: none; }
+    .slide-eyebrow {
+      font-size: var(--fs-label); font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--rh-red); font-family: var(--font-mono); margin-bottom: var(--space-sm, 0.75rem);
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+    .display-xl { font-size: var(--fs-display-xl); line-height: 1.05; letter-spacing: -0.03em; font-weight: 800; color: var(--text-primary); }
+    .display-lg { font-size: var(--fs-display-lg); line-height: 1.1; letter-spacing: -0.02em; font-weight: 700; color: var(--text-primary); margin: 0 0 1rem; }
+    .lead { font-size: var(--fs-body-lead); line-height: 1.45; color: var(--text-secondary); margin: 0.75rem 0 0; max-width: 80ch; font-family: var(--font-text); }
+    .accent { color: var(--rh-red); }
+    @keyframes fade-up { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fade-in { from { opacity:0; } to { opacity:1; } }
+    main.deck .slide.current .anim-fade-up { animation: fade-up 400ms var(--ease-out-pop) both; animation-delay: calc(var(--index,0) * var(--stagger-delay)); }
+    main.deck .slide.current .anim-fade-in { animation: fade-in 400ms ease-out both; animation-delay: calc(var(--index,0) * var(--stagger-delay)); }
+    .deck-controls {
+      position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 1rem;
+      background: rgba(21,21,21,0.92); backdrop-filter: blur(8px);
+      border: 1px solid var(--border-subtle); border-radius: 999px; padding: 0.5rem 1.1rem; z-index: 50;
+    }
+    .deck-controls button {
+      width: 38px; height: 38px; background: transparent; border: none;
+      color: var(--rh-red); font-size: 1.3rem; cursor: pointer; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: background 180ms, color 180ms;
+    }
+    .deck-controls button:hover:not(:disabled) { background: rgba(238,0,0,0.15); color: #ff4444; }
+    .deck-controls button:disabled { opacity: 0.3; cursor: not-allowed; }
+    .deck-dots { display: flex; gap: 0.35rem; list-style: none; }
+    .deck-dots button { width: 8px; height: 8px; padding: 0; border-radius: 50%; background: var(--text-muted); transition: background 180ms, transform 180ms; color: transparent; font-size: 0; border: none; cursor: pointer; }
+    .deck-dots button[aria-current="true"] { background: var(--rh-red); transform: scale(1.4); box-shadow: 0 0 12px rgba(238,0,0,0.5); }
+    .deck-counter { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted); letter-spacing: 0.06em; padding: 0 0.75rem; border-left: 1px solid var(--border-subtle); }
+    .deck-overview { position: fixed; inset: 0; background: rgba(21,21,21,0.97); backdrop-filter: blur(12px); z-index: 100; padding: 4rem 3rem; overflow-y: auto; }
+    .deck-overview[hidden] { display: none; }
+    .overview-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.25rem; max-width: 1100px; margin: 0 auto; }
+    .overview-thumb { aspect-ratio: 16/10; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 1rem; cursor: pointer; text-align: left; color: var(--text-secondary); display: flex; flex-direction: column; justify-content: space-between; font-family: var(--font-sans); transition: border-color 180ms, transform 180ms; }
+    .overview-thumb:hover { border-color: var(--rh-red); transform: translateY(-2px); }
+    .overview-thumb .num { font-family: var(--font-mono); font-size: 0.75rem; color: var(--rh-red); letter-spacing: 0.15em; }
+    .overview-thumb .ttl { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); line-height: 1.25; }
+    .overview-thumb .beat { font-size: 0.65rem; color: var(--text-muted); letter-spacing: 0.15em; text-transform: uppercase; }
+    .deck-notes { position: fixed; left: 0; right: 0; bottom: 0; background: rgba(21,21,21,0.95); border-top: 1px solid var(--rh-red); padding: 1rem 1.5rem; z-index: 60; }
+    .deck-notes[hidden] { display: none; }
+    .notes-label { color: var(--rh-red); font-size: var(--fs-label); letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; margin: 0 0 0.3rem; }
+    .notes-body { color: var(--text-secondary); font-size: 0.9rem; margin: 0; font-family: var(--font-text); }
+    .card-grid { display: grid; gap: 1rem; margin-top: 1.5rem; }
+    .card-grid.cols-2 { grid-template-columns: repeat(2,1fr); }
+    .card-grid.cols-3 { grid-template-columns: repeat(3,1fr); }
+    .card-grid.cols-4 { grid-template-columns: repeat(4,1fr); }
+    .card {
+      background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 1.15rem;
+      transition: border-color 300ms, transform 200ms;
+    }
+    .card:hover { border-color: var(--rh-red); transform: translateY(-2px); }
+    .card .card-tag { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; padding: 0.2rem 0.6rem; border-radius: 3px; display: inline-block; margin-bottom: 0.5rem; }
+    .card .card-title { font-family: var(--font-sans); font-weight: 600; font-size: 1.05rem; color: var(--text-primary); margin-bottom: 0.35rem; }
+    .card .card-body { font-family: var(--font-text); font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5; }
+    .card .card-body strong { color: var(--text-primary); }
+    .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-family: var(--font-text); font-size: 0.95rem; }
+    .data-table th { text-align: left; padding: 0.6rem 0.8rem; font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--rh-red); border-bottom: 2px solid var(--rh-red); font-weight: 700; }
+    .data-table td { padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border-subtle); color: var(--text-secondary); }
+    .data-table td:first-child { color: var(--text-primary); font-weight: 500; }
+    .data-table tr:hover td { background: rgba(238,0,0,0.03); }
+    .callout { margin-top: 1.25rem; border-left: 3px solid var(--rh-red); padding: 0.75rem 1rem; background: rgba(238,0,0,0.04); border-radius: 0 8px 8px 0; }
+    .callout p { font-family: var(--font-text); font-size: 1rem; color: var(--text-secondary); margin: 0; }
+    .callout strong { color: var(--text-primary); }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem; }
+    .stat-strip { display: flex; gap: 2.5rem; margin-top: 2rem; flex-wrap: wrap; }
+    .stat-item .stat-value { font-family: var(--font-sans); font-size: 2.5rem; font-weight: 800; line-height: 1; }
+    .stat-item .stat-label { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.3rem; }
+    .diagram-box {
+      background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-radius: 10px;
+      padding: 1.5rem; font-family: var(--font-mono); font-size: 0.92rem; color: var(--text-secondary);
+      line-height: 1.7; white-space: pre; overflow-x: auto;
+    }
+    .diagram-box .hl-red { color: var(--rh-red); font-weight: 600; }
+    .diagram-box .hl-teal { color: var(--rh-teal); font-weight: 600; }
+    .diagram-box .hl-blue { color: var(--rh-blue-light); font-weight: 600; }
+    .diagram-box .hl-green { color: var(--rh-green); font-weight: 600; }
+    .diagram-box .hl-purple { color: var(--rh-purple); font-weight: 600; }
+    .diagram-box .hl-orange { color: var(--rh-orange); font-weight: 600; }
+    code { font-family: var(--font-mono); font-size: 0.9em; color: var(--rh-teal); }
+    .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 3px; font-family: var(--font-mono); font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+    .badge-go { background: rgba(62,134,53,0.15); color: var(--rh-green); }
+    .badge-warn { background: rgba(244,180,0,0.15); color: var(--rh-orange); }
+    .badge-fail { background: rgba(238,0,0,0.15); color: var(--rh-red); }
+    .badge-sync { background: rgba(62,134,53,0.15); color: var(--rh-green); }
+    .badge-oos { background: rgba(244,180,0,0.15); color: var(--rh-orange); }
+    .badge-managed { background: rgba(62,134,53,0.12); color: var(--rh-green); }
+    .badge-removed { background: rgba(138,138,138,0.12); color: var(--text-muted); }
+    .badge-unmanaged { background: rgba(244,180,0,0.12); color: var(--rh-orange); }
+    .step-list { list-style: none; counter-reset: step; }
+    .step-list li { counter-increment: step; padding: 0.75rem 1rem; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-left: 3px solid var(--rh-red); border-radius: 0 6px 6px 0; margin-bottom: 0.6rem; font-size: 1rem; color: var(--text-secondary); font-family: var(--font-text); display: flex; gap: 0.75rem; align-items: baseline; }
+    .step-list li::before { content: counter(step); font-family: var(--font-mono); font-weight: 700; color: var(--rh-red); font-size: 1rem; min-width: 1.2em; }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: 0.01ms !important; transition-duration: 180ms !important; }
+    }
+    @media print {
+      html, body, main.deck { overflow: visible; height: auto; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      .deck-controls, .deck-overview, .deck-notes { display: none !important; }
+      .slide { position: relative; opacity: 1 !important; visibility: visible !important; transform: none !important; pointer-events: auto; page-break-after: always; min-height: auto; }
+    }
+    @media (max-width: 768px) {
+      :root { --fs-display-xl: 2.2rem; --fs-display-lg: 1.6rem; --fs-body-lead: 1.15rem; }
+      .slide { padding: 2rem 1.25rem; }
+      .card-grid.cols-2, .card-grid.cols-3, .card-grid.cols-4 { grid-template-columns: 1fr; }
+      .two-col { grid-template-columns: 1fr; }
+      .overview-grid { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+<main class="deck" data-slide-current="1" tabindex="0">
+
+  <!-- ===== SLIDE 1: TITLE ===== -->
+  <section class="slide current" data-slide="1" role="group" aria-label="Title">
+    <div class="slide-inner" style="display: flex; flex-direction: column; justify-content: center; min-height: 85vh; position: relative;">
+      <div style="position: absolute; top: -100px; right: -100px; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(238,0,0,0.2) 0%, transparent 70%); pointer-events: none;"></div>
+      <div class="anim-fade-up" style="--index:0"><div class="slide-eyebrow">RHOAI 3.5 EA2 &middot; GITOPS</div></div>
+      <h1 class="display-xl anim-fade-up" style="--index:1">Deploying Red Hat OpenShift AI<br>with <span class="accent">GitOps</span></h1>
+      <p class="lead anim-fade-up" style="--index:2">One ConfigMap. One <code>oc apply</code>. A fully self-healing AI platform &mdash; from bare cluster to 14 operators, 26 deployments, and 30 ArgoCD applications.</p>
+      <div class="stat-strip anim-fade-up" style="--index:3">
+        <div class="stat-item"><div class="stat-value" style="color:var(--rh-red);">14</div><div class="stat-label">Operators Deployed</div></div>
+        <div class="stat-item"><div class="stat-value">26</div><div class="stat-label">Deployments in RHOAI</div></div>
+        <div class="stat-item"><div class="stat-value" style="color:var(--rh-teal);">30</div><div class="stat-label">ArgoCD Applications</div></div>
+        <div class="stat-item"><div class="stat-value" style="color:var(--rh-green);">23</div><div class="stat-label">DSC Conditions True</div></div>
+      </div>
+      <div style="margin-top:2rem; font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);" class="anim-fade-up" style="--index:4">
+        OCP 4.19.40 &middot; AWS us-east-2 &middot; Channel: beta &middot; Profile: full
+      </div>
+      <div class="slide-notes">Opening slide. The key message: RHOAI GitOps reduces an enormously complex AI platform to a single ConfigMap and one oc apply command. Everything after that is Git-driven.</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 2: JOURNEY OVERVIEW ===== -->
+  <section class="slide" data-slide="2" role="group" aria-label="Journey" aria-hidden="true">
+    <div class="slide-inner">
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">THE JOURNEY</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Six Phases to a Running AI Platform</h2>
+      <div class="anim-fade-up" style="--index:2; margin-top:2.5rem; display:flex; justify-content:center;">
+        <svg viewBox="0 0 1020 200" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:1020px; display:block;">
+          <defs><marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0,0 L10,3.5 L0,7" fill="#8a8a8a"/></marker></defs>
+          <!-- Phase 1 -->
+          <rect x="10" y="10" width="140" height="110" rx="10" fill="rgba(238,0,0,0.08)" stroke="#EE0000" stroke-width="1.5"/>
+          <text x="80" y="42" fill="#EE0000" font-family="Red Hat Display,sans-serif" font-size="16" font-weight="700" text-anchor="middle">Phase 1</text>
+          <text x="80" y="68" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="13" text-anchor="middle">Cluster Readiness</text>
+          <text x="80" y="92" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="11" text-anchor="middle">9-point check</text>
+          <line x1="155" y1="65" x2="175" y2="65" stroke="#8a8a8a" stroke-width="2" marker-end="url(#ah)"/>
+
+          <!-- Phase 2 -->
+          <rect x="180" y="10" width="140" height="110" rx="10" fill="rgba(244,180,0,0.08)" stroke="#F4B400" stroke-width="1.5"/>
+          <text x="250" y="42" fill="#F4B400" font-family="Red Hat Display,sans-serif" font-size="16" font-weight="700" text-anchor="middle">Phase 2</text>
+          <text x="250" y="68" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="13" text-anchor="middle">OCP Upgrade</text>
+          <text x="250" y="92" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="11" text-anchor="middle">4.18 &rarr; 4.19 (~66 min)</text>
+          <line x1="325" y1="65" x2="345" y2="65" stroke="#8a8a8a" stroke-width="2" marker-end="url(#ah)"/>
+
+          <!-- Phase 3 -->
+          <rect x="350" y="10" width="140" height="110" rx="10" fill="rgba(0,149,150,0.08)" stroke="#009596" stroke-width="1.5"/>
+          <text x="420" y="42" fill="#009596" font-family="Red Hat Display,sans-serif" font-size="16" font-weight="700" text-anchor="middle">Phase 3</text>
+          <text x="420" y="68" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="13" text-anchor="middle">Repo Config</text>
+          <text x="420" y="92" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="11" text-anchor="middle">configure.sh</text>
+          <line x1="495" y1="65" x2="515" y2="65" stroke="#8a8a8a" stroke-width="2" marker-end="url(#ah)"/>
+
+          <!-- Phase 4 -->
+          <rect x="520" y="10" width="140" height="110" rx="10" fill="rgba(0,102,204,0.08)" stroke="#0066CC" stroke-width="1.5"/>
+          <text x="590" y="42" fill="#4394e5" font-family="Red Hat Display,sans-serif" font-size="16" font-weight="700" text-anchor="middle">Phase 4</text>
+          <text x="590" y="68" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="13" text-anchor="middle">Bootstrap ArgoCD</text>
+          <text x="590" y="92" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="11" text-anchor="middle">oc apply -k</text>
+          <line x1="665" y1="65" x2="685" y2="65" stroke="#8a8a8a" stroke-width="2" marker-end="url(#ah)"/>
+
+          <!-- Phase 5 -->
+          <rect x="690" y="10" width="140" height="110" rx="10" fill="rgba(103,83,172,0.08)" stroke="#6753AC" stroke-width="1.5"/>
+          <text x="760" y="42" fill="#6753AC" font-family="Red Hat Display,sans-serif" font-size="16" font-weight="700" text-anchor="middle">Phase 5</text>
+          <text x="760" y="68" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="13" text-anchor="middle">Convergence</text>
+          <text x="760" y="92" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="11" text-anchor="middle">14 ops &middot; 30 apps</text>
+          <line x1="835" y1="65" x2="855" y2="65" stroke="#8a8a8a" stroke-width="2" marker-end="url(#ah)"/>
+
+          <!-- Phase 6 -->
+          <rect x="860" y="10" width="140" height="110" rx="10" fill="rgba(62,134,53,0.08)" stroke="#3E8635" stroke-width="1.5"/>
+          <text x="930" y="42" fill="#3E8635" font-family="Red Hat Display,sans-serif" font-size="16" font-weight="700" text-anchor="middle">Phase 6</text>
+          <text x="930" y="68" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="13" text-anchor="middle">Validation</text>
+          <text x="930" y="92" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="11" text-anchor="middle">9 fixes applied</text>
+
+          <!-- Timeline bar -->
+          <rect x="10" y="145" width="990" height="8" rx="4" fill="#333"/>
+          <rect x="10" y="145" width="990" height="8" rx="4" fill="url(#tl-grad)"/>
+          <defs><linearGradient id="tl-grad" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#EE0000" stop-opacity="0.6"/><stop offset="100%" stop-color="#3E8635" stop-opacity="0.6"/></linearGradient></defs>
+          <text x="510" y="185" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="13" text-anchor="middle" letter-spacing="0.15em">~30 MINUTES END-TO-END</text>
+        </svg>
+      </div>
+      <div class="slide-notes">Walk through the 6 phases. Emphasize that Phase 1-2 are prerequisites, Phase 3-4 are one-time setup, and Phase 5-6 happen automatically.</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 3: CLUSTER READINESS ===== -->
+  <section class="slide" data-slide="3" role="group" aria-label="Readiness" aria-hidden="true">
+    <div class="slide-inner">
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">PHASE 1</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Cluster Readiness Assessment</h2>
+      <p class="lead anim-fade-up" style="--index:2">9-phase automated check before deploying RHOAI. The cluster must meet compute, storage, networking, and operator prerequisites.</p>
+      <div class="two-col anim-fade-up" style="--index:3">
+        <div>
+          <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--rh-red); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:0.75rem;">Cluster Profile</div>
+          <div style="display:flex; flex-direction:column; gap:0.5rem;">
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-teal); border-radius:0 6px 6px 0; font-size:0.82rem; color:var(--text-secondary); display:flex; justify-content:space-between;"><span>Nodes</span><strong style="color:var(--text-primary);">5 (3 control + 2 worker)</strong></div>
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-teal); border-radius:0 6px 6px 0; font-size:0.82rem; color:var(--text-secondary); display:flex; justify-content:space-between;"><span>Workers</span><strong style="color:var(--text-primary);">m6a.4xlarge (16 vCPU / 64Gi)</strong></div>
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-teal); border-radius:0 6px 6px 0; font-size:0.82rem; color:var(--text-secondary); display:flex; justify-content:space-between;"><span>Region</span><strong style="color:var(--text-primary);">AWS us-east-2</strong></div>
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-teal); border-radius:0 6px 6px 0; font-size:0.82rem; color:var(--text-secondary); display:flex; justify-content:space-between;"><span>OCP Version</span><strong style="color:var(--rh-orange);">4.18.21 (needs upgrade)</strong></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--rh-green); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:0.75rem;">Assessment Results</div>
+          <div style="display:flex; flex-direction:column; gap:0.5rem;">
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-green); border-radius:0 6px 6px 0; font-size:0.82rem; display:flex; justify-content:space-between;"><span style="color:var(--text-secondary);">Compute</span><span class="badge badge-go">GO</span></div>
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-green); border-radius:0 6px 6px 0; font-size:0.82rem; display:flex; justify-content:space-between;"><span style="color:var(--text-secondary);">Networking</span><span class="badge badge-go">GO</span></div>
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-green); border-radius:0 6px 6px 0; font-size:0.82rem; display:flex; justify-content:space-between;"><span style="color:var(--text-secondary);">Identity Provider</span><span class="badge badge-go">GO</span></div>
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-orange); border-radius:0 6px 6px 0; font-size:0.82rem; display:flex; justify-content:space-between;"><span style="color:var(--text-secondary);">Storage (WaitForFirstConsumer)</span><span class="badge badge-warn">WARN</span></div>
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-orange); border-radius:0 6px 6px 0; font-size:0.82rem; display:flex; justify-content:space-between;"><span style="color:var(--text-secondary);">GPU Nodes</span><span class="badge badge-warn">WARN</span></div>
+          </div>
+          <div style="margin-top:1rem; text-align:center; padding:0.75rem; background:var(--bg-elevated); border-radius:8px; border:1px solid var(--rh-green);">
+            <span style="font-family:var(--font-sans); font-weight:700; font-size:1rem; color:var(--rh-green);">7 GO</span>
+            <span style="margin:0 0.5rem; color:var(--text-muted);">/</span>
+            <span style="font-family:var(--font-sans); font-weight:700; font-size:1rem; color:var(--rh-orange);">2 WARN</span>
+            <span style="margin:0 0.5rem; color:var(--text-muted);">/</span>
+            <span style="font-family:var(--font-sans); font-weight:700; font-size:1rem; color:var(--text-muted);">0 NO-GO</span>
+          </div>
+        </div>
+      </div>
+      <div class="slide-notes">9 checks cover compute, storage, networking, existing operators, namespaces, GPU, IdP, and cluster health. Warnings are non-blocking.</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 4: VERSION COMPAT ===== -->
+  <section class="slide" data-slide="4" role="group" aria-label="Version" aria-hidden="true">
+    <div class="slide-inner">
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">BLOCKER</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Version Compatibility &mdash; The First Blocker</h2>
+      <p class="lead anim-fade-up" style="--index:2">RHOAI 3.5 EA2 requires OCP 4.19+. The cluster was on <strong style="color:var(--rh-red);">4.18.21</strong>.</p>
+      <table class="data-table anim-fade-up" style="--index:3; max-width:600px;">
+        <thead><tr><th>RHOAI Version</th><th>Required OCP</th><th>Cluster</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>3.5 EA2</td><td>4.19, 4.20</td><td style="color:var(--rh-red);">4.18.21</td><td><span class="badge badge-fail">BLOCKED</span></td></tr>
+        </tbody>
+      </table>
+      <div class="callout anim-fade-up" style="--index:4">
+        <p><strong>Decision:</strong> Upgrade OCP from 4.18.21 to 4.19.40 before proceeding with RHOAI deployment. Two AdminAck gates must be cleared first.</p>
+      </div>
+      <div class="slide-notes">This is the first blocker. docs/upgrading.md defines the compatibility matrix. Without OCP 4.19, RHOAI 3.5 EA2 will not install.</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 5: OCP UPGRADE ===== -->
+  <section class="slide" data-slide="5" role="group" aria-label="Upgrade" aria-hidden="true">
+    <div class="slide-inner">
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">PHASE 2</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">OCP Upgrade: 4.18.21 &rarr; 4.19.40</h2>
+      <p class="lead anim-fade-up" style="--index:2">Two admin acknowledgements required before the upgrade path opens.</p>
+      <div class="two-col anim-fade-up" style="--index:3">
+        <div>
+          <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--rh-orange); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:0.75rem;">AdminAck Gates</div>
+          <div style="display:flex; flex-direction:column; gap:0.5rem;">
+            <div style="padding:0.65rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-orange); border-radius:0 6px 6px 0;">
+              <div style="font-size:0.85rem; color:var(--text-primary); font-weight:500;">K8s 1.32 API Removals</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-text);">flowcontrol.apiserver.k8s.io/v1beta3 removed</div>
+            </div>
+            <div style="padding:0.65rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-orange); border-radius:0 6px 6px 0;">
+              <div style="font-size:0.85rem; color:var(--text-primary); font-weight:500;">AWS Boot Image Management</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-text);">Behavior change in machine config</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--rh-green); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:0.75rem;">Upgrade Timeline</div>
+          <div style="display:flex; flex-direction:column; gap:0.5rem;">
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-blue); border-radius:0 6px 6px 0; font-size:0.82rem; color:var(--text-secondary);">Channel: <strong style="color:var(--text-primary);">stable-4.18 &rarr; stable-4.19</strong></div>
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-blue); border-radius:0 6px 6px 0; font-size:0.82rem; color:var(--text-secondary);">Duration: <strong style="color:var(--text-primary);">~66 minutes</strong></div>
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-blue); border-radius:0 6px 6px 0; font-size:0.82rem; color:var(--text-secondary);">Order: <strong style="color:var(--text-primary);">etcd &rarr; api &rarr; controllers &rarr; MCP &rarr; nodes</strong></div>
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-green); border-radius:0 6px 6px 0; font-size:0.82rem; color:var(--text-secondary);">Result: <strong style="color:var(--rh-green);">All 5 nodes Ready, all COs Available</strong></div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-notes">Both AdminAck gates must be cleared before the upgrade controller will offer 4.19. The upgrade takes about 66 minutes and reboots all 5 nodes.</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 6: REPO ARCHITECTURE ===== -->
+  <section class="slide" data-slide="6" role="group" aria-label="Repo" aria-hidden="true">
+    <div class="slide-inner">
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">REPO STRUCTURE</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Repository Architecture</h2>
+      <p class="lead anim-fade-up" style="--index:2">Three directories, one ConfigMap, everything is discoverable.</p>
+      <div class="anim-fade-up" style="--index:3; margin-top:1rem;">
+        <div class="diagram-box"><span class="hl-red">rhoai-deploy-gitops/</span>
+├── <span class="hl-red">bootstrap/</span>                    <span class="hl-green"># One-time entry point</span>
+│   └── overlays/default/
+│       ├── <span class="hl-orange">cluster-config.yaml</span>    <span class="hl-green"># Single source of truth</span>
+│       ├── kustomization.yaml      <span class="hl-green"># Kustomize replacements</span>
+│       └── gitops-controller.yaml  <span class="hl-green"># Self-management (wave 10)</span>
+├── <span class="hl-teal">components/</span>
+│   ├── <span class="hl-teal">operators/</span>               <span class="hl-green"># 12 operator directories</span>
+│   │   ├── rhoai-operator/         <span class="hl-green"># NS + OG + Subscription per dir</span>
+│   │   ├── cert-manager/
+│   │   ├── servicemesh/
+│   │   ├── kueue-operator/
+│   │   └── ... (8 more)
+│   ├── <span class="hl-teal">instances/</span>               <span class="hl-green"># 20 instance CRs</span>
+│   │   ├── rhoai-instance/         <span class="hl-green"># 6 DSC profiles (overlays)</span>
+│   │   ├── nfd-instance/
+│   │   ├── maas-postgres/
+│   │   └── ... (17 more)
+│   └── <span class="hl-teal">argocd/</span>                  <span class="hl-green"># 4 ApplicationSets + apps</span>
+├── <span class="hl-purple">usecases/</span>
+│   ├── models/                     <span class="hl-green"># Opt-in AI models</span>
+│   └── services/                   <span class="hl-green"># Opt-in AI services</span>
+└── <span class="hl-blue">scripts/configure.sh</span>         <span class="hl-green"># CLI setup (374 lines)</span></div>
+      </div>
+      <div class="callout anim-fade-up" style="--index:4">
+        <p><strong>cluster-config.yaml</strong> is a ConfigMap with 4 fields: <code>repoURL</code>, <code>targetRevision</code>, <code>rhoaiChannel</code>, <code>rhoaiOverlay</code>. Kustomize replacements inject these into all 13 ArgoCD resources.</p>
+      </div>
+      <div class="slide-notes">This is the key architecture slide. Everything flows from cluster-config.yaml. 4 operators use redhat-cop/gitops-catalog as remote Kustomize base pinned at commit 7727f242.</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 7: APP-OF-APPS ===== -->
+  <section class="slide" data-slide="7" role="group" aria-label="App of Apps" aria-hidden="true">
+    <div class="slide-inner">
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">PATTERN</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">The App-of-Apps Pattern</h2>
+      <p class="lead anim-fade-up" style="--index:2">4 ApplicationSets auto-discover directories. Add a dir, push, ArgoCD creates the Application.</p>
+      <div class="anim-fade-up" style="--index:3; margin-top:1.5rem;">
+        <svg viewBox="0 0 780 340" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:780px; display:block; margin:0 auto;">
+          <defs><marker id="ah2" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#8a8a8a"/></marker></defs>
+          <!-- Bootstrap -->
+          <rect x="280" y="5" width="200" height="36" rx="6" fill="rgba(238,0,0,0.08)" stroke="#EE0000" stroke-width="1.5"/>
+          <text x="380" y="28" fill="#EE0000" font-family="Red Hat Display,sans-serif" font-size="12" font-weight="700" text-anchor="middle">oc apply -k bootstrap/</text>
+          <line x1="380" y1="41" x2="380" y2="58" stroke="#8a8a8a" stroke-width="1.5" marker-end="url(#ah2)"/>
+          <!-- ArgoCD -->
+          <rect x="300" y="62" width="160" height="32" rx="6" fill="rgba(0,102,204,0.08)" stroke="#0066CC" stroke-width="1.2"/>
+          <text x="380" y="83" fill="#4394e5" font-family="Red Hat Display,sans-serif" font-size="11" font-weight="700" text-anchor="middle">ArgoCD Instance</text>
+          <!-- Fan out -->
+          <line x1="200" y1="94" x2="120" y2="120" stroke="#8a8a8a" stroke-width="1.2" marker-end="url(#ah2)"/>
+          <line x1="310" y1="94" x2="270" y2="120" stroke="#8a8a8a" stroke-width="1.2" marker-end="url(#ah2)"/>
+          <line x1="450" y1="94" x2="430" y2="120" stroke="#8a8a8a" stroke-width="1.2" marker-end="url(#ah2)"/>
+          <line x1="560" y1="94" x2="580" y2="120" stroke="#8a8a8a" stroke-width="1.2" marker-end="url(#ah2)"/>
+          <line x1="380" y1="94" x2="690" y2="120" stroke="#8a8a8a" stroke-width="1.2" marker-end="url(#ah2)"/>
+          <!-- AppSets -->
+          <rect x="30" y="124" width="180" height="44" rx="6" fill="rgba(238,0,0,0.06)" stroke="#EE0000" stroke-width="1"/>
+          <text x="120" y="143" fill="#EE0000" font-family="Red Hat Display,sans-serif" font-size="10" font-weight="600" text-anchor="middle">cluster-operators</text>
+          <text x="120" y="158" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">wave 1 &middot; 12 dirs &middot; 11 apps</text>
+
+          <rect x="220" y="124" width="160" height="44" rx="6" fill="rgba(0,149,150,0.06)" stroke="#009596" stroke-width="1"/>
+          <text x="300" y="143" fill="#009596" font-family="Red Hat Display,sans-serif" font-size="10" font-weight="600" text-anchor="middle">cluster-instances</text>
+          <text x="300" y="158" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">wave 2 &middot; 20 dirs &middot; 16 apps</text>
+
+          <rect x="390" y="124" width="140" height="44" rx="6" fill="rgba(103,83,172,0.06)" stroke="#6753AC" stroke-width="1"/>
+          <text x="460" y="143" fill="#6753AC" font-family="Red Hat Display,sans-serif" font-size="10" font-weight="600" text-anchor="middle">cluster-models</text>
+          <text x="460" y="158" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">wave 5 &middot; opt-in</text>
+
+          <rect x="540" y="124" width="140" height="44" rx="6" fill="rgba(103,83,172,0.06)" stroke="#6753AC" stroke-width="1"/>
+          <text x="610" y="143" fill="#6753AC" font-family="Red Hat Display,sans-serif" font-size="10" font-weight="600" text-anchor="middle">cluster-services</text>
+          <text x="610" y="158" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">wave 5 &middot; opt-in</text>
+          <!-- Standalone apps -->
+          <rect x="640" y="80" width="130" height="80" rx="6" fill="rgba(244,180,0,0.06)" stroke="#F4B400" stroke-width="1"/>
+          <text x="705" y="103" fill="#F4B400" font-family="Red Hat Display,sans-serif" font-size="10" font-weight="600" text-anchor="middle">Standalone Apps</text>
+          <text x="705" y="120" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">rhoai-dsc (wave 3)</text>
+          <text x="705" y="133" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">gitops-controller</text>
+          <text x="705" y="146" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">(wave 10)</text>
+          <!-- Generated apps -->
+          <line x1="120" y1="168" x2="120" y2="186" stroke="#8a8a8a" stroke-width="1" marker-end="url(#ah2)"/>
+          <rect x="20" y="190" width="200" height="140" rx="6" fill="rgba(238,0,0,0.03)" stroke="var(--border-subtle)" stroke-width="0.5"/>
+          <text x="120" y="208" fill="#EE0000" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle" letter-spacing="0.08em">GENERATED OPERATOR APPS</text>
+          <text x="30" y="224" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="8">operator-rhoai-operator</text>
+          <text x="30" y="238" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="8">operator-cert-manager</text>
+          <text x="30" y="252" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="8">operator-servicemesh</text>
+          <text x="30" y="266" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="8">operator-kueue-operator</text>
+          <text x="30" y="280" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="8">operator-rhcl</text>
+          <text x="30" y="294" fill="#8a8a8a" font-family="Red Hat Text,sans-serif" font-size="8">... +6 more</text>
+
+          <line x1="300" y1="168" x2="300" y2="186" stroke="#8a8a8a" stroke-width="1" marker-end="url(#ah2)"/>
+          <rect x="230" y="190" width="200" height="140" rx="6" fill="rgba(0,149,150,0.03)" stroke="var(--border-subtle)" stroke-width="0.5"/>
+          <text x="330" y="208" fill="#009596" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle" letter-spacing="0.08em">GENERATED INSTANCE APPS</text>
+          <text x="240" y="224" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="8">instance-nfd-instance</text>
+          <text x="240" y="238" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="8">instance-kueue-instance</text>
+          <text x="240" y="252" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="8">instance-rhcl-instance</text>
+          <text x="240" y="266" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="8">instance-maas-postgres</text>
+          <text x="240" y="280" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="8">instance-rhdh-instance</text>
+          <text x="240" y="294" fill="#8a8a8a" font-family="Red Hat Text,sans-serif" font-size="8">... +11 more</text>
+        </svg>
+      </div>
+      <div class="slide-notes">ApplicationSets use Git directory generators. Each scans a path (e.g. components/operators/*) and creates one ArgoCD Application per subdirectory. Exclusions are configured directly in the AppSet YAML.</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 8: BOOTSTRAP ===== -->
+  <section class="slide" data-slide="8" role="group" aria-label="Bootstrap" aria-hidden="true">
+    <div class="slide-inner">
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">PHASE 4</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Bootstrap: 7 Layers in One Command</h2>
+      <p class="lead anim-fade-up" style="--index:2"><code>oc apply -k bootstrap/overlays/default</code> &mdash; after this, Git is the only interface.</p>
+      <ol class="step-list anim-fade-up" style="--index:3; max-width:700px; margin-top:1.5rem;">
+        <li><strong style="color:var(--text-primary);">GitOps Operator</strong> &mdash; Subscription + ClusterRoleBinding</li>
+        <li><strong style="color:var(--text-primary);">ArgoCD Instance</strong> &mdash; Helm + Kustomize enabled, health checks for DSC/DSCI CRDs</li>
+        <li><strong style="color:var(--text-primary);">cluster-config ConfigMap</strong> &mdash; repoURL, targetRevision, rhoaiChannel, rhoaiOverlay</li>
+        <li><strong style="color:var(--text-primary);">AppProjects</strong> &mdash; <code>platform</code> (operators/instances) + <code>usecases</code> (models/services)</li>
+        <li><strong style="color:var(--text-primary);">4 ApplicationSets</strong> &mdash; auto-discovery engines for operators, instances, models, services</li>
+        <li><strong style="color:var(--text-primary);">rhoai-dsc Application</strong> &mdash; separate from AppSet (Replace sync + status ignore + retry config)</li>
+        <li><strong style="color:var(--text-primary);">gitops-controller</strong> &mdash; self-management at wave 10 (ServerSideApply, last to sync)</li>
+      </ol>
+      <div class="callout anim-fade-up" style="--index:4">
+        <p><strong>CRD timing:</strong> The bootstrap uses an <code>until</code> loop because the ArgoCD CRD isn't immediately available after the GitOps operator is installed. In our deploy, it succeeded on <strong style="color:var(--rh-red);">attempt 3</strong> (10s sleep between retries).</p>
+      </div>
+      <div class="slide-notes">After bootstrap, you never run oc apply again. Everything is managed through Git pushes. The gitops-controller at wave 10 watches itself — ArgoCD managing ArgoCD.</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 9: OPERATOR DEPENDENCY CHAIN ===== -->
+  <section class="slide" data-slide="9" role="group" aria-label="Dependencies" aria-hidden="true">
+    <div class="slide-inner">
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">DEEP DIVE</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Operator Dependency Chain</h2>
+      <p class="lead anim-fade-up" style="--index:2">14 operators. Each has a role. Some depend on others. RHCL auto-installs 3 sub-operators.</p>
+      <div class="anim-fade-up" style="--index:3; margin-top:1rem;">
+        <svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:800px; display:block; margin:0 auto;">
+          <defs><marker id="ah3" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#8a8a8a"/></marker></defs>
+          <!-- Platform prereqs -->
+          <text x="15" y="18" fill="#EE0000" font-family="Red Hat Mono,monospace" font-size="9" letter-spacing="0.12em">PLATFORM PREREQUISITES</text>
+          <rect x="10" y="26" width="140" height="50" rx="6" fill="rgba(238,0,0,0.06)" stroke="#EE0000" stroke-width="1"/><text x="80" y="47" fill="#EE0000" font-family="Red Hat Display,sans-serif" font-size="10" font-weight="600" text-anchor="middle">cert-manager</text><text x="80" y="62" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">v1.20.0</text>
+          <rect x="160" y="26" width="140" height="50" rx="6" fill="rgba(238,0,0,0.06)" stroke="#EE0000" stroke-width="1"/><text x="230" y="47" fill="#EE0000" font-family="Red Hat Display,sans-serif" font-size="10" font-weight="600" text-anchor="middle">ServiceMesh 3</text><text x="230" y="62" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">v3.3.6</text>
+          <rect x="310" y="26" width="100" height="50" rx="6" fill="rgba(238,0,0,0.06)" stroke="#EE0000" stroke-width="1"/><text x="360" y="47" fill="#EE0000" font-family="Red Hat Display,sans-serif" font-size="10" font-weight="600" text-anchor="middle">NFD</text><text x="360" y="62" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">4.19.0</text>
+          <!-- Training trio -->
+          <text x="15" y="100" fill="#6753AC" font-family="Red Hat Mono,monospace" font-size="9" letter-spacing="0.12em">TRAINING TRIO</text>
+          <rect x="10" y="108" width="110" height="50" rx="6" fill="rgba(103,83,172,0.06)" stroke="#6753AC" stroke-width="1"/><text x="65" y="129" fill="#6753AC" font-family="Red Hat Display,sans-serif" font-size="10" font-weight="600" text-anchor="middle">Kueue</text><text x="65" y="144" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">v1.4.0</text>
+          <rect x="130" y="108" width="110" height="50" rx="6" fill="rgba(103,83,172,0.06)" stroke="#6753AC" stroke-width="1"/><text x="185" y="129" fill="#6753AC" font-family="Red Hat Display,sans-serif" font-size="10" font-weight="600" text-anchor="middle">JobSet</text><text x="185" y="144" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">v1.0.0</text>
+          <rect x="250" y="108" width="110" height="50" rx="6" fill="rgba(103,83,172,0.06)" stroke="#6753AC" stroke-width="1"/><text x="305" y="129" fill="#6753AC" font-family="Red Hat Display,sans-serif" font-size="10" font-weight="600" text-anchor="middle">LWS</text><text x="305" y="144" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">v1.0.0</text>
+          <rect x="370" y="108" width="110" height="50" rx="6" fill="rgba(103,83,172,0.06)" stroke="#6753AC" stroke-width="1"/><text x="425" y="129" fill="#6753AC" font-family="Red Hat Display,sans-serif" font-size="10" font-weight="600" text-anchor="middle">CMA/KEDA</text><text x="425" y="144" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">v2.19.0-2</text>
+          <!-- Gateway stack -->
+          <text x="500" y="18" fill="#009596" font-family="Red Hat Mono,monospace" font-size="9" letter-spacing="0.12em">GATEWAY &amp; AUTH STACK</text>
+          <rect x="490" y="26" width="130" height="50" rx="6" fill="rgba(0,149,150,0.06)" stroke="#009596" stroke-width="1"/><text x="555" y="47" fill="#009596" font-family="Red Hat Display,sans-serif" font-size="10" font-weight="600" text-anchor="middle">RHCL/Kuadrant</text><text x="555" y="62" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">v1.4.2</text>
+          <!-- Auto-installed -->
+          <line x1="555" y1="76" x2="510" y2="106" stroke="#009596" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#ah3)"/>
+          <line x1="555" y1="76" x2="555" y2="106" stroke="#009596" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#ah3)"/>
+          <line x1="555" y1="76" x2="600" y2="106" stroke="#009596" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#ah3)"/>
+          <rect x="490" y="108" width="80" height="40" rx="5" fill="rgba(0,149,150,0.04)" stroke="#009596" stroke-width="0.8"/><text x="530" y="132" fill="#009596" font-family="Red Hat Text,sans-serif" font-size="8" text-anchor="middle">Authorino</text>
+          <rect x="575" y="108" width="70" height="40" rx="5" fill="rgba(0,149,150,0.04)" stroke="#009596" stroke-width="0.8"/><text x="610" y="132" fill="#009596" font-family="Red Hat Text,sans-serif" font-size="8" text-anchor="middle">DNS</text>
+          <rect x="650" y="108" width="80" height="40" rx="5" fill="rgba(0,149,150,0.04)" stroke="#009596" stroke-width="0.8"/><text x="690" y="132" fill="#009596" font-family="Red Hat Text,sans-serif" font-size="8" text-anchor="middle">Limitador</text>
+          <text x="620" y="162" fill="#009596" font-family="Red Hat Mono,monospace" font-size="7" text-anchor="middle" font-style="italic">auto-installed by RHCL</text>
+          <!-- Add-ons -->
+          <text x="500" y="182" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="9" letter-spacing="0.12em">ADD-ONS</text>
+          <rect x="490" y="190" width="110" height="40" rx="5" fill="rgba(138,138,138,0.06)" stroke="var(--border-subtle)" stroke-width="0.8"/><text x="545" y="214" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="9" text-anchor="middle">RHDH v1.10.3</text>
+          <rect x="610" y="190" width="130" height="40" rx="5" fill="rgba(138,138,138,0.06)" stroke="var(--border-subtle)" stroke-width="0.8"/><text x="675" y="214" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="9" text-anchor="middle">Ext Secrets v1.2.0</text>
+          <!-- RHOAI - big box -->
+          <rect x="140" y="190" width="300" height="50" rx="8" fill="rgba(238,0,0,0.1)" stroke="#EE0000" stroke-width="2"/>
+          <text x="290" y="213" fill="#EE0000" font-family="Red Hat Display,sans-serif" font-size="14" font-weight="800" text-anchor="middle">rhods-operator 3.5.0-ea.2</text>
+          <text x="290" y="230" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="9" text-anchor="middle">Meta-operator &mdash; reconciles all AI components</text>
+          <!-- Arrows from prereqs to RHOAI -->
+          <line x1="80" y1="76" x2="200" y2="190" stroke="#EE0000" stroke-width="0.8" stroke-dasharray="3,3"/>
+          <line x1="230" y1="76" x2="260" y2="190" stroke="#EE0000" stroke-width="0.8" stroke-dasharray="3,3"/>
+          <line x1="555" y1="76" x2="380" y2="190" stroke="#009596" stroke-width="0.8" stroke-dasharray="3,3"/>
+          <line x1="65" y1="158" x2="200" y2="190" stroke="#6753AC" stroke-width="0.8" stroke-dasharray="3,3"/>
+          <!-- DSC -->
+          <line x1="290" y1="240" x2="290" y2="266" stroke="#EE0000" stroke-width="1.5" marker-end="url(#ah3)"/>
+          <rect x="180" y="270" width="220" height="40" rx="6" fill="rgba(62,134,53,0.08)" stroke="#3E8635" stroke-width="1.5"/>
+          <text x="290" y="295" fill="#3E8635" font-family="Red Hat Display,sans-serif" font-size="13" font-weight="700" text-anchor="middle">DataScienceCluster</text>
+          <!-- 26 deployments -->
+          <line x1="290" y1="310" x2="290" y2="330" stroke="#8a8a8a" stroke-width="1.5" marker-end="url(#ah3)"/>
+          <rect x="160" y="334" width="260" height="30" rx="6" fill="rgba(62,134,53,0.06)" stroke="#3E8635" stroke-width="0.8"/>
+          <text x="290" y="354" fill="#3E8635" font-family="Red Hat Mono,monospace" font-size="9" text-anchor="middle">26 deployments in redhat-ods-applications</text>
+        </svg>
+      </div>
+      <div class="slide-notes">14 unique operator CSVs. RHCL is a dependency chain that auto-installs 3 sub-operators. All prereqs must be Succeeded before DSC can fully reconcile.</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 10: RHOAI INTERNALS ===== -->
+  <section class="slide" data-slide="10" role="group" aria-label="RHOAI Internals" aria-hidden="true">
+    <div class="slide-inner">
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">DEEP DIVE</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">What RHOAI Deploys Inside the Cluster</h2>
+      <p class="lead anim-fade-up" style="--index:2">The RHOAI operator is a <strong style="color:var(--rh-red);">meta-operator</strong>: one DataScienceCluster CR triggers 26 deployments, 50+ CRDs, and 4 managed namespaces.</p>
+      <div class="card-grid cols-4 anim-fade-up" style="--index:3" data-stagger>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-red); --index:0;">
+          <span class="card-tag" style="background:rgba(238,0,0,0.12); color:var(--rh-red);">Serving</span>
+          <div class="card-body" style="font-size:0.75rem; line-height:1.7;">
+            rhods-dashboard (x2)<br>kserve-controller<br>localmodel-controller<br>odh-model-controller<br>maas-api + maas-controller<br>ai-gateway-operator<br>batch-gateway-operator
+          </div>
+        </div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-purple); --index:1;">
+          <span class="card-tag" style="background:rgba(103,83,172,0.12); color:var(--rh-purple);">Training</span>
+          <div class="card-body" style="font-size:0.75rem; line-height:1.7;">
+            ds-pipelines-operator<br>kuberay-operator<br>training-operator<br>trainer-controller<br>spark-operator + webhook
+          </div>
+        </div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-teal); --index:2;">
+          <span class="card-tag" style="background:rgba(0,149,150,0.12); color:var(--rh-teal);">Registry &amp; Ops</span>
+          <div class="card-body" style="font-size:0.75rem; line-height:1.7;">
+            model-registry-operator<br>trustyai-operator<br>mlflow-operator<br>feast-operator<br>ogx-controller
+          </div>
+        </div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-blue); --index:3;">
+          <span class="card-tag" style="background:rgba(0,102,204,0.12); color:var(--rh-blue-light);">Infrastructure</span>
+          <div class="card-body" style="font-size:0.75rem; line-height:1.7;">
+            notebook-controller<br>odh-notebook-controller<br>nim-account-controller
+          </div>
+        </div>
+      </div>
+      <div class="callout anim-fade-up" style="--index:4">
+        <p><strong>Auto-created by RHOAI operator (not in Git):</strong> <code>DSCInitialization</code> (default-dsci), namespaces <code>redhat-ods-monitoring</code>, <code>rhods-notebooks</code>, <code>rhoai-model-registries</code>. Also embeds KNative Serving, Tekton Pipelines, and DevWorkspace operator.</p>
+      </div>
+      <div class="slide-notes">RHOAI is the most complex operator in the stack. It manages 26 deployments, creates 4 namespaces, and registers 50+ CRDs from a single DataScienceCluster CR.</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 11: OPERATORS TABLE ===== -->
+  <section class="slide" data-slide="11" role="group" aria-label="Operators" aria-hidden="true">
+    <div class="slide-inner">
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">ALL 14 OPERATORS</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Operator Subscription Details</h2>
+      <table class="data-table anim-fade-up" style="--index:2; font-size:0.78rem;">
+        <thead><tr><th>Operator</th><th>Version</th><th>Channel</th><th>Namespace</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>rhods-operator</td><td>3.5.0-ea.2</td><td>beta</td><td>redhat-ods-operator</td><td style="color:var(--rh-red);">gitops-catalog base</td></tr>
+          <tr><td>cert-manager</td><td>v1.20.0</td><td>stable-v1</td><td>cert-manager-operator</td><td style="color:var(--rh-red);">gitops-catalog base</td></tr>
+          <tr><td>servicemeshoperator3</td><td>v3.3.6</td><td>stable</td><td>openshift-operators</td><td></td></tr>
+          <tr><td>kueue-operator</td><td>v1.4.0</td><td>stable-v1.4</td><td>openshift-kueue-operator</td><td></td></tr>
+          <tr><td>job-set</td><td>v1.0.0</td><td>stable-v1.0</td><td>openshift-jobset-operator</td><td></td></tr>
+          <tr><td>leader-worker-set</td><td>v1.0.0</td><td>stable-v1.0</td><td>openshift-lws</td><td></td></tr>
+          <tr><td>custom-metrics-autoscaler</td><td>v2.19.0-2</td><td>stable</td><td>ocp-custom-metrics-autoscaler</td><td></td></tr>
+          <tr><td>rhcl-operator (Kuadrant)</td><td>v1.4.2</td><td>stable</td><td>kuadrant-system</td><td style="color:var(--rh-teal);">installs 3 sub-ops</td></tr>
+          <tr><td style="padding-left:1.5rem;color:var(--text-muted);">&#8627; authorino-operator</td><td>v1.4.2</td><td colspan="2" style="color:var(--text-muted);">auto via RHCL</td><td></td></tr>
+          <tr><td style="padding-left:1.5rem;color:var(--text-muted);">&#8627; dns-operator</td><td>v1.4.1</td><td colspan="2" style="color:var(--text-muted);">auto via RHCL</td><td></td></tr>
+          <tr><td style="padding-left:1.5rem;color:var(--text-muted);">&#8627; limitador-operator</td><td>v1.4.1</td><td colspan="2" style="color:var(--text-muted);">auto via RHCL</td><td></td></tr>
+          <tr><td>rhdh</td><td>v1.10.3</td><td>fast</td><td>rhdh-operator</td><td></td></tr>
+          <tr><td>external-secrets</td><td>v1.2.0</td><td>stable-v1</td><td>external-secrets-operator</td><td></td></tr>
+          <tr><td>nfd</td><td>4.19.0</td><td>stable</td><td>openshift-nfd</td><td style="color:var(--rh-red);">gitops-catalog base</td></tr>
+        </tbody>
+      </table>
+      <div class="slide-notes">All operators reached Succeeded within 5-10 minutes of bootstrap. 4 use redhat-cop/gitops-catalog as remote Kustomize base pinned at commit 7727f242.</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 12: SYNC WAVES ===== -->
+  <section class="slide" data-slide="12" role="group" aria-label="Sync Waves" aria-hidden="true">
+    <div class="slide-inner">
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">ORDERING</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Sync Waves &amp; Dependency Ordering</h2>
+      <p class="lead anim-fade-up" style="--index:2">ArgoCD sync waves ensure resources are created in the correct order. Operators before instances, instances before DSC.</p>
+      <table class="data-table anim-fade-up" style="--index:3;">
+        <thead><tr><th>Wave</th><th>Scope</th><th>What Deploys</th><th>Examples</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--rh-red); font-weight:700;">0</td><td>Operators</td><td>Namespaces, OperatorGroups</td><td style="font-size:0.75rem;">external-secrets NS+OG, maas-db NS</td></tr>
+          <tr><td style="color:var(--rh-red); font-weight:700;">1</td><td>Operators</td><td>Operator Subscriptions</td><td style="font-size:0.75rem;">All 12 Subscriptions, monitoring-config CM</td></tr>
+          <tr><td style="color:var(--rh-teal); font-weight:700;">2</td><td>Instances</td><td>Basic instance CRs</td><td style="font-size:0.75rem;">Kuadrant, Backstage, ClusterAutoscaler</td></tr>
+          <tr><td style="color:var(--rh-teal); font-weight:700;">3</td><td>Instances</td><td>Dependent CRs</td><td style="font-size:0.75rem;">ExternalSecretsConfig, NFD, Kueue, Authorino</td></tr>
+          <tr><td style="color:var(--rh-blue); font-weight:700;">3</td><td>DSC App</td><td>rhoai-dsc Application</td><td style="font-size:0.75rem;">ArgoCD creates the Application resource</td></tr>
+          <tr><td style="color:var(--rh-purple); font-weight:700;">4</td><td>DSC</td><td>DataScienceCluster</td><td style="font-size:0.75rem;">default-dsc &mdash; RHOAI begins reconciling</td></tr>
+          <tr><td style="color:var(--rh-green); font-weight:700;">5-6</td><td>Post-DSC</td><td>Config + hardware profiles</td><td style="font-size:0.75rem;">Dashboard config, MLflow, MCP, observability</td></tr>
+          <tr><td style="color:var(--rh-orange); font-weight:700;">10</td><td>Bootstrap</td><td>gitops-controller</td><td style="font-size:0.75rem;">Self-management (must be last)</td></tr>
+        </tbody>
+      </table>
+      <div class="slide-notes">Sync waves are the ordering mechanism. They prevent CRD-not-found errors by ensuring operators install before their CRs are applied.</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 13: DSC PROFILES ===== -->
+  <section class="slide" data-slide="13" role="group" aria-label="Profiles" aria-hidden="true">
+    <div class="slide-inner">
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">PROFILES</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">DSC Profiles &mdash; Choose Your Platform</h2>
+      <p class="lead anim-fade-up" style="--index:2">6 overlay options. Switch with <code>configure.sh --dsc &lt;profile&gt;</code>, push, ArgoCD reconciles.</p>
+      <div style="overflow-x:auto;" class="anim-fade-up" style="--index:3">
+        <table class="data-table" style="font-size:0.72rem; min-width:700px;">
+          <thead><tr><th>Component</th><th>full</th><th>serving</th><th>training</th><th>maas</th><th>minimal</th><th>dev</th></tr></thead>
+          <tbody>
+            <tr><td>dashboard</td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-managed">M</span></td></tr>
+            <tr><td>kserve + MaaS</td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-removed">R</span></td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-removed">R</span></td><td><span class="badge badge-managed">M</span></td></tr>
+            <tr><td>aipipelines</td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-removed">R</span></td><td><span class="badge badge-managed">M</span></td></tr>
+            <tr><td>workbenches</td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-removed">R</span></td><td><span class="badge badge-managed">M</span></td></tr>
+            <tr><td>ray + trainer + spark</td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-removed">R</span></td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-removed">R</span></td><td><span class="badge badge-removed">R</span></td><td><span class="badge badge-managed">M</span></td></tr>
+            <tr><td>aigateway</td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-removed">R</span></td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-removed">R</span></td><td><span class="badge badge-managed">M</span></td></tr>
+            <tr><td>trustyai + mlflow + feast</td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-managed">M</span></td><td><span class="badge badge-removed">R</span></td><td><span class="badge badge-managed">M</span></td></tr>
+            <tr><td>kueue</td><td><span class="badge badge-unmanaged">U</span></td><td><span class="badge badge-unmanaged">U</span></td><td><span class="badge badge-unmanaged">U</span></td><td><span class="badge badge-unmanaged">U</span></td><td><span class="badge badge-unmanaged">U</span></td><td><span class="badge badge-unmanaged">U</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top:0.75rem; display:flex; gap:1rem; font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">
+        <span><span class="badge badge-managed">M</span> = Managed</span>
+        <span><span class="badge badge-removed">R</span> = Removed</span>
+        <span><span class="badge badge-unmanaged">U</span> = Unmanaged (GitOps-deployed separately)</span>
+      </div>
+      <div class="callout anim-fade-up" style="--index:4">
+        <p>We used <strong>full</strong> &mdash; all 14 AI components Managed + Kueue Unmanaged (deployed separately via GitOps for version control). The <code>minimal</code> profile deploys dashboard only.</p>
+      </div>
+      <div class="slide-notes">6 profiles cover every use case from dashboard-only (minimal) to everything (full). Kueue is always Unmanaged because the GitOps repo deploys it separately with its own operator subscription for version pinning.</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 14: KNOWN ISSUES ===== -->
+  <section class="slide" data-slide="14" role="group" aria-label="Issues" aria-hidden="true">
+    <div class="slide-inner">
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">TROUBLESHOOTING</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">9 Issues Encountered &amp; Fixed</h2>
+      <div class="card-grid cols-3 anim-fade-up" style="--index:2; font-size:0.78rem;" data-stagger>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-red); --index:0;">
+          <span class="card-tag" style="background:rgba(238,0,0,0.12); color:var(--rh-red);">ArgoCD</span>
+          <div class="card-title">preserveResourcesOnDeletion</div>
+          <div class="card-body">Not in ArgoCD CRD schema. <strong>Blocked ALL AppSet updates.</strong><br>Fix: Removed from all 4 ApplicationSets.</div>
+        </div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-red); --index:1;">
+          <span class="card-tag" style="background:rgba(238,0,0,0.12); color:var(--rh-red);">ArgoCD</span>
+          <div class="card-title">ExternalSecretsConfig wave 0</div>
+          <div class="card-body">CRD not yet installed when CR applied.<br>Fix: Added <code>sync-wave: "3"</code> after operator.</div>
+        </div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-purple); --index:2;">
+          <span class="card-tag" style="background:rgba(103,83,172,0.12); color:var(--rh-purple);">Operator</span>
+          <div class="card-title">NFD excluded but instance not</div>
+          <div class="card-body">NFD operator excluded from AppSet but nfd-instance expected it.<br>Fix: Removed NFD exclusion from operators AppSet.</div>
+        </div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-orange); --index:3;">
+          <span class="card-tag" style="background:rgba(244,180,0,0.12); color:var(--rh-orange);">Secret</span>
+          <div class="card-title">maas-db-config wrong namespace</div>
+          <div class="card-body">Secret in <code>maas-db</code>, RHOAI expects <code>redhat-ods-applications</code> with key <code>DB_CONNECTION_URL</code>.<br>Fix: Placeholder YAML + ignoreDifferences.</div>
+        </div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-teal); --index:4;">
+          <span class="card-tag" style="background:rgba(0,149,150,0.12); color:var(--rh-teal);">CRD</span>
+          <div class="card-title">Backstage .replicas invalid</div>
+          <div class="card-body"><code>.spec.application.replicas</code> not in v1alpha5 CRD. Retried 5+ times.<br>Fix: Removed field; operator defaults.</div>
+        </div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-teal); --index:5;">
+          <span class="card-tag" style="background:rgba(0,149,150,0.12); color:var(--rh-teal);">CRD</span>
+          <div class="card-title">EvalHub CRD missing</div>
+          <div class="card-body">CRD not shipped in RHOAI 3.5 EA2.<br>Fix: Excluded evalhub + external-secrets-config from instances AppSet.</div>
+        </div>
+      </div>
+      <div class="callout anim-fade-up" style="--index:3">
+        <p><strong>4 Git commits fixed the repo:</strong> <code>7b07bee</code>, <code>0d39ebc</code>, <code>2337349</code>, <code>d9f21aa</code>. These fixes are now committed and reusable for any future deployment.</p>
+      </div>
+      <div class="slide-notes">9 issues in total. They fall into 4 categories: ArgoCD schema/sync, operator dependencies, secret management, and CRD compatibility. All were fixed in Git and pushed.</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 15: SECRET MANAGEMENT ===== -->
+  <section class="slide" data-slide="15" role="group" aria-label="Secrets" aria-hidden="true">
+    <div class="slide-inner">
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">SECURITY</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Secret Management Pattern</h2>
+      <p class="lead anim-fade-up" style="--index:2">Never commit real credentials to Git. Three layers ensure secrets are safe and ArgoCD doesn't revert them.</p>
+      <div class="anim-fade-up" style="--index:3; margin-top:1.5rem;">
+        <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:700px; display:block; margin:0 auto;">
+          <defs><marker id="ah4" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#8a8a8a"/></marker></defs>
+          <!-- Layer 1 -->
+          <rect x="10" y="20" width="200" height="70" rx="8" fill="rgba(238,0,0,0.06)" stroke="#EE0000" stroke-width="1.2"/>
+          <text x="110" y="42" fill="#EE0000" font-family="Red Hat Display,sans-serif" font-size="11" font-weight="700" text-anchor="middle">Layer 1: Git</text>
+          <text x="110" y="58" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="9" text-anchor="middle">Placeholder YAML</text>
+          <text x="110" y="74" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">DB_CONNECTION_URL: "REPLACE_ME"</text>
+          <line x1="215" y1="55" x2="240" y2="55" stroke="#8a8a8a" stroke-width="1.5" marker-end="url(#ah4)"/>
+          <!-- Layer 2 -->
+          <rect x="245" y="20" width="200" height="70" rx="8" fill="rgba(0,149,150,0.06)" stroke="#009596" stroke-width="1.2"/>
+          <text x="345" y="42" fill="#009596" font-family="Red Hat Display,sans-serif" font-size="11" font-weight="700" text-anchor="middle">Layer 2: ArgoCD</text>
+          <text x="345" y="58" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="9" text-anchor="middle">ignoreDifferences</text>
+          <text x="345" y="74" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">Secret /data + /stringData</text>
+          <line x1="450" y1="55" x2="475" y2="55" stroke="#8a8a8a" stroke-width="1.5" marker-end="url(#ah4)"/>
+          <!-- Layer 3 -->
+          <rect x="480" y="20" width="200" height="70" rx="8" fill="rgba(62,134,53,0.06)" stroke="#3E8635" stroke-width="1.2"/>
+          <text x="580" y="42" fill="#3E8635" font-family="Red Hat Display,sans-serif" font-size="11" font-weight="700" text-anchor="middle">Layer 3: On-Cluster</text>
+          <text x="580" y="58" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="9" text-anchor="middle">oc patch secret</text>
+          <text x="580" y="74" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">Sets real DB connection URL</text>
+          <!-- Bottom: future -->
+          <rect x="180" y="120" width="340" height="50" rx="8" fill="rgba(244,180,0,0.06)" stroke="#F4B400" stroke-width="1" stroke-dasharray="5,3"/>
+          <text x="350" y="142" fill="#F4B400" font-family="Red Hat Display,sans-serif" font-size="11" font-weight="600" text-anchor="middle">Long-term: External Secrets Operator</text>
+          <text x="350" y="158" fill="#8a8a8a" font-family="Red Hat Text,sans-serif" font-size="9" text-anchor="middle">Sync from Vault / AWS Secrets Manager (already deployed)</text>
+        </svg>
+      </div>
+      <div class="callout anim-fade-up" style="--index:4">
+        <p><strong>Prune=false</strong> annotation on the Secret prevents ArgoCD from deleting it. <strong>ignoreDifferences</strong> prevents ArgoCD from reverting the real value back to the placeholder.</p>
+      </div>
+      <div class="slide-notes">This pattern keeps secrets safe: placeholder in Git, ArgoCD ignores the data fields, and the real value is set on-cluster. External Secrets Operator is already deployed for long-term automation.</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 16: FINAL STATE ===== -->
+  <section class="slide" data-slide="16" role="group" aria-label="Final State" aria-hidden="true">
+    <div class="slide-inner">
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">RESULT</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Final Deployment State</h2>
+      <div class="two-col anim-fade-up" style="--index:2">
+        <div>
+          <div style="text-align:center; padding:1.5rem; background:var(--bg-elevated); border-radius:12px; border:1px solid var(--rh-green); margin-bottom:1rem;">
+            <div style="font-family:var(--font-sans); font-size:2.5rem; font-weight:800; color:var(--rh-green);">26/30</div>
+            <div style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.1em;">Apps Synced + Healthy</div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+            <div style="text-align:center; padding:0.75rem; background:var(--bg-elevated); border-radius:8px;">
+              <div style="font-family:var(--font-sans); font-size:1.4rem; font-weight:700; color:var(--rh-green);">23</div>
+              <div style="font-family:var(--font-mono); font-size:0.55rem; color:var(--text-muted); text-transform:uppercase;">DSC Conditions True</div>
+            </div>
+            <div style="text-align:center; padding:0.75rem; background:var(--bg-elevated); border-radius:8px;">
+              <div style="font-family:var(--font-sans); font-size:1.4rem; font-weight:700; color:var(--rh-green);">14</div>
+              <div style="font-family:var(--font-mono); font-size:0.55rem; color:var(--text-muted); text-transform:uppercase;">Operator CSVs Succeeded</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--rh-orange); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:0.75rem;">4 Remaining OutOfSync (Non-Critical)</div>
+          <div style="display:flex; flex-direction:column; gap:0.5rem;">
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-orange); border-radius:0 6px 6px 0; font-size:0.78rem;">
+              <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-primary);">instance-kueue-config</span><span class="badge badge-oos">OutOfSync</span></div>
+              <div style="color:var(--text-muted); font-size:0.7rem;">ClusterQueue field drift (operator-managed)</div>
+            </div>
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-orange); border-radius:0 6px 6px 0; font-size:0.78rem;">
+              <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-primary);">operator-servicemesh</span><span class="badge badge-oos">OutOfSync</span></div>
+              <div style="color:var(--text-muted); font-size:0.7rem;">OLM Subscription annotation drift</div>
+            </div>
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-orange); border-radius:0 6px 6px 0; font-size:0.78rem;">
+              <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-primary);">instance-maas-postgres</span><span class="badge badge-oos">OutOfSync</span></div>
+              <div style="color:var(--text-muted); font-size:0.7rem;">Secret data ignored by design</div>
+            </div>
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-red); border-radius:0 6px 6px 0; font-size:0.78rem;">
+              <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-primary);">instance-maas-gateway</span><span class="badge badge-fail">Degraded</span></div>
+              <div style="color:var(--text-muted); font-size:0.7rem;">TLS cert pending DNS validation</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-notes">26 of 30 apps fully healthy. The 4 remaining are understood and non-critical — they represent expected operator drift, design-intent secret ignoring, and a pending DNS validation for MaaS TLS.</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 17: DAY-2 OPS ===== -->
+  <section class="slide" data-slide="17" role="group" aria-label="Day 2" aria-hidden="true">
+    <div class="slide-inner">
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">OPERATIONS</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Day-2 Operations</h2>
+      <p class="lead anim-fade-up" style="--index:2">After bootstrap, everything is a Git push. Here's how common operations work.</p>
+      <div class="card-grid cols-2 anim-fade-up" style="--index:3" data-stagger>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-red); --index:0;">
+          <div class="card-title">Add an Operator</div>
+          <div class="card-body">Create dir under <code>components/operators/</code> &rarr; push &rarr; ArgoCD auto-discovers via ApplicationSet</div>
+        </div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-teal); --index:1;">
+          <div class="card-title">Change DSC Profile</div>
+          <div class="card-body"><code>configure.sh --dsc serving</code> &rarr; push &rarr; ArgoCD reconciles the DSC overlay</div>
+        </div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-purple); --index:2;">
+          <div class="card-title">Enable a Model</div>
+          <div class="card-body"><code>configure.sh enable-model gemma2-9b-fp8</code> &rarr; push &rarr; model Application created</div>
+        </div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-blue); --index:3;">
+          <div class="card-title">Upgrade RHOAI</div>
+          <div class="card-body"><code>configure.sh --channel fast</code> (when GA) &rarr; push &rarr; OLM upgrades the operator</div>
+        </div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-orange); --index:4;">
+          <div class="card-title">Rotate Secrets</div>
+          <div class="card-body"><code>oc patch secret</code> on cluster &rarr; ArgoCD ignores the diff (ignoreDifferences configured)</div>
+        </div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-green); --index:5;">
+          <div class="card-title">Troubleshoot Stuck Apps</div>
+          <div class="card-body">ArgoCD dashboard shows diffs; <code>oc annotate ... refresh=hard</code> for retry-exhausted apps</div>
+        </div>
+      </div>
+      <div class="slide-notes">Every common operation maps to either a Git push or a single oc command. The ArgoCD dashboard is the primary troubleshooting interface.</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 18: KEY TAKEAWAYS ===== -->
+  <section class="slide" data-slide="18" role="group" aria-label="Takeaways" aria-hidden="true">
+    <div class="slide-inner" style="display:flex; flex-direction:column; justify-content:center; min-height:80vh;">
+      <div style="position: absolute; top:-100px; left:-100px; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle, rgba(238,0,0,0.15) 0%, transparent 70%); pointer-events:none;"></div>
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">TAKEAWAYS</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">One Mental Model for RHOAI GitOps</h2>
+      <div class="anim-fade-up" style="--index:2; margin-top:1.5rem;">
+        <div style="display:flex; flex-direction:column; gap:1.25rem; max-width:700px;">
+          <div style="padding:1rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:4px solid var(--rh-red); border-radius:0 10px 10px 0;">
+            <div style="font-size:1rem; color:var(--text-primary); font-weight:600;">One ConfigMap + one <code>oc apply</code> = entire AI platform</div>
+            <div style="font-size:0.82rem; color:var(--text-muted); font-family:var(--font-text); margin-top:0.25rem;">14 operators, 26 deployments, 30 ArgoCD apps, 50+ CRDs</div>
+          </div>
+          <div style="padding:1rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:4px solid var(--rh-teal); border-radius:0 10px 10px 0;">
+            <div style="font-size:1rem; color:var(--text-primary); font-weight:600;">Git is the source of truth</div>
+            <div style="font-size:0.82rem; color:var(--text-muted); font-family:var(--font-text); margin-top:0.25rem;">No manual <code>oc</code> commands after bootstrap. Auto-discovery via ApplicationSets.</div>
+          </div>
+          <div style="padding:1rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:4px solid var(--rh-purple); border-radius:0 10px 10px 0;">
+            <div style="font-size:1rem; color:var(--text-primary); font-weight:600;">RHOAI is a meta-operator</div>
+            <div style="font-size:0.82rem; color:var(--text-muted); font-family:var(--font-text); margin-top:0.25rem;">26 sub-operator deployments from a single DataScienceCluster CR. 6 profiles for different workloads.</div>
+          </div>
+          <div style="padding:1rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:4px solid var(--rh-orange); border-radius:0 10px 10px 0;">
+            <div style="font-size:1rem; color:var(--text-primary); font-weight:600;">Know the failure modes</div>
+            <div style="font-size:0.82rem; color:var(--text-muted); font-family:var(--font-text); margin-top:0.25rem;">CRD timing, retry exhaustion, hard refresh. 9 issues fixed, 4 commits &mdash; now reusable.</div>
+          </div>
+          <div style="padding:1rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:4px solid var(--rh-green); border-radius:0 10px 10px 0;">
+            <div style="font-size:1rem; color:var(--text-primary); font-weight:600;">~30 minutes from bootstrap to fully operational</div>
+            <div style="font-size:0.82rem; color:var(--text-muted); font-family:var(--font-text); margin-top:0.25rem;">Secrets never in Git. Sync waves enforce ordering. Self-healing via ArgoCD.</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-notes">Closing slide. Five key takeaways that capture the entire deployment story. The meta-operator concept and failure mode awareness are the most important lessons.</div>
+    </div>
+  </section>
+
+  <!-- ===== OVERVIEW ===== -->
+  <div class="deck-overview" hidden aria-label="Slide overview">
+    <div class="overview-grid">
+      <button class="overview-thumb" data-goto="1"><span class="num">01</span><span class="ttl">RHOAI 3.5 EA2 GitOps Deployment</span><span class="beat">TITLE</span></button>
+      <button class="overview-thumb" data-goto="2"><span class="num">02</span><span class="ttl">Six Phases to Running AI</span><span class="beat">JOURNEY</span></button>
+      <button class="overview-thumb" data-goto="3"><span class="num">03</span><span class="ttl">Cluster Readiness</span><span class="beat">PHASE 1</span></button>
+      <button class="overview-thumb" data-goto="4"><span class="num">04</span><span class="ttl">Version Compatibility</span><span class="beat">BLOCKER</span></button>
+      <button class="overview-thumb" data-goto="5"><span class="num">05</span><span class="ttl">OCP Upgrade 4.18 &rarr; 4.19</span><span class="beat">PHASE 2</span></button>
+      <button class="overview-thumb" data-goto="6"><span class="num">06</span><span class="ttl">Repository Architecture</span><span class="beat">STRUCTURE</span></button>
+      <button class="overview-thumb" data-goto="7"><span class="num">07</span><span class="ttl">App-of-Apps Pattern</span><span class="beat">PATTERN</span></button>
+      <button class="overview-thumb" data-goto="8"><span class="num">08</span><span class="ttl">Bootstrap 7 Layers</span><span class="beat">PHASE 4</span></button>
+      <button class="overview-thumb" data-goto="9"><span class="num">09</span><span class="ttl">Operator Dependency Chain</span><span class="beat">DEEP DIVE</span></button>
+      <button class="overview-thumb" data-goto="10"><span class="num">10</span><span class="ttl">RHOAI Internal Architecture</span><span class="beat">DEEP DIVE</span></button>
+      <button class="overview-thumb" data-goto="11"><span class="num">11</span><span class="ttl">14 Operator Subscriptions</span><span class="beat">OPERATORS</span></button>
+      <button class="overview-thumb" data-goto="12"><span class="num">12</span><span class="ttl">Sync Waves &amp; Ordering</span><span class="beat">ORDERING</span></button>
+      <button class="overview-thumb" data-goto="13"><span class="num">13</span><span class="ttl">DSC Profiles</span><span class="beat">PROFILES</span></button>
+      <button class="overview-thumb" data-goto="14"><span class="num">14</span><span class="ttl">9 Issues Fixed</span><span class="beat">TROUBLESHOOTING</span></button>
+      <button class="overview-thumb" data-goto="15"><span class="num">15</span><span class="ttl">Secret Management Pattern</span><span class="beat">SECURITY</span></button>
+      <button class="overview-thumb" data-goto="16"><span class="num">16</span><span class="ttl">Final Deployment State</span><span class="beat">RESULT</span></button>
+      <button class="overview-thumb" data-goto="17"><span class="num">17</span><span class="ttl">Day-2 Operations</span><span class="beat">OPERATIONS</span></button>
+      <button class="overview-thumb" data-goto="18"><span class="num">18</span><span class="ttl">Key Takeaways</span><span class="beat">TAKEAWAYS</span></button>
+    </div>
+  </div>
+
+  <!-- ===== NOTES ===== -->
+  <div class="deck-notes" hidden>
+    <p class="notes-label">Presenter Notes &middot; <kbd>P</kbd> to toggle</p>
+    <p class="notes-body" id="notes-body"></p>
+  </div>
+</main>
+
+<nav class="deck-controls" aria-label="Slide navigation">
+  <button class="btn-prev" aria-label="Previous slide" disabled>&larr;</button>
+  <ol class="deck-dots" role="tablist">
+    <li><button role="tab" data-goto="1" aria-label="Slide 1" aria-current="true"></button></li>
+    <li><button role="tab" data-goto="2" aria-label="Slide 2"></button></li>
+    <li><button role="tab" data-goto="3" aria-label="Slide 3"></button></li>
+    <li><button role="tab" data-goto="4" aria-label="Slide 4"></button></li>
+    <li><button role="tab" data-goto="5" aria-label="Slide 5"></button></li>
+    <li><button role="tab" data-goto="6" aria-label="Slide 6"></button></li>
+    <li><button role="tab" data-goto="7" aria-label="Slide 7"></button></li>
+    <li><button role="tab" data-goto="8" aria-label="Slide 8"></button></li>
+    <li><button role="tab" data-goto="9" aria-label="Slide 9"></button></li>
+    <li><button role="tab" data-goto="10" aria-label="Slide 10"></button></li>
+    <li><button role="tab" data-goto="11" aria-label="Slide 11"></button></li>
+    <li><button role="tab" data-goto="12" aria-label="Slide 12"></button></li>
+    <li><button role="tab" data-goto="13" aria-label="Slide 13"></button></li>
+    <li><button role="tab" data-goto="14" aria-label="Slide 14"></button></li>
+    <li><button role="tab" data-goto="15" aria-label="Slide 15"></button></li>
+    <li><button role="tab" data-goto="16" aria-label="Slide 16"></button></li>
+    <li><button role="tab" data-goto="17" aria-label="Slide 17"></button></li>
+    <li><button role="tab" data-goto="18" aria-label="Slide 18"></button></li>
+  </ol>
+  <span class="deck-counter">01 / 18</span>
+  <button class="btn-next" aria-label="Next slide">&rarr;</button>
+</nav>
+
+<script>
+(function(){
+  var deck=document.querySelector('main.deck'), TOTAL=deck.querySelectorAll('.slide').length;
+  var dots=Array.from(document.querySelectorAll('.deck-dots button'));
+  var btnP=document.querySelector('.btn-prev'), btnN=document.querySelector('.btn-next');
+  var counter=document.querySelector('.deck-counter');
+  var ov=document.querySelector('.deck-overview'), notes=document.querySelector('.deck-notes'), nb=document.getElementById('notes-body');
+  var st=document.createElement('style'), css='';
+  for(var i=1;i<=TOTAL;i++) css+='main.deck[data-slide-current="'+i+'"] .slide[data-slide="'+i+'"]{ opacity:1; visibility:visible; pointer-events:auto; transform:scale(1); transition: opacity var(--transition-enter) var(--ease-out-pop), transform var(--transition-enter) var(--ease-out-pop), visibility 0s linear 0s; }\n';
+  st.textContent=css; document.head.appendChild(st);
+  var S={cur:1, ovOpen:false, nOpen:false};
+  function clamp(n){return Math.max(1,Math.min(TOTAL,n));}
+  function getNotes(n){var s=deck.querySelector('.slide[data-slide="'+n+'"]'); if(!s)return''; var e=s.querySelector('.slide-notes'); return e?e.textContent:'';}
+  function render(){
+    deck.setAttribute('data-slide-current',String(S.cur));
+    counter.textContent=String(S.cur).padStart(2,'0')+' / '+String(TOTAL).padStart(2,'0');
+    dots.forEach(function(d,i){if(i+1===S.cur)d.setAttribute('aria-current','true');else d.removeAttribute('aria-current');});
+    Array.from(deck.querySelectorAll('.slide')).forEach(function(s){var n=+s.getAttribute('data-slide');if(n===S.cur){s.classList.add('current');s.removeAttribute('aria-hidden');}else{s.classList.remove('current');s.setAttribute('aria-hidden','true');}});
+    btnP.disabled=S.cur===1; btnN.disabled=S.cur===TOTAL;
+    if(S.nOpen) nb.textContent=getNotes(S.cur)||'(No notes)';
+    requestAnimationFrame(fire);
+  }
+  function goTo(n){var x=clamp(n);if(x===S.cur)return;S.cur=x;render();syncH();}
+  function next(){goTo(S.cur+1);} function prev(){goTo(S.cur-1);}
+  function syncH(){var h='#s='+S.cur;if(location.hash!==h)history.replaceState(null,'',h);}
+  function readH(){var m=/^#s=(\d{1,2})$/.exec(location.hash||'');return m?clamp(+m[1]):1;}
+  var db='',dt=null;function cb(){db='';if(dt){clearTimeout(dt);dt=null;}}
+  function onK(e){
+    if(S.ovOpen){if(e.key==='Escape'){e.preventDefault();closeOv();}if(e.key==='Enter'){var t=document.activeElement;if(t&&t.classList.contains('overview-thumb')){goTo(+t.getAttribute('data-goto'));closeOv();}}return;}
+    var k=e.key;
+    if(k==='ArrowRight'||k==='ArrowDown'||k===' '){e.preventDefault();next();cb();return;}
+    if(k==='ArrowLeft'||k==='ArrowUp'||k==='Backspace'){e.preventDefault();prev();cb();return;}
+    if(k==='Home'){e.preventDefault();goTo(1);cb();return;}
+    if(k==='End'){e.preventDefault();goTo(TOTAL);cb();return;}
+    if(k==='Escape'){e.preventDefault();toggleOv();cb();return;}
+    if(k==='p'||k==='P'){e.preventDefault();toggleN();cb();return;}
+    if(/^[0-9]$/.test(k)){e.preventDefault();db+=k;if(dt)clearTimeout(dt);if(db.length===2){goTo(+db);cb();return;}dt=setTimeout(function(){var n=+db;if(n>=1&&n<=9)goTo(n);cb();},600);}
+  }
+  btnP.addEventListener('click',prev); btnN.addEventListener('click',next);
+  dots.forEach(function(d){d.addEventListener('click',function(){goTo(+d.getAttribute('data-goto'));});});
+  window.addEventListener('keydown',onK);
+  Array.from(ov.querySelectorAll('.overview-thumb')).forEach(function(t){t.addEventListener('click',function(){goTo(+t.getAttribute('data-goto'));closeOv();});});
+  function fire(){var c=deck.querySelector('.slide.current');if(c)Array.from(c.querySelectorAll('[data-stagger]>*')).forEach(function(el,i){el.style.setProperty('--index',String(i));});}
+  function toggleOv(){S.ovOpen?closeOv():openOv();}
+  function openOv(){S.ovOpen=true;ov.hidden=false;var a=ov.querySelector('.overview-thumb[data-goto="'+S.cur+'"]');if(a)a.focus();}
+  function closeOv(){S.ovOpen=false;ov.hidden=true;deck.focus();}
+  function toggleN(){if(!notes)return;S.nOpen=!S.nOpen;notes.hidden=!S.nOpen;if(S.nOpen)nb.textContent=getNotes(S.cur)||'(No notes)';}
+  document.addEventListener('DOMContentLoaded',function(){S.cur=readH();render();window.addEventListener('hashchange',function(){S.cur=readH();render();});});
+  window.__deck={goTo:goTo,next:next,prev:prev,state:S};
+}());
+</script>
+</body>
+</html>

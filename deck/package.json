@@ -1,0 +1,13 @@
+{
+  "name": "rhoai-gitops-deck",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "encrypt": "./encrypt.sh",
+    "serve": "cd encrypted && python3 -m http.server 8000",
+    "preview": "./encrypt.sh && cd encrypted && python3 -m http.server 8000"
+  },
+  "devDependencies": {
+    "staticrypt": "^3.5.4"
+  }
+}
