@@ -182,7 +182,7 @@
         <div class="stat-item"><div class="stat-value" style="color:var(--rh-teal);">30</div><div class="stat-label">ArgoCD Applications</div></div>
         <div class="stat-item"><div class="stat-value" style="color:var(--rh-green);">23</div><div class="stat-label">DSC Conditions True</div></div>
       </div>
-      <div style="margin-top:2rem; font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted);" class="anim-fade-up" style="--index:4">
+      <div style="margin-top:2rem; font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted); --index:4;" class="anim-fade-up">
         OCP 4.19.40 &middot; AWS us-east-2 &middot; Channel: beta &middot; Profile: full
       </div>
       <div class="slide-notes">Opening slide. The key message: RHOAI GitOps reduces an enormously complex AI platform to a single ConfigMap and one oc apply command. Everything after that is Git-driven.</div>
@@ -360,19 +360,19 @@
 │   │   ├── servicemesh/
 │   │   ├── kueue-operator/
 │   │   └── ... (8 more)
-│   ├── <span class="hl-teal">instances/</span>               <span class="hl-green"># 20 instance CRs</span>
+│   ├── <span class="hl-teal">instances/</span>               <span class="hl-green"># 24 instance directories</span>
 │   │   ├── rhoai-instance/         <span class="hl-green"># 6 DSC profiles (overlays)</span>
 │   │   ├── nfd-instance/
 │   │   ├── maas-postgres/
-│   │   └── ... (17 more)
+│   │   └── ... (21 more)
 │   └── <span class="hl-teal">argocd/</span>                  <span class="hl-green"># 4 ApplicationSets + apps</span>
 ├── <span class="hl-purple">usecases/</span>
 │   ├── models/                     <span class="hl-green"># Opt-in AI models</span>
 │   └── services/                   <span class="hl-green"># Opt-in AI services</span>
-└── <span class="hl-blue">scripts/configure.sh</span>         <span class="hl-green"># CLI setup (374 lines)</span></div>
+└── <span class="hl-blue">scripts/configure.sh</span>         <span class="hl-green"># CLI setup (~370 lines)</span></div>
       </div>
       <div class="callout anim-fade-up" style="--index:4">
-        <p><strong>cluster-config.yaml</strong> is a ConfigMap with 4 fields: <code>repoURL</code>, <code>targetRevision</code>, <code>rhoaiChannel</code>, <code>rhoaiOverlay</code>. Kustomize replacements inject these into all 13 ArgoCD resources.</p>
+        <p><strong>cluster-config.yaml</strong> is a ConfigMap with 4 fields: <code>repoURL</code>, <code>targetRevision</code>, <code>rhoaiChannel</code>, <code>rhoaiOverlay</code>. Kustomize replacements inject these into all 4 ApplicationSets + 2 standalone Applications.</p>
       </div>
       <div class="slide-notes">This is the key architecture slide. Everything flows from cluster-config.yaml. 4 operators use redhat-cop/gitops-catalog as remote Kustomize base pinned at commit 7727f242.</div>
     </div>
@@ -407,7 +407,7 @@
 
           <rect x="220" y="124" width="160" height="44" rx="6" fill="rgba(0,149,150,0.06)" stroke="#009596" stroke-width="1"/>
           <text x="300" y="143" fill="#009596" font-family="Red Hat Display,sans-serif" font-size="10" font-weight="600" text-anchor="middle">cluster-instances</text>
-          <text x="300" y="158" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">wave 2 &middot; 20 dirs &middot; 16 apps</text>
+          <text x="300" y="158" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">wave 2 &middot; 24 dirs &middot; 17 apps</text>
 
           <rect x="390" y="124" width="140" height="44" rx="6" fill="rgba(103,83,172,0.06)" stroke="#6753AC" stroke-width="1"/>
           <text x="460" y="143" fill="#6753AC" font-family="Red Hat Display,sans-serif" font-size="10" font-weight="600" text-anchor="middle">cluster-models</text>
@@ -441,7 +441,7 @@
           <text x="240" y="252" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="8">instance-rhcl-instance</text>
           <text x="240" y="266" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="8">instance-maas-postgres</text>
           <text x="240" y="280" fill="#d2d2d2" font-family="Red Hat Text,sans-serif" font-size="8">instance-rhdh-instance</text>
-          <text x="240" y="294" fill="#8a8a8a" font-family="Red Hat Text,sans-serif" font-size="8">... +11 more</text>
+          <text x="240" y="294" fill="#8a8a8a" font-family="Red Hat Text,sans-serif" font-size="8">... +12 more</text>
         </svg>
       </div>
       <div class="slide-notes">ApplicationSets use Git directory generators. Each scans a path (e.g. components/operators/*) and creates one ArgoCD Application per subdirectory. Exclusions are configured directly in the AppSet YAML.</div>
@@ -556,7 +556,7 @@
         <div class="card anim-fade-up" style="border-top:3px solid var(--rh-blue); --index:3;">
           <span class="card-tag" style="background:rgba(0,102,204,0.12); color:var(--rh-blue-light);">Infrastructure</span>
           <div class="card-body" style="font-size:0.75rem; line-height:1.7;">
-            notebook-controller<br>odh-notebook-controller<br>nim-account-controller
+            notebook-controller<br>odh-notebook-controller<br>nim-account-controller<br>codeflare-operator<br>+ webhook deployments
           </div>
         </div>
       </div>
@@ -581,7 +581,7 @@
           <tr><td>kueue-operator</td><td>v1.4.0</td><td>stable-v1.4</td><td>openshift-kueue-operator</td><td></td></tr>
           <tr><td>job-set</td><td>v1.0.0</td><td>stable-v1.0</td><td>openshift-jobset-operator</td><td></td></tr>
           <tr><td>leader-worker-set</td><td>v1.0.0</td><td>stable-v1.0</td><td>openshift-lws</td><td></td></tr>
-          <tr><td>custom-metrics-autoscaler</td><td>v2.19.0-2</td><td>stable</td><td>ocp-custom-metrics-autoscaler</td><td></td></tr>
+          <tr><td>custom-metrics-autoscaler</td><td>v2.19.0-2</td><td>stable</td><td>openshift-custom-metrics-autoscaler</td><td></td></tr>
           <tr><td>rhcl-operator (Kuadrant)</td><td>v1.4.2</td><td>stable</td><td>kuadrant-system</td><td style="color:var(--rh-teal);">installs 3 sub-ops</td></tr>
           <tr><td style="padding-left:1.5rem;color:var(--text-muted);">&#8627; authorino-operator</td><td>v1.4.2</td><td colspan="2" style="color:var(--text-muted);">auto via RHCL</td><td></td></tr>
           <tr><td style="padding-left:1.5rem;color:var(--text-muted);">&#8627; dns-operator</td><td>v1.4.1</td><td colspan="2" style="color:var(--text-muted);">auto via RHCL</td><td></td></tr>
@@ -624,7 +624,7 @@
       <div class="slide-eyebrow anim-fade-up" style="--index:0">PROFILES</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">DSC Profiles &mdash; Choose Your Platform</h2>
       <p class="lead anim-fade-up" style="--index:2">6 overlay options. Switch with <code>configure.sh --dsc &lt;profile&gt;</code>, push, ArgoCD reconciles.</p>
-      <div style="overflow-x:auto;" class="anim-fade-up" style="--index:3">
+      <div style="overflow-x:auto; --index:3;" class="anim-fade-up">
         <table class="data-table" style="font-size:0.72rem; min-width:700px;">
           <thead><tr><th>Component</th><th>full</th><th>serving</th><th>training</th><th>maas</th><th>minimal</th><th>dev</th></tr></thead>
           <tbody>
@@ -685,7 +685,22 @@
         <div class="card anim-fade-up" style="border-top:3px solid var(--rh-teal); --index:5;">
           <span class="card-tag" style="background:rgba(0,149,150,0.12); color:var(--rh-teal);">CRD</span>
           <div class="card-title">EvalHub CRD missing</div>
-          <div class="card-body">CRD not shipped in RHOAI 3.5 EA2.<br>Fix: Excluded evalhub + external-secrets-config from instances AppSet.</div>
+          <div class="card-body">CRD not shipped in RHOAI 3.5 EA2.<br>Fix: Excluded evalhub from instances AppSet.</div>
+        </div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-orange); --index:6;">
+          <span class="card-tag" style="background:rgba(244,180,0,0.12); color:var(--rh-orange);">Dependency</span>
+          <div class="card-title">external-secrets-config &rarr; vault-dev</div>
+          <div class="card-body">ExternalSecretsConfig instance depends on <code>vault-dev</code> namespace (excluded).<br>Fix: Excluded external-secrets-config from instances AppSet.</div>
+        </div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-red); --index:7;">
+          <span class="card-tag" style="background:rgba(238,0,0,0.12); color:var(--rh-red);">Runtime</span>
+          <div class="card-title">maas-api CrashLoopBackOff</div>
+          <div class="card-body">Pod crashed looking for <code>maas-db-config</code> secret with wrong key in wrong NS.<br>Fix: Created placeholder, patched real value on-cluster.</div>
+        </div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-blue); --index:8;">
+          <span class="card-tag" style="background:rgba(0,102,204,0.12); color:var(--rh-blue-light);">Timing</span>
+          <div class="card-title">AppSet discovery delay</div>
+          <div class="card-body">ApplicationSets showed 0 child apps initially. Repo-server was still starting.<br>Fix: Wait ~60s for repo-server; apps auto-populated.</div>
         </div>
       </div>
       <div class="callout anim-fade-up" style="--index:3">
