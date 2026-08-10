@@ -6,7 +6,6 @@ metadata:
 spec:
   goTemplate: true
   goTemplateOptions: ["missingkey=error"]
-  preserveResourcesOnDeletion: true
   syncPolicy:
     applicationsSync: sync
   generators:
