@@ -185,12 +185,75 @@
       <div style="margin-top:2rem; font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted); --index:4;" class="anim-fade-up">
         OCP 4.19.40 &middot; AWS us-east-2 &middot; Channel: beta &middot; Profile: full
       </div>
-      <div class="slide-notes">Opening slide. The key message: RHOAI GitOps reduces an enormously complex AI platform to a single ConfigMap and one oc apply command. Everything after that is Git-driven.</div>
+      <div class="slide-notes">"Thank you all for being here. What I'm about to walk you through isn't a theory deck or a product overview. This is a real deployment — one I did from scratch on a live AWS cluster." --- pause --- "Red Hat OpenShift AI is one of the most complex operator ecosystems in the Kubernetes world. 14 operators. 26 internal deployments. 50+ CRDs. And here's the thing — we deployed all of it with a single ConfigMap and one oc apply command. Everything after that was Git-driven." --- pause --- "In the next 20 slides, I'll show you exactly how — every dependency, every failure, every fix. This is battle-tested. Let me start with why this is hard in the first place."</div>
     </div>
   </section>
 
-  <!-- ===== SLIDE 2: JOURNEY OVERVIEW ===== -->
-  <section class="slide" data-slide="2" role="group" aria-label="Journey" aria-hidden="true">
+  <!-- ===== SLIDE 2: THE CHALLENGE (SCQA: SITUATION + COMPLICATION) ===== -->
+  <section class="slide" data-slide="2" role="group" aria-label="The Challenge" aria-hidden="true">
+    <div class="slide-inner">
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">THE CHALLENGE</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Why Deploying RHOAI Is Hard</h2>
+      <p class="lead anim-fade-up" style="--index:2">RHOAI is not a single operator &mdash; it&rsquo;s an <strong style="color:var(--rh-red);">ecosystem</strong>. Deploying it manually means coordinating 14 operators, dozens of CRDs, version-locked dependencies, and careful ordering. One mistake means hours of debugging.</p>
+      <div class="card-grid cols-3 anim-fade-up" style="--index:3" data-stagger>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-red); --index:0;">
+          <span class="card-tag" style="background:rgba(238,0,0,0.12); color:var(--rh-red);">Complexity</span>
+          <div class="card-title">14 Operators, 50+ CRDs</div>
+          <div class="card-body">RHOAI depends on cert-manager, ServiceMesh, Kuadrant, Kueue, NFD, and more. Each has its own namespace, subscription channel, and version constraints. Miss one and the DSC never reconciles.</div>
+        </div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-orange); --index:1;">
+          <span class="card-tag" style="background:rgba(244,180,0,0.12); color:var(--rh-orange);">Ordering</span>
+          <div class="card-title">CRDs Before CRs</div>
+          <div class="card-body">Apply a Custom Resource before its operator installs the CRD? <code>no matches for kind</code>. Manual deployment means constant race conditions between operators and their instances.</div>
+        </div>
+        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-purple); --index:2;">
+          <span class="card-tag" style="background:rgba(103,83,172,0.12); color:var(--rh-purple);">Drift</span>
+          <div class="card-title">No Self-Healing</div>
+          <div class="card-body">Someone deletes a namespace. A secret gets overwritten. An operator drifts to a newer channel. Without continuous reconciliation, the platform silently degrades.</div>
+        </div>
+      </div>
+      <div class="callout anim-fade-up" style="--index:4">
+        <p><strong>The real cost:</strong> Teams report 2&ndash;5 days for a fresh RHOAI install, and weeks debugging post-install drift. Every cluster is a snowflake. Reproducing a known-good state is nearly impossible without GitOps.</p>
+      </div>
+      <div class="slide-notes">This slide establishes the COMPLICATION. The audience needs to feel the pain of manual RHOAI deployment before they'll appreciate the GitOps solution. Emphasize that RHOAI is uniquely complex compared to most operators — it's a meta-operator that depends on a fleet of prerequisite operators, each with its own lifecycle. Mention that the "14 operators" number isn't theoretical — it's what we discovered during a real deployment. The ordering problem is the most common failure mode: CRD timing, sync waves, and dependency chains. Without automation, every deployment is a manual orchestration exercise. Pause after the callout to let "2–5 days" sink in before moving to the answer.</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 3: THE ANSWER (SCQA: ANSWER + AGENDA) ===== -->
+  <section class="slide" data-slide="3" role="group" aria-label="The Answer" aria-hidden="true">
+    <div class="slide-inner">
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">THE ANSWER</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">GitOps: Declare Once, Converge Forever</h2>
+      <p class="lead anim-fade-up" style="--index:2">Instead of manually orchestrating 14 operators, we define the entire platform as code in a Git repository. ArgoCD watches Git, applies changes in the correct order, and self-heals any drift &mdash; continuously, automatically, forever.</p>
+      <div class="two-col anim-fade-up" style="--index:3">
+        <div>
+          <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--rh-red); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:0.75rem;">Without GitOps</div>
+          <div style="display:flex; flex-direction:column; gap:0.5rem;">
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-red); border-radius:0 6px 6px 0; font-size:0.9rem; color:var(--text-secondary);">Manual <code>oc apply</code> for each operator</div>
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-red); border-radius:0 6px 6px 0; font-size:0.9rem; color:var(--text-secondary);">Hope-based ordering (CRD timing)</div>
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-red); border-radius:0 6px 6px 0; font-size:0.9rem; color:var(--text-secondary);">Snowflake clusters, no reproducibility</div>
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-red); border-radius:0 6px 6px 0; font-size:0.9rem; color:var(--text-secondary);">Silent drift until something breaks</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-mono); font-size:0.72rem; color:var(--rh-green); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:0.75rem;">With GitOps</div>
+          <div style="display:flex; flex-direction:column; gap:0.5rem;">
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-green); border-radius:0 6px 6px 0; font-size:0.9rem; color:var(--text-secondary);">One <code>oc apply -k</code>, ArgoCD handles the rest</div>
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-green); border-radius:0 6px 6px 0; font-size:0.9rem; color:var(--text-secondary);">Sync waves enforce correct ordering</div>
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-green); border-radius:0 6px 6px 0; font-size:0.9rem; color:var(--text-secondary);">Every cluster identical, auditable, reproducible</div>
+            <div style="padding:0.5rem 0.85rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:3px solid var(--rh-green); border-radius:0 6px 6px 0; font-size:0.9rem; color:var(--text-secondary);">Continuous reconciliation catches drift in seconds</div>
+          </div>
+        </div>
+      </div>
+      <div class="callout anim-fade-up" style="--index:4">
+        <p><strong>What we&rsquo;ll cover:</strong> A real, end-to-end deployment of RHOAI 3.5 EA2 on a live cluster &mdash; from cluster readiness assessment through OCP upgrade, bootstrap, convergence, troubleshooting, and Day-2 operations. Every issue encountered, every fix applied, every lesson learned.</p>
+      </div>
+      <div class="slide-notes">This is the ANSWER slide — the Pyramid Principle governing thought. Show the solution BEFORE diving into details so the audience has the map in their head. The two-column comparison is the emotional hook: left column is the pain they know, right column is the promise. Pause on the "Without GitOps" column and let the audience nod — they've lived this. Then reveal the "With GitOps" column. The callout sets the agenda: this isn't theory, it's a live deployment walkthrough. Emphasize "every issue encountered" — this is battle-tested, not a happy-path demo. Transition: "Let me show you the six phases that got us from a bare cluster to a fully operational AI platform in under 30 minutes."</div>
+    </div>
+  </section>
+
+  <!-- ===== SLIDE 4: JOURNEY OVERVIEW ===== -->
+  <section class="slide" data-slide="4" role="group" aria-label="Journey" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">THE JOURNEY</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">Six Phases to a Running AI Platform</h2>
@@ -245,12 +308,12 @@
           <text x="510" y="185" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="13" text-anchor="middle" letter-spacing="0.15em">~30 MINUTES END-TO-END</text>
         </svg>
       </div>
-      <div class="slide-notes">Walk through the 6 phases. Emphasize that Phase 1-2 are prerequisites, Phase 3-4 are one-time setup, and Phase 5-6 happen automatically.</div>
+      <div class="slide-notes">"This is the map. Six phases, left to right, and I want you to keep this picture in your head as we go through each one." --- pause --- "Phases 1 and 2 are prerequisites — we assess the cluster and upgrade OpenShift if needed. In our case, the cluster was on 4.18 and RHOAI 3.5 EA2 requires 4.19, so we had to upgrade first. That took 66 minutes." "Phases 3 and 4 are one-time setup — you run configure.sh to point the repo at your cluster, then a single oc apply -k to bootstrap ArgoCD. After that, you never run oc apply again." "Phases 5 and 6 are where the magic happens — and they're fully automatic. ArgoCD discovers all the directories in the repo, creates 30 Applications, installs 14 operators, reconciles the DataScienceCluster, and self-heals any drift. The entire process from bootstrap to fully operational? About 30 minutes." --- pause --- "Let's start with Phase 1: is the cluster even ready for this?"</div>
     </div>
   </section>
 
   <!-- ===== SLIDE 3: CLUSTER READINESS ===== -->
-  <section class="slide" data-slide="3" role="group" aria-label="Readiness" aria-hidden="true">
+  <section class="slide" data-slide="5" role="group" aria-label="Readiness" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">PHASE 1</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">Cluster Readiness Assessment</h2>
@@ -283,12 +346,12 @@
           </div>
         </div>
       </div>
-      <div class="slide-notes">9 checks cover compute, storage, networking, existing operators, namespaces, GPU, IdP, and cluster health. Warnings are non-blocking.</div>
+      <div class="slide-notes">"Before you touch a single YAML file, you need to know what you're working with. We ran a 9-point readiness check against the live cluster." "On the left — the cluster profile. This is a modest AWS environment: 5 nodes — 3 control plane, 2 workers running m6a.4xlarge instances with 16 vCPUs and 64 gigs of RAM. Deployed in us-east-2." "On the right — the results. 7 checks passed outright: compute capacity, networking, identity provider configuration, cluster health, namespaces, existing operators, and DNS resolution. Two came back as warnings — the storage class uses WaitForFirstConsumer binding mode, which is fine for most workloads but worth noting. And no GPU nodes are present, which is expected for a sandbox cluster." "The critical finding? OCP version. The cluster was running 4.18.21, and RHOAI 3.5 EA2 requires 4.19. That's our first blocker." --- pause --- "Let me show you exactly what that compatibility matrix looks like."</div>
     </div>
   </section>
 
   <!-- ===== SLIDE 4: VERSION COMPAT ===== -->
-  <section class="slide" data-slide="4" role="group" aria-label="Version" aria-hidden="true">
+  <section class="slide" data-slide="6" role="group" aria-label="Version" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">BLOCKER</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">Version Compatibility &mdash; The First Blocker</h2>
@@ -302,12 +365,12 @@
       <div class="callout anim-fade-up" style="--index:4">
         <p><strong>Decision:</strong> Upgrade OCP from 4.18.21 to 4.19.40 before proceeding with RHOAI deployment. Two AdminAck gates must be cleared first.</p>
       </div>
-      <div class="slide-notes">This is the first blocker. docs/upgrading.md defines the compatibility matrix. Without OCP 4.19, RHOAI 3.5 EA2 will not install.</div>
+      <div class="slide-notes">"This is a hard stop. RHOAI 3.5 EA2 will not install on OCP 4.18. The operator subscription won't even resolve — OLM won't find a matching bundle in the catalog." "This isn't a soft warning. The compatibility matrix from Red Hat's documentation is explicit: RHOAI 3.5 EA2 supports OCP 4.19 and 4.20. Our cluster is on 4.18.21. We're locked out." --- pause --- "The decision is straightforward: upgrade OCP before doing anything else. But OCP upgrades on 4.18 to 4.19 aren't a simple one-click — there are two AdminAck gates that must be cleared first. Let me show you what that upgrade looks like." IF SOMEONE ASKS: "Can you force-install RHOAI on an unsupported OCP version?" — "Technically the CatalogSource might contain the bundle, but the operator will fail to reconcile. CRD dependencies and API versions won't match. Don't do it."</div>
     </div>
   </section>
 
   <!-- ===== SLIDE 5: OCP UPGRADE ===== -->
-  <section class="slide" data-slide="5" role="group" aria-label="Upgrade" aria-hidden="true">
+  <section class="slide" data-slide="7" role="group" aria-label="Upgrade" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">PHASE 2</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">OCP Upgrade: 4.18.21 &rarr; 4.19.40</h2>
@@ -336,12 +399,12 @@
           </div>
         </div>
       </div>
-      <div class="slide-notes">Both AdminAck gates must be cleared before the upgrade controller will offer 4.19. The upgrade takes about 66 minutes and reboots all 5 nodes.</div>
+      <div class="slide-notes">"Two AdminAck gates stand between us and 4.19. These exist because Kubernetes 1.32 removed the flowcontrol.apiserver.k8s.io/v1beta3 API group, and there's a behavior change in how AWS boot images are managed by MachineConfig. OpenShift won't let you upgrade until you explicitly acknowledge both." "We cleared them with oc patch on the configmap/admin-acks in openshift-config, then switched the channel from stable-4.18 to stable-4.19 and set desiredUpdate to 4.19.40." "The upgrade took 66 minutes end-to-end. The order is deterministic: etcd first, then the API server, then controllers, then the MachineConfigPool rolls through all 5 nodes one by one. Every node reboots, every node comes back Ready, every ClusterOperator returns to Available." --- pause --- "With the cluster on 4.19.40, we can now talk about the GitOps repository that drives everything. Let me show you the architecture." IF SOMEONE ASKS: "What if a MachineConfigPool gets stuck during upgrade?" — "Watch oc get mcp. If a node sticks in Updating for more than 30 minutes, check oc get nodes and oc describe node for the stuck node. The most common cause is a drain failure — pods with PodDisruptionBudgets blocking eviction."</div>
     </div>
   </section>
 
   <!-- ===== SLIDE 6: REPO ARCHITECTURE ===== -->
-  <section class="slide" data-slide="6" role="group" aria-label="Repo" aria-hidden="true">
+  <section class="slide" data-slide="8" role="group" aria-label="Repo" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">REPO STRUCTURE</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">Repository Architecture</h2>
@@ -374,12 +437,12 @@
       <div class="callout anim-fade-up" style="--index:4">
         <p><strong>cluster-config.yaml</strong> is a ConfigMap with 4 fields: <code>repoURL</code>, <code>targetRevision</code>, <code>rhoaiChannel</code>, <code>rhoaiOverlay</code>. Kustomize replacements inject these into all 4 ApplicationSets + 2 standalone Applications.</p>
       </div>
-      <div class="slide-notes">This is the key architecture slide. Everything flows from cluster-config.yaml. 4 operators use redhat-cop/gitops-catalog as remote Kustomize base pinned at commit 7727f242.</div>
+      <div class="slide-notes">"This is the heart of the system. Three directories, one ConfigMap, and a 370-line configure.sh script." "The bootstrap directory is your one-time entry point. Inside it, cluster-config.yaml is a simple ConfigMap with just 4 fields: repoURL, targetRevision, rhoaiChannel, and rhoaiOverlay. Kustomize replacements inject these values into every ApplicationSet and standalone Application in the repo. Change one field, push to Git, and the entire platform reconfigures." "The components directory is where all the resources live. 12 operator directories — each with a Namespace, OperatorGroup, and Subscription. 24 instance directories for Custom Resources like NFD, Kueue, Backstage. And 4 ApplicationSets under argocd/ that auto-discover these directories." "Four of these operators — rhoai, cert-manager, NFD, and RHDH — use redhat-cop/gitops-catalog as a remote Kustomize base, pinned at a specific commit hash. That gives you reusable community manifests with version stability." --- pause --- "But directories alone don't deploy anything. Let me show you the pattern that connects them."</div>
     </div>
   </section>
 
   <!-- ===== SLIDE 7: APP-OF-APPS ===== -->
-  <section class="slide" data-slide="7" role="group" aria-label="App of Apps" aria-hidden="true">
+  <section class="slide" data-slide="9" role="group" aria-label="App of Apps" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">PATTERN</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">The App-of-Apps Pattern</h2>
@@ -444,12 +507,12 @@
           <text x="240" y="294" fill="#8a8a8a" font-family="Red Hat Text,sans-serif" font-size="8">... +12 more</text>
         </svg>
       </div>
-      <div class="slide-notes">ApplicationSets use Git directory generators. Each scans a path (e.g. components/operators/*) and creates one ArgoCD Application per subdirectory. Exclusions are configured directly in the AppSet YAML.</div>
+      <div class="slide-notes">"This is the App-of-Apps pattern — and it's what makes the entire system extensible without touching any ArgoCD configuration." "One oc apply creates the ArgoCD instance. ArgoCD picks up the 4 ApplicationSets. Each ApplicationSet uses a Git directory generator — it scans a path in the repo and creates one ArgoCD Application per subdirectory it finds." "Look at the numbers. cluster-operators scans 12 directories, creates 11 apps — one directory is excluded. cluster-instances scans 24 directories, creates 17 — some are excluded because their CRDs don't ship yet in EA2. cluster-models and cluster-services are opt-in, wave 5." "The two standalone apps are special. rhoai-dsc at wave 3 uses a Replace sync strategy with ignoreDifferences on the DSC status — because the RHOAI operator constantly mutates the status field and ArgoCD would fight it otherwise. And gitops-controller at wave 10 is ArgoCD managing itself." "Want to add a new operator? Create a directory under components/operators/, push, and ArgoCD auto-discovers it. No manual Application creation required." --- pause --- "Let me show you what happens when you actually run the bootstrap command."</div>
     </div>
   </section>
 
   <!-- ===== SLIDE 8: BOOTSTRAP ===== -->
-  <section class="slide" data-slide="8" role="group" aria-label="Bootstrap" aria-hidden="true">
+  <section class="slide" data-slide="10" role="group" aria-label="Bootstrap" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">PHASE 4</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">Bootstrap: 7 Layers in One Command</h2>
@@ -466,12 +529,12 @@
       <div class="callout anim-fade-up" style="--index:4">
         <p><strong>CRD timing:</strong> The bootstrap uses an <code>until</code> loop because the ArgoCD CRD isn't immediately available after the GitOps operator is installed. In our deploy, it succeeded on <strong style="color:var(--rh-red);">attempt 3</strong> (10s sleep between retries).</p>
       </div>
-      <div class="slide-notes">After bootstrap, you never run oc apply again. Everything is managed through Git pushes. The gitops-controller at wave 10 watches itself — ArgoCD managing ArgoCD.</div>
+      <div class="slide-notes">"This is the moment of truth. One command: oc apply -k bootstrap/overlays/default. After this, you never run oc apply again." "Seven layers deploy in sequence. First, the GitOps Operator subscription — that installs ArgoCD. Then the ArgoCD instance itself, configured with Helm and Kustomize rendering, plus custom health checks that understand DSC and DSCI CRDs." "Next, the cluster-config ConfigMap with your 4 fields. Then AppProjects — we use two: 'platform' for operators and instances, 'usecases' for models and services. This gives you RBAC separation." "Then the 4 ApplicationSets — these are the auto-discovery engines. The rhoai-dsc Application deploys separately because it needs special handling: Replace sync strategy, status field ignoreDifferences, and a retry configuration with backoff." "And finally, gitops-controller at wave 10 — this is ArgoCD managing its own ArgoCD instance using ServerSideApply. It must be last to avoid a self-modification loop during bootstrap." "In practice, the ArgoCD CRD isn't immediately available after the GitOps operator installs. Our bootstrap script uses a retry loop — in our deployment, it succeeded on attempt 3 with a 10-second sleep between retries." --- pause --- "Now let me show you the operator dependency chain that ArgoCD has to orchestrate."</div>
     </div>
   </section>
 
   <!-- ===== SLIDE 9: OPERATOR DEPENDENCY CHAIN ===== -->
-  <section class="slide" data-slide="9" role="group" aria-label="Dependencies" aria-hidden="true">
+  <section class="slide" data-slide="11" role="group" aria-label="Dependencies" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">DEEP DIVE</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">Operator Dependency Chain</h2>
@@ -524,12 +587,12 @@
           <text x="290" y="354" fill="#3E8635" font-family="Red Hat Mono,monospace" font-size="9" text-anchor="middle">26 deployments in redhat-ods-applications</text>
         </svg>
       </div>
-      <div class="slide-notes">14 unique operator CSVs. RHCL is a dependency chain that auto-installs 3 sub-operators. All prereqs must be Succeeded before DSC can fully reconcile.</div>
+      <div class="slide-notes">"This diagram is WHY GitOps matters for RHOAI. Look at what has to happen in the right order." "At the top — three platform prerequisites. cert-manager provides TLS certificate management. ServiceMesh 3 provides the networking layer for model serving. NFD — Node Feature Discovery — labels GPU nodes, but even without GPUs it needs to be running for RHOAI to be happy." "The training trio in the middle — Kueue for workload scheduling, JobSet for distributed training jobs, LeaderWorkerSet for coordinated training, and Custom Metrics Autoscaler with KEDA for auto-scaling." "On the right — the gateway and auth stack. RHCL, also known as Kuadrant, is interesting because it's a dependency chain: installing RHCL automatically triggers OLM to install three sub-operators: Authorino for auth, DNS operator, and Limitador for rate limiting. You don't manage those three directly." "And then the big box — rhods-operator 3.5.0-ea.2. This is the meta-operator. It doesn't do anything useful until ALL these prerequisites are Succeeded. Then it reads the DataScienceCluster CR and deploys 26 internal deployments." "The dashed lines show the dependency flow — every arrow that touches the RHOAI box represents a CRD that must exist before the DSC can fully reconcile." --- pause --- "Let me show you what those 26 deployments actually are."</div>
     </div>
   </section>
 
   <!-- ===== SLIDE 10: RHOAI INTERNALS ===== -->
-  <section class="slide" data-slide="10" role="group" aria-label="RHOAI Internals" aria-hidden="true">
+  <section class="slide" data-slide="12" role="group" aria-label="RHOAI Internals" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">DEEP DIVE</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">What RHOAI Deploys Inside the Cluster</h2>
@@ -563,12 +626,12 @@
       <div class="callout anim-fade-up" style="--index:4">
         <p><strong>Auto-created by RHOAI operator (not in Git):</strong> <code>DSCInitialization</code> (default-dsci), namespaces <code>redhat-ods-monitoring</code>, <code>rhods-notebooks</code>, <code>rhoai-model-registries</code>. Also embeds KNative Serving, Tekton Pipelines, and DevWorkspace operator.</p>
       </div>
-      <div class="slide-notes">RHOAI is the most complex operator in the stack. It manages 26 deployments, creates 4 namespaces, and registers 50+ CRDs from a single DataScienceCluster CR.</div>
+      <div class="slide-notes">"When the DataScienceCluster CR reconciles, THIS is what appears in the cluster. 26 deployments across 4 functional areas." "Serving — this is model inference. The RHOAI dashboard runs with 2 replicas. KServe handles model serving. There's a local model controller for caching models on nodes. The MaaS stack — model-as-a-service — includes an API server and controller. And two gateway operators for AI traffic routing." "Training — ds-pipelines-operator for ML pipelines, KubeRay for Ray clusters, training-operator and trainer-controller for distributed training, plus Spark with its webhook." "Registry and Ops — model-registry-operator for model lifecycle, TrustyAI for explainability, MLflow for experiment tracking, Feast for feature stores, and OGX controller." "Infrastructure — notebook controllers for JupyterHub, NIM account controller for NVIDIA integration, CodeFlare operator for distributed computing, plus webhook deployments." "And here's the part that surprises people: RHOAI also auto-creates resources that aren't in your Git repo. A DSCInitialization resource called default-dsci, three additional namespaces — redhat-ods-monitoring, rhods-notebooks, rhoai-model-registries — and it embeds KNative Serving, Tekton Pipelines, and DevWorkspace operator internally." --- pause --- "Let me give you the full operator subscription table." IF SOMEONE ASKS: "Can you deploy RHOAI without all 26 deployments?" — "Yes, that's what DSC profiles are for. The minimal profile gives you just the dashboard. We'll cover profiles in a few slides."</div>
     </div>
   </section>
 
   <!-- ===== SLIDE 11: OPERATORS TABLE ===== -->
-  <section class="slide" data-slide="11" role="group" aria-label="Operators" aria-hidden="true">
+  <section class="slide" data-slide="13" role="group" aria-label="Operators" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">ALL 14 OPERATORS</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">Operator Subscription Details</h2>
@@ -591,12 +654,12 @@
           <tr><td>nfd</td><td>4.19.0</td><td>stable</td><td>openshift-nfd</td><td style="color:var(--rh-red);">gitops-catalog base</td></tr>
         </tbody>
       </table>
-      <div class="slide-notes">All operators reached Succeeded within 5-10 minutes of bootstrap. 4 use redhat-cop/gitops-catalog as remote Kustomize base pinned at commit 7727f242.</div>
+      <div class="slide-notes">"This is the reference table. 14 operator CSVs, their exact versions, channels, and namespaces. You'll want to screenshot this slide." "Notice the pattern: most operators get their own namespace — cert-manager-operator, openshift-kueue-operator, openshift-nfd, etc. ServiceMesh is the exception, deploying to the shared openshift-operators namespace." "Four of these — rhods-operator, cert-manager, NFD, and RHDH — use gitops-catalog as a remote Kustomize base. The base is pinned at commit 7727f242 for reproducibility. If the community updates the catalog, your deployment doesn't change until you explicitly update the commit hash." "The RHCL row is special — see the three indented sub-operators below it? Authorino, DNS, and Limitador. You don't create Subscriptions for these; OLM installs them automatically when RHCL's ClusterServiceVersion declares them as dependencies." "All 14 operators reached Succeeded status within 5 to 10 minutes of bootstrap. The slowest was RHOAI itself because it has the most CRDs to register." --- pause --- "But getting them installed in the right order — that's where sync waves come in."</div>
     </div>
   </section>
 
   <!-- ===== SLIDE 12: SYNC WAVES ===== -->
-  <section class="slide" data-slide="12" role="group" aria-label="Sync Waves" aria-hidden="true">
+  <section class="slide" data-slide="14" role="group" aria-label="Sync Waves" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">ORDERING</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">Sync Waves &amp; Dependency Ordering</h2>
@@ -614,12 +677,12 @@
           <tr><td style="color:var(--rh-orange); font-weight:700;">10</td><td>Bootstrap</td><td>gitops-controller</td><td style="font-size:0.75rem;">Self-management (must be last)</td></tr>
         </tbody>
       </table>
-      <div class="slide-notes">Sync waves are the ordering mechanism. They prevent CRD-not-found errors by ensuring operators install before their CRs are applied.</div>
+      <div class="slide-notes">"Sync waves are how ArgoCD solves the ordering problem — and if you get these wrong, you get 'no matches for kind' errors that make your deployment look broken." "Wave 0 creates the foundation: namespaces and OperatorGroups. You need the namespace before you can install an operator into it. Wave 1 deploys the operator Subscriptions themselves." "Wave 2 creates basic instance CRs — Kuadrant, Backstage, ClusterAutoscaler. These are CRs whose CRDs were registered by wave 1 operators." "Wave 3 is where it gets interesting. This is for CRs that depend on OTHER CRs being reconciled first. ExternalSecretsConfig is a perfect example — we learned the hard way that without wave 3, it deploys at wave 0 before the External Secrets operator even exists. NFD instance, Kueue instance, and Authorino all sit here too." "Also at wave 3 — the rhoai-dsc Application resource is created by ArgoCD. At wave 4, the actual DataScienceCluster CR deploys, and RHOAI begins its long reconciliation loop." "Wave 5-6 handles post-DSC configuration — dashboard settings, hardware profiles, observability. And wave 10 is always gitops-controller — self-management must be last to prevent a modification loop." --- pause --- "Now, not every team needs all 26 deployments. Let me show you the profile system."</div>
     </div>
   </section>
 
   <!-- ===== SLIDE 13: DSC PROFILES ===== -->
-  <section class="slide" data-slide="13" role="group" aria-label="Profiles" aria-hidden="true">
+  <section class="slide" data-slide="15" role="group" aria-label="Profiles" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">PROFILES</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">DSC Profiles &mdash; Choose Your Platform</h2>
@@ -647,12 +710,12 @@
       <div class="callout anim-fade-up" style="--index:4">
         <p>We used <strong>full</strong> &mdash; all 14 AI components Managed + Kueue Unmanaged (deployed separately via GitOps for version control). The <code>minimal</code> profile deploys dashboard only.</p>
       </div>
-      <div class="slide-notes">6 profiles cover every use case from dashboard-only (minimal) to everything (full). Kueue is always Unmanaged because the GitOps repo deploys it separately with its own operator subscription for version pinning.</div>
+      <div class="slide-notes">"Six profiles, each an overlay in the repo. You switch profiles with one configure.sh command, push, and ArgoCD reconciles the DataScienceCluster to match." "The table shows M for Managed, R for Removed, U for Unmanaged. Full — which is what we deployed — enables every component. Serving gives you model inference without training. Training gives you pipelines and distributed training without model serving. MaaS is optimized for model-as-a-service deployments. Minimal is dashboard-only — useful for administrators who want the UI without any workloads. Dev is everything for development environments." "Notice that Kueue is always Unmanaged across all profiles. That's intentional — the GitOps repo deploys Kueue as a separate operator with its own Subscription, channel, and version pin. This gives you fine-grained control over Kueue upgrades independent of RHOAI upgrades." "In practice, switching profiles is the most common Day-2 operation: configure.sh --dsc serving, git push, wait 5 minutes, done." --- pause --- "Now let me show you the real world — the 9 issues we hit during deployment and how we fixed them." IF SOMEONE ASKS: "What happens if you switch from 'full' to 'minimal'?" — "RHOAI will set all non-dashboard components to Removed, which tears down their deployments. It's reversible — switch back to full and they redeploy. But running workloads WILL be interrupted."</div>
     </div>
   </section>
 
   <!-- ===== SLIDE 14: KNOWN ISSUES ===== -->
-  <section class="slide" data-slide="14" role="group" aria-label="Issues" aria-hidden="true">
+  <section class="slide" data-slide="16" role="group" aria-label="Issues" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">TROUBLESHOOTING</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">9 Issues Encountered &amp; Fixed</h2>
@@ -706,12 +769,12 @@
       <div class="callout anim-fade-up" style="--index:3">
         <p><strong>4 Git commits fixed the repo:</strong> <code>7b07bee</code>, <code>0d39ebc</code>, <code>2337349</code>, <code>d9f21aa</code>. These fixes are now committed and reusable for any future deployment.</p>
       </div>
-      <div class="slide-notes">9 issues in total. They fall into 4 categories: ArgoCD schema/sync, operator dependencies, secret management, and CRD compatibility. All were fixed in Git and pushed.</div>
+      <div class="slide-notes">"This is the slide that makes this deck different from a marketing presentation. Nine real issues, encountered during a real deployment, with real fixes." "Let me walk you through the categories. The ArgoCD issues — preserveResourcesOnDeletion wasn't in the CRD schema for the installed ArgoCD version. This is a newer feature that the OpenShift GitOps 1.21 operator doesn't support yet. It BLOCKED all ApplicationSet updates — nothing could sync until we removed it from all four AppSets." "ExternalSecretsConfig at wave 0 is a classic CRD timing issue. The ExternalSecretsConfig Custom Resource was deployed before the External Secrets operator installed the CRD. Moving it to wave 3 fixed it." "Operator dependency mismatches — NFD was excluded from the operators AppSet but nfd-instance still expected it. Two components out of alignment." "Secret management was the trickiest. The MaaS API pod was CrashLoopBackOff because it expected a secret called maas-db-config in redhat-ods-applications with a specific key: DB_CONNECTION_URL. The repo had the secret in the wrong namespace with the wrong key." "CRD compatibility — Backstage's v1alpha5 schema doesn't accept replicas. EvalHub's CRD doesn't ship in EA2 at all." --- pause --- "Four Git commits fixed everything: 7b07bee, 0d39ebc, 2337349, d9f21aa. These fixes are now baked into the repo — anyone deploying after us won't hit these issues." "Let me show you how we handle the secret problem long-term."</div>
     </div>
   </section>
 
   <!-- ===== SLIDE 15: SECRET MANAGEMENT ===== -->
-  <section class="slide" data-slide="15" role="group" aria-label="Secrets" aria-hidden="true">
+  <section class="slide" data-slide="17" role="group" aria-label="Secrets" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">SECURITY</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">Secret Management Pattern</h2>
@@ -745,12 +808,12 @@
       <div class="callout anim-fade-up" style="--index:4">
         <p><strong>Prune=false</strong> annotation on the Secret prevents ArgoCD from deleting it. <strong>ignoreDifferences</strong> prevents ArgoCD from reverting the real value back to the placeholder.</p>
       </div>
-      <div class="slide-notes">This pattern keeps secrets safe: placeholder in Git, ArgoCD ignores the data fields, and the real value is set on-cluster. External Secrets Operator is already deployed for long-term automation.</div>
+      <div class="slide-notes">"Rule number one of GitOps: never commit real credentials to Git. But RHOAI needs a database connection URL for MaaS. How do you square that?" "Three layers." "Layer 1: Git. The repo contains a placeholder YAML — it's a real Kubernetes Secret object, correct namespace, correct key, but the value is literally the string REPLACE_ME. ArgoCD applies this and creates the Secret structure on the cluster." "Layer 2: ArgoCD. The instances ApplicationSet has ignoreDifferences configured for Secret objects on /data and /stringData jsonPaths. This tells ArgoCD: 'I know the cluster state differs from Git for these fields. Don't revert it. Don't flag it as OutOfSync.'" "Layer 3: On-cluster. An operator or administrator runs oc patch to set the real database connection URL. ArgoCD sees the diff, ignores it per configuration, and the MaaS API pod picks up the real secret and starts successfully." --- pause --- "Long-term, the External Secrets Operator is already deployed in the cluster. It can sync secrets from HashiCorp Vault, AWS Secrets Manager, or Azure Key Vault directly into Kubernetes Secrets. The dashed box on the diagram shows this future state — it's ready to configure." IF SOMEONE ASKS: "Why not use SealedSecrets?" — "SealedSecrets work too, but External Secrets Operator gives you runtime rotation and multi-backend support. For enterprise deployments with existing Vault infrastructure, ESO is the better choice."</div>
     </div>
   </section>
 
   <!-- ===== SLIDE 16: FINAL STATE ===== -->
-  <section class="slide" data-slide="16" role="group" aria-label="Final State" aria-hidden="true">
+  <section class="slide" data-slide="18" role="group" aria-label="Final State" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">RESULT</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">Final Deployment State</h2>
@@ -793,12 +856,12 @@
           </div>
         </div>
       </div>
-      <div class="slide-notes">26 of 30 apps fully healthy. The 4 remaining are understood and non-critical — they represent expected operator drift, design-intent secret ignoring, and a pending DNS validation for MaaS TLS.</div>
+      <div class="slide-notes">"This is where we landed. 26 out of 30 ArgoCD applications fully Synced and Healthy. All 14 operator CSVs in Succeeded state. 23 DSC conditions reporting True." "Now, four apps show as OutOfSync or Degraded — and every single one is understood and non-critical." "kueue-config is OutOfSync because the Kueue operator mutates ClusterQueue fields after creation. ArgoCD sees the diff, but the cluster state is correct. You can add ignoreDifferences for this, or just leave it — it's cosmetic." "operator-servicemesh is OutOfSync because OLM adds annotations to the Subscription resource that aren't in our Git YAML. Again, cosmetic drift from the operator lifecycle manager." "instance-maas-postgres is OutOfSync by design — that's our secret management pattern working. The Git placeholder says REPLACE_ME, the cluster has the real value, ArgoCD ignores the diff but still reports OutOfSync at the Application level." "instance-maas-gateway shows Degraded because it's waiting for DNS validation to issue a TLS certificate. In a production environment with proper DNS delegation, this resolves automatically." --- pause --- "So the platform is running. What does Day-2 look like? Let me show you."</div>
     </div>
   </section>
 
   <!-- ===== SLIDE 17: DAY-2 OPS ===== -->
-  <section class="slide" data-slide="17" role="group" aria-label="Day 2" aria-hidden="true">
+  <section class="slide" data-slide="19" role="group" aria-label="Day 2" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">OPERATIONS</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">Day-2 Operations</h2>
@@ -829,12 +892,12 @@
           <div class="card-body">ArgoCD dashboard shows diffs; <code>oc annotate ... refresh=hard</code> for retry-exhausted apps</div>
         </div>
       </div>
-      <div class="slide-notes">Every common operation maps to either a Git push or a single oc command. The ArgoCD dashboard is the primary troubleshooting interface.</div>
+      <div class="slide-notes">"After bootstrap, your workflow changes completely. Everything is a Git push." "Want to add a new operator? Create a directory under components/operators/ with a namespace.yaml, operatorgroup.yaml, and subscription.yaml. Push. The ApplicationSet discovers it automatically and creates the ArgoCD Application. No manual ArgoCD configuration needed." "Want to switch from full to serving-only? Run configure.sh --dsc serving, push, ArgoCD reconciles the overlay — training components get torn down, serving stays up." "Want to deploy a model? configure.sh enable-model gemma2-9b-fp8, push, model Application appears under the cluster-models AppSet." "Upgrading RHOAI itself? Change the channel in cluster-config.yaml — when GA lands, switch from beta to fast or stable. Push. OLM picks up the new channel and triggers the upgrade." "Secrets are the one exception — those are oc patch commands on-cluster, and ArgoCD is configured to ignore the diff." "For troubleshooting, the ArgoCD dashboard is your primary interface. It shows per-resource diffs, sync status, and health. For stuck apps that have exhausted retries, oc annotate with refresh=hard forces a fresh reconciliation." --- pause --- "Let me close with the five things I want you to remember."</div>
     </div>
   </section>
 
   <!-- ===== SLIDE 18: KEY TAKEAWAYS ===== -->
-  <section class="slide" data-slide="18" role="group" aria-label="Takeaways" aria-hidden="true">
+  <section class="slide" data-slide="20" role="group" aria-label="Takeaways" aria-hidden="true">
     <div class="slide-inner" style="display:flex; flex-direction:column; justify-content:center; min-height:80vh;">
       <div style="position: absolute; top:-100px; left:-100px; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle, rgba(238,0,0,0.15) 0%, transparent 70%); pointer-events:none;"></div>
       <div class="slide-eyebrow anim-fade-up" style="--index:0">TAKEAWAYS</div>
@@ -863,7 +926,7 @@
           </div>
         </div>
       </div>
-      <div class="slide-notes">Closing slide. Five key takeaways that capture the entire deployment story. The meta-operator concept and failure mode awareness are the most important lessons.</div>
+      <div class="slide-notes">"Five things. If you remember nothing else from this presentation, remember these." --- pause --- "First: one ConfigMap plus one oc apply equals an entire AI platform. 14 operators, 26 deployments, 30 ArgoCD applications, 50+ CRDs. That's the power of the App-of-Apps pattern with ApplicationSet auto-discovery." "Second: Git is the source of truth. After bootstrap, you never run oc apply again. Add a directory, push, ArgoCD discovers it. Change a field, push, ArgoCD reconciles it. Delete a directory, push, ArgoCD cleans it up." "Third: RHOAI is a meta-operator. This is the key mental model. It's not one operator — it's an orchestrator that manages 26 sub-operator deployments from a single DataScienceCluster Custom Resource. Six profiles let you tune what gets deployed." "Fourth: know the failure modes. CRD timing, retry exhaustion, hard refresh. We hit 9 issues in a single deployment and fixed all of them in 4 commits. Those fixes are now in the repo and reusable." "Fifth: 30 minutes from bootstrap to fully operational. Secrets never touch Git. Sync waves enforce ordering. ArgoCD self-heals any drift." --- pause --- "The repo is open. The deck is published. Everything you need to reproduce this deployment is in the Git history. Questions?"</div>
     </div>
   </section>
 
@@ -871,23 +934,25 @@
   <div class="deck-overview" hidden aria-label="Slide overview">
     <div class="overview-grid">
       <button class="overview-thumb" data-goto="1"><span class="num">01</span><span class="ttl">RHOAI 3.5 EA2 GitOps Deployment</span><span class="beat">TITLE</span></button>
-      <button class="overview-thumb" data-goto="2"><span class="num">02</span><span class="ttl">Six Phases to Running AI</span><span class="beat">JOURNEY</span></button>
-      <button class="overview-thumb" data-goto="3"><span class="num">03</span><span class="ttl">Cluster Readiness</span><span class="beat">PHASE 1</span></button>
-      <button class="overview-thumb" data-goto="4"><span class="num">04</span><span class="ttl">Version Compatibility</span><span class="beat">BLOCKER</span></button>
-      <button class="overview-thumb" data-goto="5"><span class="num">05</span><span class="ttl">OCP Upgrade 4.18 &rarr; 4.19</span><span class="beat">PHASE 2</span></button>
-      <button class="overview-thumb" data-goto="6"><span class="num">06</span><span class="ttl">Repository Architecture</span><span class="beat">STRUCTURE</span></button>
-      <button class="overview-thumb" data-goto="7"><span class="num">07</span><span class="ttl">App-of-Apps Pattern</span><span class="beat">PATTERN</span></button>
-      <button class="overview-thumb" data-goto="8"><span class="num">08</span><span class="ttl">Bootstrap 7 Layers</span><span class="beat">PHASE 4</span></button>
-      <button class="overview-thumb" data-goto="9"><span class="num">09</span><span class="ttl">Operator Dependency Chain</span><span class="beat">DEEP DIVE</span></button>
-      <button class="overview-thumb" data-goto="10"><span class="num">10</span><span class="ttl">RHOAI Internal Architecture</span><span class="beat">DEEP DIVE</span></button>
-      <button class="overview-thumb" data-goto="11"><span class="num">11</span><span class="ttl">14 Operator Subscriptions</span><span class="beat">OPERATORS</span></button>
-      <button class="overview-thumb" data-goto="12"><span class="num">12</span><span class="ttl">Sync Waves &amp; Ordering</span><span class="beat">ORDERING</span></button>
-      <button class="overview-thumb" data-goto="13"><span class="num">13</span><span class="ttl">DSC Profiles</span><span class="beat">PROFILES</span></button>
-      <button class="overview-thumb" data-goto="14"><span class="num">14</span><span class="ttl">9 Issues Fixed</span><span class="beat">TROUBLESHOOTING</span></button>
-      <button class="overview-thumb" data-goto="15"><span class="num">15</span><span class="ttl">Secret Management Pattern</span><span class="beat">SECURITY</span></button>
-      <button class="overview-thumb" data-goto="16"><span class="num">16</span><span class="ttl">Final Deployment State</span><span class="beat">RESULT</span></button>
-      <button class="overview-thumb" data-goto="17"><span class="num">17</span><span class="ttl">Day-2 Operations</span><span class="beat">OPERATIONS</span></button>
-      <button class="overview-thumb" data-goto="18"><span class="num">18</span><span class="ttl">Key Takeaways</span><span class="beat">TAKEAWAYS</span></button>
+      <button class="overview-thumb" data-goto="2"><span class="num">02</span><span class="ttl">Why Deploying RHOAI Is Hard</span><span class="beat">CHALLENGE</span></button>
+      <button class="overview-thumb" data-goto="3"><span class="num">03</span><span class="ttl">Declare Once, Converge Forever</span><span class="beat">ANSWER</span></button>
+      <button class="overview-thumb" data-goto="4"><span class="num">04</span><span class="ttl">Six Phases to Running AI</span><span class="beat">JOURNEY</span></button>
+      <button class="overview-thumb" data-goto="5"><span class="num">05</span><span class="ttl">Cluster Readiness</span><span class="beat">PHASE 1</span></button>
+      <button class="overview-thumb" data-goto="6"><span class="num">06</span><span class="ttl">Version Compatibility</span><span class="beat">BLOCKER</span></button>
+      <button class="overview-thumb" data-goto="7"><span class="num">07</span><span class="ttl">OCP Upgrade 4.18 &rarr; 4.19</span><span class="beat">PHASE 2</span></button>
+      <button class="overview-thumb" data-goto="8"><span class="num">08</span><span class="ttl">Repository Architecture</span><span class="beat">STRUCTURE</span></button>
+      <button class="overview-thumb" data-goto="9"><span class="num">09</span><span class="ttl">App-of-Apps Pattern</span><span class="beat">PATTERN</span></button>
+      <button class="overview-thumb" data-goto="10"><span class="num">10</span><span class="ttl">Bootstrap 7 Layers</span><span class="beat">PHASE 4</span></button>
+      <button class="overview-thumb" data-goto="11"><span class="num">11</span><span class="ttl">Operator Dependency Chain</span><span class="beat">DEEP DIVE</span></button>
+      <button class="overview-thumb" data-goto="12"><span class="num">12</span><span class="ttl">RHOAI Internal Architecture</span><span class="beat">DEEP DIVE</span></button>
+      <button class="overview-thumb" data-goto="13"><span class="num">13</span><span class="ttl">14 Operator Subscriptions</span><span class="beat">OPERATORS</span></button>
+      <button class="overview-thumb" data-goto="14"><span class="num">14</span><span class="ttl">Sync Waves &amp; Ordering</span><span class="beat">ORDERING</span></button>
+      <button class="overview-thumb" data-goto="15"><span class="num">15</span><span class="ttl">DSC Profiles</span><span class="beat">PROFILES</span></button>
+      <button class="overview-thumb" data-goto="16"><span class="num">16</span><span class="ttl">9 Issues Fixed</span><span class="beat">TROUBLESHOOTING</span></button>
+      <button class="overview-thumb" data-goto="17"><span class="num">17</span><span class="ttl">Secret Management Pattern</span><span class="beat">SECURITY</span></button>
+      <button class="overview-thumb" data-goto="18"><span class="num">18</span><span class="ttl">Final Deployment State</span><span class="beat">RESULT</span></button>
+      <button class="overview-thumb" data-goto="19"><span class="num">19</span><span class="ttl">Day-2 Operations</span><span class="beat">OPERATIONS</span></button>
+      <button class="overview-thumb" data-goto="20"><span class="num">20</span><span class="ttl">Key Takeaways</span><span class="beat">TAKEAWAYS</span></button>
     </div>
   </div>
 
@@ -919,8 +984,10 @@
     <li><button role="tab" data-goto="16" aria-label="Slide 16"></button></li>
     <li><button role="tab" data-goto="17" aria-label="Slide 17"></button></li>
     <li><button role="tab" data-goto="18" aria-label="Slide 18"></button></li>
+    <li><button role="tab" data-goto="19" aria-label="Slide 19"></button></li>
+    <li><button role="tab" data-goto="20" aria-label="Slide 20"></button></li>
   </ol>
-  <span class="deck-counter">01 / 18</span>
+  <span class="deck-counter">01 / 20</span>
   <button class="btn-next" aria-label="Next slide">&rarr;</button>
 </nav>
 
