@@ -186,9 +186,9 @@
   <!-- ===== SLIDE 2: THE CHALLENGE (SCQA: SITUATION + COMPLICATION) ===== -->
   <section class="slide" data-slide="2" role="group" aria-label="The Challenge" aria-hidden="true">
     <div class="slide-inner">
-      <div class="slide-eyebrow anim-fade-up" style="--index:0">THE CHALLENGE</div>
-      <h2 class="display-lg anim-fade-up" style="--index:1">Why Deploying RHOAI Is Hard</h2>
-      <p class="lead anim-fade-up" style="--index:2">RHOAI is not a single operator &mdash; it&rsquo;s an <strong style="color:var(--rh-red);">ecosystem</strong>. Deploying it manually means coordinating 14 operators, dozens of CRDs, version-locked dependencies, and careful ordering. One mistake means hours of debugging.</p>
+      <div class="slide-eyebrow anim-fade-up" style="--index:0">THE LANDSCAPE</div>
+      <h2 class="display-lg anim-fade-up" style="--index:1">What Makes RHOAI Unique</h2>
+      <p class="lead anim-fade-up" style="--index:2">RHOAI is not a single operator &mdash; it&rsquo;s an <strong style="color:var(--rh-red);">ecosystem</strong> of 14 operators, dozens of CRDs, version-locked dependencies, and precise ordering requirements. Managing this at scale calls for automation.</p>
       <div class="card-grid cols-3 anim-fade-up" style="--index:3" data-stagger>
         <div class="card anim-fade-up" style="border-top:3px solid var(--rh-red); --index:0;">
           <span class="card-tag" style="background:rgba(238,0,0,0.12); color:var(--rh-red);">Complexity</span>
@@ -198,18 +198,18 @@
         <div class="card anim-fade-up" style="border-top:3px solid var(--rh-orange); --index:1;">
           <span class="card-tag" style="background:rgba(244,180,0,0.12); color:var(--rh-orange);">Ordering</span>
           <div class="card-title">CRDs Before CRs</div>
-          <div class="card-body">Apply a Custom Resource before its operator installs the CRD? <code>no matches for kind</code>. Manual deployment means constant race conditions between operators and their instances.</div>
+          <div class="card-body">Custom Resources need their CRDs to exist first. With 14 operators installing CRDs at different speeds, ordering matters. Automation ensures CRDs land before CRs.</div>
         </div>
         <div class="card anim-fade-up" style="border-top:3px solid var(--rh-purple); --index:2;">
           <span class="card-tag" style="background:rgba(103,83,172,0.12); color:var(--rh-purple);">Drift</span>
-          <div class="card-title">No Self-Healing</div>
-          <div class="card-body">Someone deletes a namespace. A secret gets overwritten. An operator drifts to a newer channel. Without continuous reconciliation, the platform silently degrades.</div>
+          <div class="card-title">Configuration Drift</div>
+          <div class="card-body">Namespaces change, secrets get overwritten, operators drift to newer channels. Continuous reconciliation detects and corrects drift automatically.</div>
         </div>
       </div>
       <div class="callout anim-fade-up" style="--index:4">
-        <p><strong>The real cost:</strong> Teams report 2&ndash;5 days for a fresh RHOAI install, and weeks debugging post-install drift. Every cluster is a snowflake. Reproducing a known-good state is nearly impossible without GitOps.</p>
+        <p><strong>The opportunity:</strong> With this many moving parts, automation isn&rsquo;t optional &mdash; it&rsquo;s the path to reproducible, auditable, self-healing deployments across every cluster.</p>
       </div>
-      <div class="slide-notes">This slide establishes the COMPLICATION. The audience needs to feel the pain of manual RHOAI deployment before they'll appreciate the GitOps solution. Emphasize that RHOAI is uniquely complex compared to most operators — it's a meta-operator that depends on a fleet of prerequisite operators, each with its own lifecycle. Mention that the "14 operators" number isn't theoretical — it's what we discovered during a real deployment. The ordering problem is the most common failure mode: CRD timing, sync waves, and dependency chains. Without automation, every deployment is a manual orchestration exercise. Pause after the callout to let "2–5 days" sink in before moving to the answer.</div>
+      <div class="slide-notes">"Before we dive in, let me give you a sense of the landscape. RHOAI isn't like most operators you install on OpenShift. It's a meta-operator — an ecosystem of 14 operators that work together to deliver a complete AI platform." --- pause --- "Three things make it unique. First, the sheer number of dependencies — cert-manager, ServiceMesh, Kuadrant, Kueue, NFD, and more. Each has its own namespace, channel, and version constraints." "Second, ordering. CRDs have to exist before you can create Custom Resources. With 14 operators registering CRDs at different speeds, getting the sequence right is critical." "Third, configuration drift. In any complex platform, things change over time — someone modifies a secret, an operator upgrades, a namespace gets altered. You need a system that continuously watches for these changes and brings everything back to the declared state." --- pause --- "This is exactly what GitOps is designed for. Let me show you the approach."</div>
     </div>
   </section>
 
@@ -962,7 +962,7 @@
   <div class="deck-overview" hidden aria-label="Slide overview">
     <div class="overview-grid">
       <button class="overview-thumb" data-goto="1"><span class="num">01</span><span class="ttl">RHOAI 3.5 EA2 GitOps Deployment</span><span class="beat">TITLE</span></button>
-      <button class="overview-thumb" data-goto="2"><span class="num">02</span><span class="ttl">Why Deploying RHOAI Is Hard</span><span class="beat">CHALLENGE</span></button>
+      <button class="overview-thumb" data-goto="2"><span class="num">02</span><span class="ttl">What Makes RHOAI Unique</span><span class="beat">LANDSCAPE</span></button>
       <button class="overview-thumb" data-goto="3"><span class="num">03</span><span class="ttl">Declare Once, Converge Forever</span><span class="beat">ANSWER</span></button>
       <button class="overview-thumb" data-goto="4"><span class="num">04</span><span class="ttl">Six Phases to Running AI</span><span class="beat">JOURNEY</span></button>
       <button class="overview-thumb" data-goto="5"><span class="num">05</span><span class="ttl">Cluster Readiness</span><span class="beat">PHASE 1</span></button>
