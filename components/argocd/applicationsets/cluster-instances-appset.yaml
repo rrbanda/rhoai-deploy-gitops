@@ -30,6 +30,12 @@ spec:
           # vault-dev is for development only — excluded by default
           - path: components/instances/vault-dev
             exclude: true
+          # external-secrets-config depends on vault-dev — excluded when vault-dev is excluded
+          - path: components/instances/external-secrets-config
+            exclude: true
+          # EvalHub CRD not available in RHOAI 3.5 EA2
+          - path: components/instances/evalhub
+            exclude: true
           # Optional: uncomment to exclude components not needed in your env
           # - path: components/instances/observability
           #   exclude: true
