@@ -167,11 +167,11 @@ until oc apply -k bootstrap/overlays/prod; do sleep 10; done
 
 ## Disconnected / Air-Gapped
 
-For environments without internet access, mirror all images to a private registry first:
+For environments without internet access, first discover and mirror all RHOAI images to a private registry:
 
 ```bash
-# List required images
-./scripts/mirror-images.sh list
+# Discover all images used by RHOAI on a running cluster
+./scripts/get-rhoai-images.sh --output rhoai-images.txt
 
 # Mirror to your registry
 ./scripts/mirror-images.sh mirror --target-registry myregistry.example.com:5000
@@ -180,6 +180,8 @@ For environments without internet access, mirror all images to a private registr
 ./scripts/configure.sh --repo <url> --overlay disconnected --new-overlay
 until oc apply -k bootstrap/overlays/disconnected; do sleep 10; done
 ```
+
+The image discovery script is also available as a standalone gist: [get-rhoai-images.sh](https://gist.github.com/rrbanda/ce6e03777b33137b4f62ca41b3b2b8ed)
 
 See [docs/disconnected.md](docs/disconnected.md) for the full guide.
 
