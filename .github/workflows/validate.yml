@@ -73,6 +73,7 @@ jobs:
         run: |
           shellcheck scripts/configure.sh
           shellcheck scripts/mirror-images.sh
+          shellcheck scripts/get-rhoai-images.sh
 
   gitleaks:
     name: Secret Scan
