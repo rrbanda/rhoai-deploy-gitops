@@ -39,6 +39,7 @@ spec:
           jsonPointers:
             - /spec/startingCSV
             - /status
+            - /metadata/annotations
       syncPolicy:
         automated:
           selfHeal: true

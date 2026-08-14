@@ -33,6 +33,9 @@ spec:
           # EvalHub CRD not available in RHOAI 3.5 EA2
           - path: components/instances/evalhub
             exclude: true
+          # MaaS gateway requires external DNS delegation for TLS cert validation
+          - path: components/instances/maas-gateway
+            exclude: true
           # Optional: uncomment to exclude components not needed in your env
           # - path: components/instances/observability
           #   exclude: true
@@ -62,6 +65,11 @@ spec:
           kind: NodeFeatureDiscovery
           jsonPointers:
             - /status
+        - group: kueue.x-k8s.io
+          kind: ClusterQueue
+          jsonPointers:
+            - /spec/queueingStrategy
+            - /spec/fairSharing
         - group: ""
           kind: Secret
           jsonPointers:
