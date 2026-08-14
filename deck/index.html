@@ -188,7 +188,7 @@
   <section class="slide" data-slide="2" role="group" aria-label="The Challenge" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">THE LANDSCAPE</div>
-      <h2 class="display-lg anim-fade-up" style="--index:1">14 Operators, Precise Ordering, Zero Margin for Drift</h2>
+      <h2 class="display-lg anim-fade-up" style="--index:1">14 Operators, Dependency Chains, and Reconciliation Order</h2>
       <p class="lead anim-fade-up" style="--index:2">RHOAI is not a single operator &mdash; it&rsquo;s an <strong style="color:var(--rh-red);">ecosystem</strong> of 14 operators, dozens of CRDs, version-locked dependencies, and precise ordering requirements. Managing this at scale calls for automation.</p>
       <div class="card-grid cols-3 anim-fade-up" style="--index:3" data-stagger>
         <div class="card anim-fade-up" style="border-top:3px solid var(--rh-red); --index:0;">
@@ -218,7 +218,7 @@
   <section class="slide" data-slide="3" role="group" aria-label="The Answer" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">THE ANSWER</div>
-      <h2 class="display-lg anim-fade-up" style="--index:1">GitOps: Declare Once, Converge Forever</h2>
+      <h2 class="display-lg anim-fade-up" style="--index:1">ArgoCD Reconciliation Loop: Desired State vs. Live State</h2>
       <p class="lead anim-fade-up" style="--index:2">Instead of manually orchestrating 14 operators, we define the entire platform as code in a Git repository. ArgoCD watches Git, applies changes in the correct order, and self-heals any drift &mdash; continuously, automatically, forever.</p>
       <div class="two-col anim-fade-up" style="--index:3">
         <div>
@@ -251,7 +251,7 @@
   <section class="slide" data-slide="4" role="group" aria-label="Journey" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">THE JOURNEY</div>
-      <h2 class="display-lg anim-fade-up" style="--index:1">Six Phases to a Running AI Platform</h2>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Deployment Phases: OCP Readiness Through DSC Reconciliation</h2>
       <div class="anim-fade-up" style="--index:2; margin-top:2.5rem; display:flex; justify-content:center;">
         <svg viewBox="0 0 1020 200" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:1020px; display:block;">
           <defs><marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><path d="M0,0 L10,3.5 L0,7" fill="#8a8a8a"/></marker></defs>
@@ -312,7 +312,7 @@
   <section class="slide" data-slide="5" role="group" aria-label="Readiness" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">PHASE 1</div>
-      <h2 class="display-lg anim-fade-up" style="--index:1">Nine Checks Prove Your Cluster Is Ready</h2>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Pre-Flight Validation: OCP Version, Capacity, and CRD State</h2>
       <p class="lead anim-fade-up" style="--index:2">9-phase automated check before deploying RHOAI. The cluster must meet compute, storage, networking, and operator prerequisites.</p>
       <div class="two-col anim-fade-up" style="--index:3">
         <div>
@@ -428,7 +428,7 @@
   <section class="slide" data-slide="9" role="group" aria-label="Repo" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">REPO STRUCTURE</div>
-      <h2 class="display-lg anim-fade-up" style="--index:1">Three Directories + One ConfigMap = Full Control</h2>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Repo Layout: operators/, instances/, usecases/ + Kustomize Overlays</h2>
       <p class="lead anim-fade-up" style="--index:2">Three directories, one ConfigMap, everything is discoverable.</p>
       <div class="anim-fade-up" style="--index:3; margin-top:1rem;">
         <div class="diagram-box"><span class="hl-red">rhoai-deploy-gitops/</span>
@@ -466,7 +466,7 @@
   <section class="slide" data-slide="10" role="group" aria-label="App of Apps" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">PATTERN</div>
-      <h2 class="display-lg anim-fade-up" style="--index:1">Add a Directory, Push &mdash; ArgoCD Creates the App</h2>
+      <h2 class="display-lg anim-fade-up" style="--index:1">ApplicationSet Git Generator: Directory Discovery to Application CR</h2>
       <p class="lead anim-fade-up" style="--index:2">4 ApplicationSets auto-discover directories via Git generators. Add a dir, push, ArgoCD creates the Application.</p>
       <div class="anim-fade-up" style="--index:3; margin-top:1.5rem;">
         <svg viewBox="0 0 780 340" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:780px; display:block; margin:0 auto;">
@@ -558,7 +558,7 @@
   <section class="slide" data-slide="12" role="group" aria-label="Dependencies" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">DEEP DIVE</div>
-      <h2 class="display-lg anim-fade-up" style="--index:1">14 Operators Must Land in Order &mdash; or the DSC Never Reconciles</h2>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Operator Install Ordering: OLM Dependencies and DSC Preconditions</h2>
       <p class="lead anim-fade-up" style="--index:2">11 directly subscribed operators + 3 auto-installed by RHCL = 14 OLM CSVs total. Each has a role. Some depend on others.</p>
       <div class="anim-fade-up" style="--index:3; margin-top:1rem;">
         <svg viewBox="0 0 800 380" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:800px; display:block; margin:0 auto;">
@@ -712,7 +712,7 @@
   <section class="slide" data-slide="16" role="group" aria-label="Profiles" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">PROFILES</div>
-      <h2 class="display-lg anim-fade-up" style="--index:1">DSC Profiles &mdash; Choose Your Platform</h2>
+      <h2 class="display-lg anim-fade-up" style="--index:1">DSC managementState: Managed, Unmanaged, and Removed</h2>
       <p class="lead anim-fade-up" style="--index:2">6 overlay options. Switch with <code>configure.sh --dsc &lt;profile&gt;</code>, push, ArgoCD reconciles.</p>
       <div style="overflow-x:auto; --index:3;" class="anim-fade-up">
         <table class="data-table" style="font-size:0.72rem; min-width:700px;">
@@ -745,7 +745,7 @@
   <section class="slide" data-slide="17" role="group" aria-label="Issues" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">LESSONS LEARNED</div>
-      <h2 class="display-lg anim-fade-up" style="--index:1">What We Hit &amp; What You Won&rsquo;t</h2>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Failure Modes: SCC Constraints, CRD Races, and Operator Drift</h2>
       <p class="lead anim-fade-up" style="--index:2">9 issues discovered during the first deployment. <strong style="color:var(--rh-green);">7 are permanently fixed</strong> in the repo &mdash; you&rsquo;ll never see them. <strong style="color:var(--rh-orange);">2 are platform behaviors</strong> to be aware of.</p>
 
       <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--rh-green); text-transform:uppercase; letter-spacing:0.15em; margin-top:0.75rem; margin-bottom:0.4rem;" class="anim-fade-up" style="--index:3">&#10003; FIXED IN REPO &mdash; WON&rsquo;T RECUR</div>
@@ -809,7 +809,7 @@
   <section class="slide" data-slide="18" role="group" aria-label="Secrets" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">SECURITY</div>
-      <h2 class="display-lg anim-fade-up" style="--index:1">Credentials Never Touch Git &mdash; Three Layers Enforce It</h2>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Secret Management: ESO + Vault + ignoreDifferences</h2>
       <p class="lead anim-fade-up" style="--index:2">Never commit real credentials to Git. Three layers ensure secrets are safe and ArgoCD doesn't revert them.</p>
       <div class="anim-fade-up" style="--index:3; margin-top:1.5rem;">
         <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:700px; display:block; margin:0 auto;">
@@ -896,7 +896,7 @@
   <section class="slide" data-slide="20" role="group" aria-label="Day 2" aria-hidden="true">
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">OPERATIONS</div>
-      <h2 class="display-lg anim-fade-up" style="--index:1">After Bootstrap, Every Change Is a Git Push</h2>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Day-2 Operations: Adding Operators, Models, and Config Changes</h2>
       <p class="lead anim-fade-up" style="--index:2">After bootstrap, everything is a Git push. Here's how common operations work.</p>
       <div class="card-grid cols-2 anim-fade-up" style="--index:3" data-stagger>
         <div class="card anim-fade-up" style="border-top:3px solid var(--rh-red); --index:0;">
@@ -941,7 +941,7 @@
     <div class="slide-inner" style="display:flex; flex-direction:column; justify-content:flex-start; min-height:80vh;">
       <div style="position: absolute; top:-100px; left:-100px; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle, rgba(238,0,0,0.15) 0%, transparent 70%); pointer-events:none;"></div>
       <div class="slide-eyebrow anim-fade-up" style="--index:0">TAKEAWAYS</div>
-      <h2 class="display-lg anim-fade-up" style="--index:1">One Mental Model for RHOAI GitOps</h2>
+      <h2 class="display-lg anim-fade-up" style="--index:1">Architecture Summary: Bootstrap &rarr; Operators &rarr; DSC &rarr; Workloads</h2>
       <div class="anim-fade-up" style="--index:2; margin-top:1rem;">
         <div style="display:flex; flex-direction:column; gap:0.85rem; max-width:700px;">
           <div style="padding:0.75rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:4px solid var(--rh-red); border-radius:0 10px 10px 0;">
@@ -991,26 +991,26 @@
   <div class="deck-overview" hidden aria-label="Slide overview">
     <div class="overview-grid">
       <button class="overview-thumb" data-goto="1"><span class="num">01</span><span class="ttl">RHOAI 3.5 EA2 GitOps Deployment</span><span class="beat">TITLE</span></button>
-      <button class="overview-thumb" data-goto="2"><span class="num">02</span><span class="ttl">14 Operators, Zero Drift Margin</span><span class="beat">LANDSCAPE</span></button>
-      <button class="overview-thumb" data-goto="3"><span class="num">03</span><span class="ttl">Declare Once, Converge Forever</span><span class="beat">ANSWER</span></button>
-      <button class="overview-thumb" data-goto="4"><span class="num">04</span><span class="ttl">Six Phases to Running AI</span><span class="beat">JOURNEY</span></button>
-      <button class="overview-thumb" data-goto="5"><span class="num">05</span><span class="ttl">Nine Checks Prove Readiness</span><span class="beat">PHASE 1</span></button>
+      <button class="overview-thumb" data-goto="2"><span class="num">02</span><span class="ttl">14 Operators + Reconciliation</span><span class="beat">LANDSCAPE</span></button>
+      <button class="overview-thumb" data-goto="3"><span class="num">03</span><span class="ttl">ArgoCD Reconciliation Loop</span><span class="beat">ANSWER</span></button>
+      <button class="overview-thumb" data-goto="4"><span class="num">04</span><span class="ttl">Deployment Phases</span><span class="beat">JOURNEY</span></button>
+      <button class="overview-thumb" data-goto="5"><span class="num">05</span><span class="ttl">Pre-Flight Validation</span><span class="beat">PHASE 1</span></button>
       <button class="overview-thumb" data-goto="6"><span class="num">06</span><span class="ttl">OCP 4.19 Required</span><span class="beat">BLOCKER</span></button>
       <button class="overview-thumb" data-goto="7"><span class="num">07</span><span class="ttl">Two AdminAck Gates</span><span class="beat">IF NEEDED</span></button>
       <button class="overview-thumb" data-goto="8"><span class="num">08</span><span class="ttl">The GitOps Engine</span><span class="beat">SECTION</span></button>
-      <button class="overview-thumb" data-goto="9"><span class="num">09</span><span class="ttl">3 Dirs + 1 ConfigMap</span><span class="beat">STRUCTURE</span></button>
-      <button class="overview-thumb" data-goto="10"><span class="num">10</span><span class="ttl">Add Dir, Push, App Created</span><span class="beat">PATTERN</span></button>
+      <button class="overview-thumb" data-goto="9"><span class="num">09</span><span class="ttl">Repo Layout + Kustomize</span><span class="beat">STRUCTURE</span></button>
+      <button class="overview-thumb" data-goto="10"><span class="num">10</span><span class="ttl">ApplicationSet Git Generator</span><span class="beat">PATTERN</span></button>
       <button class="overview-thumb" data-goto="11"><span class="num">11</span><span class="ttl">Bootstrap 7 Layers</span><span class="beat">PHASE 4</span></button>
-      <button class="overview-thumb" data-goto="12"><span class="num">12</span><span class="ttl">14 Ops Must Land in Order</span><span class="beat">DEEP DIVE</span></button>
+      <button class="overview-thumb" data-goto="12"><span class="num">12</span><span class="ttl">OLM Install Ordering</span><span class="beat">DEEP DIVE</span></button>
       <button class="overview-thumb" data-goto="13"><span class="num">13</span><span class="ttl">1 CR &rarr; 26 Deployments</span><span class="beat">DEEP DIVE</span></button>
       <button class="overview-thumb" data-goto="14"><span class="num">14</span><span class="ttl">14 CSVs Pinned</span><span class="beat">OPERATORS</span></button>
       <button class="overview-thumb" data-goto="15"><span class="num">15</span><span class="ttl">8 Waves: CRDs Before CRs</span><span class="beat">ORDERING</span></button>
-      <button class="overview-thumb" data-goto="16"><span class="num">16</span><span class="ttl">DSC Profiles</span><span class="beat">PROFILES</span></button>
-      <button class="overview-thumb" data-goto="17"><span class="num">17</span><span class="ttl">What We Hit &amp; What You Won&rsquo;t</span><span class="beat">LESSONS</span></button>
-      <button class="overview-thumb" data-goto="18"><span class="num">18</span><span class="ttl">Creds Never Touch Git</span><span class="beat">SECURITY</span></button>
-      <button class="overview-thumb" data-goto="19"><span class="num">19</span><span class="ttl">26/30 Healthy, 4 by Design</span><span class="beat">RESULT</span></button>
-      <button class="overview-thumb" data-goto="20"><span class="num">20</span><span class="ttl">Every Change = Git Push</span><span class="beat">OPERATIONS</span></button>
-      <button class="overview-thumb" data-goto="21"><span class="num">21</span><span class="ttl">Key Takeaways</span><span class="beat">TAKEAWAYS</span></button>
+      <button class="overview-thumb" data-goto="16"><span class="num">16</span><span class="ttl">DSC managementState</span><span class="beat">PROFILES</span></button>
+      <button class="overview-thumb" data-goto="17"><span class="num">17</span><span class="ttl">Failure Modes</span><span class="beat">LESSONS</span></button>
+      <button class="overview-thumb" data-goto="18"><span class="num">18</span><span class="ttl">ESO + Vault + ignoreDiffs</span><span class="beat">SECURITY</span></button>
+      <button class="overview-thumb" data-goto="19"><span class="num">19</span><span class="ttl">33/33 Synced + Healthy</span><span class="beat">RESULT</span></button>
+      <button class="overview-thumb" data-goto="20"><span class="num">20</span><span class="ttl">Day-2 Operations</span><span class="beat">OPERATIONS</span></button>
+      <button class="overview-thumb" data-goto="21"><span class="num">21</span><span class="ttl">Architecture Summary</span><span class="beat">TAKEAWAYS</span></button>
     </div>
   </div>
 
