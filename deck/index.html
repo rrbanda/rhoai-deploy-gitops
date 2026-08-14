@@ -941,36 +941,36 @@
 
   <!-- ===== SLIDE 18: KEY TAKEAWAYS ===== -->
   <section class="slide" data-slide="21" role="group" aria-label="Takeaways" aria-hidden="true">
-    <div class="slide-inner" style="display:flex; flex-direction:column; justify-content:center; min-height:80vh;">
+    <div class="slide-inner" style="display:flex; flex-direction:column; justify-content:flex-start; min-height:80vh;">
       <div style="position: absolute; top:-100px; left:-100px; width:500px; height:500px; border-radius:50%; background:radial-gradient(circle, rgba(238,0,0,0.15) 0%, transparent 70%); pointer-events:none;"></div>
       <div class="slide-eyebrow anim-fade-up" style="--index:0">TAKEAWAYS</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">One Mental Model for RHOAI GitOps</h2>
-      <div class="anim-fade-up" style="--index:2; margin-top:1.5rem;">
-        <div style="display:flex; flex-direction:column; gap:1.25rem; max-width:700px;">
-          <div style="padding:1rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:4px solid var(--rh-red); border-radius:0 10px 10px 0;">
+      <div class="anim-fade-up" style="--index:2; margin-top:1rem;">
+        <div style="display:flex; flex-direction:column; gap:0.85rem; max-width:700px;">
+          <div style="padding:0.75rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:4px solid var(--rh-red); border-radius:0 10px 10px 0;">
             <div style="font-size:1rem; color:var(--text-primary); font-weight:600;">One ConfigMap + one <code>oc apply</code> = entire AI platform</div>
-            <div style="font-size:0.82rem; color:var(--text-muted); font-family:var(--font-text); margin-top:0.25rem;">14 operators, 26 deployments, 30 ArgoCD apps, 50+ CRDs</div>
+            <div style="font-size:0.78rem; color:var(--text-muted); font-family:var(--font-text); margin-top:0.15rem;">14 operators, 26 deployments, 30 ArgoCD apps, 50+ CRDs</div>
           </div>
-          <div style="padding:1rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:4px solid var(--rh-teal); border-radius:0 10px 10px 0;">
+          <div style="padding:0.75rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:4px solid var(--rh-teal); border-radius:0 10px 10px 0;">
             <div style="font-size:1rem; color:var(--text-primary); font-weight:600;">Git is the source of truth</div>
-            <div style="font-size:0.82rem; color:var(--text-muted); font-family:var(--font-text); margin-top:0.25rem;">No manual <code>oc</code> commands after bootstrap. Auto-discovery via ApplicationSets.</div>
+            <div style="font-size:0.78rem; color:var(--text-muted); font-family:var(--font-text); margin-top:0.15rem;">No manual <code>oc</code> commands after bootstrap. Auto-discovery via ApplicationSets.</div>
           </div>
-          <div style="padding:1rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:4px solid var(--rh-purple); border-radius:0 10px 10px 0;">
+          <div style="padding:0.75rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:4px solid var(--rh-purple); border-radius:0 10px 10px 0;">
             <div style="font-size:1rem; color:var(--text-primary); font-weight:600;">RHOAI is a meta-operator</div>
-            <div style="font-size:0.82rem; color:var(--text-muted); font-family:var(--font-text); margin-top:0.25rem;">26 sub-operator deployments from a single DataScienceCluster CR. 6 profiles for different workloads.</div>
+            <div style="font-size:0.78rem; color:var(--text-muted); font-family:var(--font-text); margin-top:0.15rem;">26 sub-operator deployments from a single DataScienceCluster CR. 6 profiles for different workloads.</div>
           </div>
-          <div style="padding:1rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:4px solid var(--rh-orange); border-radius:0 10px 10px 0;">
+          <div style="padding:0.75rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:4px solid var(--rh-orange); border-radius:0 10px 10px 0;">
             <div style="font-size:1rem; color:var(--text-primary); font-weight:600;">Know the failure modes</div>
-            <div style="font-size:0.82rem; color:var(--text-muted); font-family:var(--font-text); margin-top:0.25rem;">CRD timing, retry exhaustion, hard refresh. 9 issues fixed, 4 commits &mdash; now reusable.</div>
+            <div style="font-size:0.78rem; color:var(--text-muted); font-family:var(--font-text); margin-top:0.15rem;">CRD timing, retry exhaustion, hard refresh. 9 issues fixed, 4 commits &mdash; now reusable.</div>
           </div>
-          <div style="padding:1rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:4px solid var(--rh-green); border-radius:0 10px 10px 0;">
+          <div style="padding:0.75rem 1.25rem; background:var(--bg-elevated); border:1px solid var(--border-subtle); border-left:4px solid var(--rh-green); border-radius:0 10px 10px 0;">
             <div style="font-size:1rem; color:var(--text-primary); font-weight:600;">~30 minutes from bootstrap to fully operational</div>
-            <div style="font-size:0.82rem; color:var(--text-muted); font-family:var(--font-text); margin-top:0.25rem;">Secrets never in Git. Sync waves enforce ordering. Self-healing via ArgoCD.</div>
+            <div style="font-size:0.78rem; color:var(--text-muted); font-family:var(--font-text); margin-top:0.15rem;">Secrets never in Git. Sync waves enforce ordering. Self-healing via ArgoCD.</div>
           </div>
         </div>
       </div>
-      <div class="anim-fade-up" style="--index:3; margin-top:2rem;">
-        <div style="font-family:var(--font-mono); font-size:0.7rem; color:var(--rh-teal); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:0.75rem;">Your Next Steps</div>
+      <div class="anim-fade-up" style="--index:3; margin-top:1.25rem;">
+        <div style="font-family:var(--font-mono); font-size:0.7rem; color:var(--rh-teal); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:0.5rem;">Your Next Steps</div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; max-width:700px;">
           <div style="padding:0.75rem 1rem; background:rgba(0,149,150,0.06); border:1px solid rgba(0,149,150,0.2); border-radius:8px; font-size:0.82rem;">
             <strong style="color:var(--rh-teal);">1.</strong> Fork the repo &rarr; run <code>configure.sh</code> &rarr; deploy to a sandbox cluster <strong>this week</strong>
