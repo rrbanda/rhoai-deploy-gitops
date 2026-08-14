@@ -149,6 +149,25 @@
     .step-list { list-style: none; counter-reset: step; }
     .step-list li { counter-increment: step; padding: 0.5rem 1rem; background: var(--bg-elevated); border: 1px solid var(--border-subtle); border-left: 3px solid var(--rh-red); border-radius: 0 6px 6px 0; margin-bottom: 0.4rem; font-size: 0.95rem; color: var(--text-secondary); font-family: var(--font-text); display: flex; gap: 0.75rem; align-items: baseline; }
     .step-list li::before { content: counter(step); font-family: var(--font-mono); font-weight: 700; color: var(--rh-red); font-size: 1rem; min-width: 1.2em; }
+    /* Dependency graph animations */
+    @keyframes draw-line { from { stroke-dashoffset: 200; } to { stroke-dashoffset: 0; } }
+    @keyframes node-pop { from { opacity:0; transform: scale(0.7); } to { opacity:1; transform: scale(1); } }
+    @keyframes pulse-glow { 0%,100% { filter: drop-shadow(0 0 4px rgba(62,134,53,0.3)); } 50% { filter: drop-shadow(0 0 12px rgba(62,134,53,0.7)); } }
+    .dep-graph .edge { stroke-dasharray: 200; stroke-dashoffset: 200; }
+    .slide.current .dep-graph .edge { animation: draw-line 0.8s ease-out forwards; }
+    .dep-graph .node { opacity: 0; transform-origin: center; transform-box: fill-box; }
+    .slide.current .dep-graph .node { animation: node-pop 0.4s var(--ease-out-pop) forwards; }
+    .slide.current .dep-graph .grp-platform .node { animation-delay: 0.2s; }
+    .slide.current .dep-graph .grp-workload .node { animation-delay: 0.5s; }
+    .slide.current .dep-graph .grp-gateway .node { animation-delay: 0.8s; }
+    .slide.current .dep-graph .grp-addon .node { animation-delay: 1.0s; }
+    .slide.current .dep-graph .grp-core .node { animation-delay: 1.3s; }
+    .slide.current .dep-graph .grp-platform .edge { animation-delay: 1.5s; }
+    .slide.current .dep-graph .grp-workload .edge { animation-delay: 1.7s; }
+    .slide.current .dep-graph .grp-gateway .edge { animation-delay: 1.9s; }
+    .slide.current .dep-graph .grp-addon .edge { animation-delay: 2.0s; }
+    .slide.current .dep-graph .grp-core .edge { animation-delay: 2.2s; }
+    .slide.current .dep-graph .dsc-pulse { animation: pulse-glow 2s ease-in-out infinite; animation-delay: 2.6s; }
     @media (prefers-reduced-motion: reduce) {
       * { animation-duration: 0.01ms !important; transition-duration: 180ms !important; }
     }
@@ -223,28 +242,153 @@
     <div class="slide-inner">
       <div class="slide-eyebrow anim-fade-up" style="--index:0">THE LANDSCAPE</div>
       <h2 class="display-lg anim-fade-up" style="--index:1">14 Operators, Dependency Chains, and Reconciliation Order</h2>
-      <p class="lead anim-fade-up" style="--index:2">RHOAI is not a single operator &mdash; it&rsquo;s an <strong style="color:var(--rh-red);">ecosystem</strong> of 14 operators, dozens of CRDs, version-locked dependencies, and precise ordering requirements. Managing this at scale calls for automation.</p>
-      <div class="card-grid cols-3 anim-fade-up" style="--index:3" data-stagger>
-        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-red); --index:0;">
-          <span class="card-tag" style="background:rgba(238,0,0,0.12); color:var(--rh-red);">Complexity</span>
-          <div class="card-title">14 Operators, 50+ CRDs</div>
-          <div class="card-body">RHOAI depends on cert-manager, ServiceMesh, Kuadrant, Kueue, NFD, and more. Each has its own namespace, subscription channel, and version constraints. Miss one and the DSC never reconciles.</div>
-        </div>
-        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-orange); --index:1;">
-          <span class="card-tag" style="background:rgba(244,180,0,0.12); color:var(--rh-orange);">Ordering</span>
-          <div class="card-title">CRDs Before CRs</div>
-          <div class="card-body">Custom Resources need their CRDs to exist first. With 14 operators installing CRDs at different speeds, ordering matters. Automation ensures CRDs land before CRs.</div>
-        </div>
-        <div class="card anim-fade-up" style="border-top:3px solid var(--rh-purple); --index:2;">
-          <span class="card-tag" style="background:rgba(103,83,172,0.12); color:var(--rh-purple);">Drift</span>
-          <div class="card-title">Configuration Drift</div>
-          <div class="card-body">Namespaces change, secrets get overwritten, operators drift to newer channels. Continuous reconciliation detects and corrects drift automatically.</div>
-        </div>
+      <div class="anim-fade-up" style="--index:2; margin-top:1rem;">
+        <svg class="dep-graph" viewBox="0 0 960 480" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:960px; display:block; margin:0 auto;">
+          <defs>
+            <marker id="arrow-red" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#EE0000"/></marker>
+            <marker id="arrow-purple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#6753AC"/></marker>
+            <marker id="arrow-teal" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#009596"/></marker>
+            <marker id="arrow-grey" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#8a8a8a"/></marker>
+            <marker id="arrow-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#3E8635"/></marker>
+          </defs>
+
+          <!-- Group labels -->
+          <text x="120" y="20" fill="#EE0000" font-family="Red Hat Mono,monospace" font-size="9" letter-spacing="0.15em" text-anchor="middle">PLATFORM PREREQUISITES</text>
+          <text x="480" y="20" fill="#6753AC" font-family="Red Hat Mono,monospace" font-size="9" letter-spacing="0.15em" text-anchor="middle">DISTRIBUTED WORKLOAD</text>
+          <text x="830" y="20" fill="#009596" font-family="Red Hat Mono,monospace" font-size="9" letter-spacing="0.15em" text-anchor="middle">GATEWAY &amp; AUTH</text>
+
+          <!-- Platform Prerequisites (RED) -->
+          <g class="grp-platform">
+            <g class="node">
+              <rect x="20" y="32" width="145" height="58" rx="8" fill="rgba(238,0,0,0.08)" stroke="#EE0000" stroke-width="1.5"/>
+              <text x="92" y="52" fill="#EE0000" font-family="Red Hat Display,sans-serif" font-size="11" font-weight="700" text-anchor="middle">cert-manager</text>
+              <text x="92" y="66" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">stable-v1</text>
+              <text x="92" y="80" fill="#555" font-family="Red Hat Mono,monospace" font-size="7" text-anchor="middle">Certificate, Issuer</text>
+            </g>
+            <g class="node">
+              <rect x="175" y="32" width="145" height="58" rx="8" fill="rgba(238,0,0,0.08)" stroke="#EE0000" stroke-width="1.5"/>
+              <text x="247" y="52" fill="#EE0000" font-family="Red Hat Display,sans-serif" font-size="11" font-weight="700" text-anchor="middle">ServiceMesh 3</text>
+              <text x="247" y="66" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">stable</text>
+              <text x="247" y="80" fill="#555" font-family="Red Hat Mono,monospace" font-size="7" text-anchor="middle">Gateway, HTTPRoute</text>
+            </g>
+            <g class="node">
+              <rect x="330" y="32" width="110" height="58" rx="8" fill="rgba(238,0,0,0.08)" stroke="#EE0000" stroke-width="1.5"/>
+              <text x="385" y="52" fill="#EE0000" font-family="Red Hat Display,sans-serif" font-size="11" font-weight="700" text-anchor="middle">NFD</text>
+              <text x="385" y="66" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">stable</text>
+              <text x="385" y="80" fill="#555" font-family="Red Hat Mono,monospace" font-size="7" text-anchor="middle">NodeFeatureDiscovery</text>
+            </g>
+            <line class="edge" x1="92" y1="90" x2="430" y2="340" stroke="#EE0000" stroke-width="1" marker-end="url(#arrow-red)"/>
+            <line class="edge" x1="247" y1="90" x2="460" y2="340" stroke="#EE0000" stroke-width="1" marker-end="url(#arrow-red)"/>
+            <line class="edge" x1="385" y1="90" x2="480" y2="340" stroke="#EE0000" stroke-width="1" marker-end="url(#arrow-red)"/>
+          </g>
+
+          <!-- Distributed Workload (PURPLE) -->
+          <g class="grp-workload">
+            <g class="node">
+              <rect x="450" y="32" width="105" height="58" rx="8" fill="rgba(103,83,172,0.08)" stroke="#6753AC" stroke-width="1.5"/>
+              <text x="502" y="52" fill="#6753AC" font-family="Red Hat Display,sans-serif" font-size="11" font-weight="700" text-anchor="middle">Kueue</text>
+              <text x="502" y="66" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">stable-v1.4</text>
+              <text x="502" y="80" fill="#555" font-family="Red Hat Mono,monospace" font-size="7" text-anchor="middle">ClusterQueue</text>
+            </g>
+            <g class="node">
+              <rect x="565" y="32" width="100" height="58" rx="8" fill="rgba(103,83,172,0.08)" stroke="#6753AC" stroke-width="1.5"/>
+              <text x="615" y="52" fill="#6753AC" font-family="Red Hat Display,sans-serif" font-size="11" font-weight="700" text-anchor="middle">JobSet</text>
+              <text x="615" y="66" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">stable-v1.0</text>
+              <text x="615" y="80" fill="#555" font-family="Red Hat Mono,monospace" font-size="7" text-anchor="middle">JobSet CRD</text>
+            </g>
+            <g class="node">
+              <rect x="450" y="105" width="100" height="50" rx="8" fill="rgba(103,83,172,0.08)" stroke="#6753AC" stroke-width="1.5"/>
+              <text x="500" y="125" fill="#6753AC" font-family="Red Hat Display,sans-serif" font-size="11" font-weight="700" text-anchor="middle">LWS</text>
+              <text x="500" y="139" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">stable-v1.0</text>
+              </g>
+            <g class="node">
+              <rect x="560" y="105" width="110" height="50" rx="8" fill="rgba(103,83,172,0.08)" stroke="#6753AC" stroke-width="1.5"/>
+              <text x="615" y="125" fill="#6753AC" font-family="Red Hat Display,sans-serif" font-size="11" font-weight="700" text-anchor="middle">CMA/KEDA</text>
+              <text x="615" y="139" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">stable</text>
+            </g>
+            <line class="edge" x1="502" y1="90" x2="500" y2="340" stroke="#6753AC" stroke-width="1" marker-end="url(#arrow-purple)"/>
+            <line class="edge" x1="615" y1="90" x2="520" y2="340" stroke="#6753AC" stroke-width="1" marker-end="url(#arrow-purple)"/>
+            <line class="edge" x1="500" y1="155" x2="500" y2="340" stroke="#6753AC" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#arrow-purple)"/>
+            <line class="edge" x1="615" y1="155" x2="530" y2="340" stroke="#6753AC" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#arrow-purple)"/>
+          </g>
+
+          <!-- Gateway & Auth (TEAL) -->
+          <g class="grp-gateway">
+            <g class="node">
+              <rect x="760" y="32" width="140" height="58" rx="8" fill="rgba(0,149,150,0.08)" stroke="#009596" stroke-width="1.5"/>
+              <text x="830" y="52" fill="#009596" font-family="Red Hat Display,sans-serif" font-size="11" font-weight="700" text-anchor="middle">RHCL / Kuadrant</text>
+              <text x="830" y="66" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">stable</text>
+              <text x="830" y="80" fill="#555" font-family="Red Hat Mono,monospace" font-size="7" text-anchor="middle">Gateway, AuthPolicy</text>
+            </g>
+            <!-- Auto-installed sub-operators -->
+            <g class="node">
+              <rect x="710" y="115" width="80" height="40" rx="6" fill="rgba(0,149,150,0.05)" stroke="#009596" stroke-width="0.8" stroke-dasharray="4,2"/>
+              <text x="750" y="139" fill="#009596" font-family="Red Hat Text,sans-serif" font-size="9" text-anchor="middle">Authorino</text>
+            </g>
+            <g class="node">
+              <rect x="800" y="115" width="60" height="40" rx="6" fill="rgba(0,149,150,0.05)" stroke="#009596" stroke-width="0.8" stroke-dasharray="4,2"/>
+              <text x="830" y="139" fill="#009596" font-family="Red Hat Text,sans-serif" font-size="9" text-anchor="middle">DNS</text>
+            </g>
+            <g class="node">
+              <rect x="870" y="115" width="80" height="40" rx="6" fill="rgba(0,149,150,0.05)" stroke="#009596" stroke-width="0.8" stroke-dasharray="4,2"/>
+              <text x="910" y="139" fill="#009596" font-family="Red Hat Text,sans-serif" font-size="9" text-anchor="middle">Limitador</text>
+            </g>
+            <text x="830" y="170" fill="#009596" font-family="Red Hat Mono,monospace" font-size="7" text-anchor="middle" font-style="italic">auto-installed by OLM</text>
+            <!-- Dashed lines from RHCL to sub-operators -->
+            <line class="edge" x1="810" y1="90" x2="750" y2="115" stroke="#009596" stroke-width="0.8" stroke-dasharray="4,3"/>
+            <line class="edge" x1="830" y1="90" x2="830" y2="115" stroke="#009596" stroke-width="0.8" stroke-dasharray="4,3"/>
+            <line class="edge" x1="850" y1="90" x2="910" y2="115" stroke="#009596" stroke-width="0.8" stroke-dasharray="4,3"/>
+            <!-- Lines to RHOAI -->
+            <line class="edge" x1="830" y1="90" x2="550" y2="340" stroke="#009596" stroke-width="1" marker-end="url(#arrow-teal)"/>
+          </g>
+
+          <!-- Add-ons (GREY) -->
+          <g class="grp-addon">
+            <text x="100" y="135" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="9" letter-spacing="0.12em" text-anchor="middle">ADD-ONS</text>
+            <g class="node">
+              <rect x="20" y="145" width="115" height="50" rx="8" fill="rgba(138,138,138,0.06)" stroke="#555" stroke-width="1"/>
+              <text x="77" y="165" fill="#d2d2d2" font-family="Red Hat Display,sans-serif" font-size="10" font-weight="600" text-anchor="middle">RHDH</text>
+              <text x="77" y="179" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">fast</text>
+            </g>
+            <g class="node">
+              <rect x="145" y="145" width="145" height="50" rx="8" fill="rgba(138,138,138,0.06)" stroke="#555" stroke-width="1"/>
+              <text x="217" y="165" fill="#d2d2d2" font-family="Red Hat Display,sans-serif" font-size="10" font-weight="600" text-anchor="middle">External Secrets</text>
+              <text x="217" y="179" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">stable-v1</text>
+            </g>
+            <line class="edge" x1="77" y1="195" x2="430" y2="340" stroke="#8a8a8a" stroke-width="0.8" stroke-dasharray="5,3" marker-end="url(#arrow-grey)"/>
+            <line class="edge" x1="217" y1="195" x2="450" y2="340" stroke="#8a8a8a" stroke-width="0.8" stroke-dasharray="5,3" marker-end="url(#arrow-grey)"/>
+          </g>
+
+          <!-- RHOAI Core (GREEN) -->
+          <g class="grp-core">
+            <g class="node">
+              <rect x="370" y="330" width="220" height="55" rx="10" fill="rgba(238,0,0,0.12)" stroke="#EE0000" stroke-width="2"/>
+              <text x="480" y="353" fill="#EE0000" font-family="Red Hat Display,sans-serif" font-size="14" font-weight="800" text-anchor="middle">rhods-operator</text>
+              <text x="480" y="371" fill="#d2d2d2" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">3.5.0-ea.2 (beta channel)</text>
+            </g>
+            <line class="edge" x1="480" y1="385" x2="480" y2="408" stroke="#3E8635" stroke-width="2" marker-end="url(#arrow-green)"/>
+            <g class="node dsc-pulse">
+              <rect x="370" y="410" width="220" height="45" rx="8" fill="rgba(62,134,53,0.1)" stroke="#3E8635" stroke-width="2"/>
+              <text x="480" y="432" fill="#3E8635" font-family="Red Hat Display,sans-serif" font-size="13" font-weight="700" text-anchor="middle">DataScienceCluster</text>
+              <text x="480" y="447" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8" text-anchor="middle">26 deployments &bull; 4 domains</text>
+            </g>
+          </g>
+
+          <!-- Statistics bar -->
+          <text x="480" y="475" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="10" text-anchor="middle" letter-spacing="0.08em">14 operators &nbsp;&bull;&nbsp; 50+ CRDs &nbsp;&bull;&nbsp; 8 sync waves &nbsp;&bull;&nbsp; 33 ArgoCD apps &nbsp;&bull;&nbsp; 26 deployments</text>
+
+          <!-- Legend -->
+          <line x1="700" y1="220" x2="740" y2="220" stroke="#EE0000" stroke-width="1.5"/>
+          <text x="748" y="224" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8">hard dependency</text>
+          <line x1="700" y1="238" x2="740" y2="238" stroke="#009596" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="748" y="242" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8">OLM auto-install</text>
+          <rect x="700" y="250" width="12" height="12" rx="3" fill="rgba(238,0,0,0.08)" stroke="#EE0000" stroke-width="1"/>
+          <text x="720" y="260" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8">subscribed operator</text>
+          <rect x="700" y="268" width="12" height="12" rx="3" fill="rgba(0,149,150,0.05)" stroke="#009596" stroke-width="0.8" stroke-dasharray="3,2"/>
+          <text x="720" y="278" fill="#8a8a8a" font-family="Red Hat Mono,monospace" font-size="8">dependency-resolved</text>
+        </svg>
       </div>
-      <div class="callout anim-fade-up" style="--index:4; border-left-color:var(--rh-orange);">
-        <p><strong>The question:</strong> How do you deploy 14 interdependent operators &mdash; reliably, repeatedly, across every cluster &mdash; without manual intervention or tribal knowledge?</p>
-      </div>
-      <div class="slide-notes">"Let me give you a sense of the landscape. RHOAI isn't like most operators you install on OpenShift. It's a meta-operator — an ecosystem of 14 operators that work together to deliver a complete AI platform." --- pause --- "Three things make it unique. First, the sheer number of dependencies — cert-manager, ServiceMesh, Kuadrant, Kueue, NFD, and more. Each has its own namespace, channel, and version constraints." "Second, ordering. CRDs have to exist before you can create Custom Resources. With 14 operators registering CRDs at different speeds, getting the sequence right is critical." "Third, configuration drift. In any complex platform, things change over time — someone modifies a secret, an operator upgrades, a namespace gets altered. You need a system that continuously watches for these changes and brings everything back to the declared state." --- pause --- "So the question is: how do you deploy 14 interdependent operators — reliably, repeatedly, across every cluster — without manual intervention or tribal knowledge? That's the problem we solved. Let me show you how."</div>
+      <div class="slide-notes">"Look at this graph. Every box is an operator that needs its own OLM Subscription, its own namespace, its own CRD set. Every line is a hard dependency — meaning if the upstream operator isn't Succeeded, the downstream one either fails to install or fails to reconcile." --- pause --- "Let me walk you through the layers. At the top in red — the three platform prerequisites. cert-manager provides TLS certificates for every webhook in the system. ServiceMesh 3 provides Gateway API CRDs that KServe uses for model routing. NFD does node feature detection — and even if you don't have GPUs, the RHOAI operator checks for that CRD at startup." --- pause --- "Purple group — the distributed workload stack. Kueue handles GPU quota scheduling. JobSet enables multi-pod training jobs. LeaderWorkerSet is new in 3.5 for distributed inference. CMA/KEDA handles autoscaling based on Prometheus metrics. These four are what make Ray-based distributed training actually work." --- pause --- "Over on the right in teal — the gateway and auth stack. Here's something that surprises people: you create ONE subscription for RHCL, and OLM automatically resolves and installs three additional operators — Authorino for auth tokens, DNS for external records, and Limitador for rate limiting. Those dashed boxes? You never create subscriptions for them. OLM does it because the RHCL CSV declares them as dependencies." --- pause --- "The grey add-ons — RHDH for the developer portal, External Secrets for Vault integration. Optional but part of our production config." --- pause --- "And everything flows down to that red box — rhods-operator. It sits there waiting. Running, yes, but doing nothing useful until every single one of those upstream operators reaches CSV Succeeded. Only then does it read your DataScienceCluster CR and start deploying the 26 workloads into redhat-ods-applications. That green box at the bottom with the pulse? That's the end state — a fully reconciled DSC." --- pause --- "Now here's the kicker — if you try to deploy all of this with manual oc apply commands, you're playing a timing game. cert-manager takes 60 seconds. ServiceMesh takes 90. Kueue takes 45. They all register CRDs at different speeds. You'd need a script that polls, waits, retries, handles race conditions... or you use sync waves, which is exactly what we did. Let me show you the solution."</div>
     </div>
   </section>
 
