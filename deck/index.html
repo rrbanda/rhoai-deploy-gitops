@@ -100,7 +100,7 @@
     .deck-notes[hidden] { display: none; }
     .notes-label { color: var(--rh-red); font-size: var(--fs-label); letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; margin: 0 0 0.3rem; }
     .notes-body { color: var(--text-secondary); font-size: 0.9rem; margin: 0; font-family: var(--font-text); }
-    .card-grid { display: grid; gap: 1rem; margin-top: 1.5rem; }
+    .card-grid { display: grid; gap: 0.75rem; margin-top: 1rem; }
     .card-grid.cols-2 { grid-template-columns: repeat(2,1fr); }
     .card-grid.cols-3 { grid-template-columns: repeat(3,1fr); }
     .card-grid.cols-4 { grid-template-columns: repeat(4,1fr); }
@@ -110,8 +110,8 @@
     }
     .card:hover { border-color: var(--rh-red); transform: translateY(-2px); }
     .card .card-tag { font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; padding: 0.2rem 0.6rem; border-radius: 3px; display: inline-block; margin-bottom: 0.5rem; }
-    .card .card-title { font-family: var(--font-sans); font-weight: 600; font-size: 1.05rem; color: var(--text-primary); margin-bottom: 0.35rem; }
-    .card .card-body { font-family: var(--font-text); font-size: 0.95rem; color: var(--text-secondary); line-height: 1.5; }
+    .card .card-title { font-family: var(--font-sans); font-weight: 600; font-size: 0.95rem; color: var(--text-primary); margin-bottom: 0.25rem; }
+    .card .card-body { font-family: var(--font-text); font-size: 0.88rem; color: var(--text-secondary); line-height: 1.45; }
     .card .card-body strong { color: var(--text-primary); }
     .data-table { width: 100%; border-collapse: collapse; margin-top: 1rem; font-family: var(--font-text); font-size: 0.95rem; }
     .data-table th { text-align: left; padding: 0.6rem 0.8rem; font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--rh-red); border-bottom: 2px solid var(--rh-red); font-weight: 700; }
@@ -751,7 +751,7 @@
       <h2 class="display-lg anim-fade-up" style="--index:1">What We Hit &amp; What You Won&rsquo;t</h2>
       <p class="lead anim-fade-up" style="--index:2">9 issues discovered during the first deployment. <strong style="color:var(--rh-green);">7 are permanently fixed</strong> in the repo &mdash; you&rsquo;ll never see them. <strong style="color:var(--rh-orange);">2 are platform behaviors</strong> to be aware of.</p>
 
-      <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--rh-green); text-transform:uppercase; letter-spacing:0.15em; margin-top:1rem; margin-bottom:0.5rem;" class="anim-fade-up" style="--index:3">&#10003; FIXED IN REPO &mdash; WON&rsquo;T RECUR</div>
+      <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--rh-green); text-transform:uppercase; letter-spacing:0.15em; margin-top:0.75rem; margin-bottom:0.4rem;" class="anim-fade-up" style="--index:3">&#10003; FIXED IN REPO &mdash; WON&rsquo;T RECUR</div>
       <div class="card-grid cols-4 anim-fade-up" style="--index:3; font-size:0.78rem;" data-stagger>
         <div class="card anim-fade-up" style="border-top:3px solid var(--rh-green); --index:0;">
           <span class="card-tag" style="background:rgba(62,134,53,0.12); color:var(--rh-green);">ArgoCD</span>
@@ -790,7 +790,7 @@
         </div>
       </div>
 
-      <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--rh-orange); text-transform:uppercase; letter-spacing:0.15em; margin-top:1.25rem; margin-bottom:0.5rem;" class="anim-fade-up" style="--index:4">&#9888; PLATFORM BEHAVIORS &mdash; BE AWARE</div>
+      <div style="font-family:var(--font-mono); font-size:0.65rem; color:var(--rh-orange); text-transform:uppercase; letter-spacing:0.15em; margin-top:0.75rem; margin-bottom:0.4rem;" class="anim-fade-up" style="--index:4">&#9888; PLATFORM BEHAVIORS &mdash; BE AWARE</div>
       <div class="card-grid cols-2 anim-fade-up" style="--index:4; font-size:0.78rem;" data-stagger>
         <div class="card anim-fade-up" style="border-top:3px solid var(--rh-orange); --index:0;">
           <span class="card-tag" style="background:rgba(244,180,0,0.12); color:var(--rh-orange);">Every Deploy</span>
@@ -804,9 +804,6 @@
         </div>
       </div>
 
-      <div class="callout anim-fade-up" style="--index:5">
-        <p><strong>4 commits hardened the repo:</strong> <code>7b07bee</code>, <code>0d39ebc</code>, <code>2337349</code>, <code>d9f21aa</code>. Anyone deploying from this repo today gets a clean run &mdash; only the 2 platform behaviors above require attention.</p>
-      </div>
       <div class="slide-notes">"This is the transparency slide. We hit 9 issues during the first deployment. But here's the key message: 7 of them are permanently fixed in the Git repo. If you deploy from this repo today, you will never see them." --- pause --- "The green cards are the fixed issues. Things like preserveResourcesOnDeletion not being in the ArgoCD CRD schema — we removed it. ExternalSecretsConfig deploying before its CRD existed — we added a sync wave. NFD operator-instance misalignment — we fixed the exclusion. Backstage schema incompatibilities, missing EA2 CRDs, dependency on excluded namespaces — all resolved in 4 commits." --- pause --- "The orange cards are platform behaviors. These happen on every deployment, and they're by design. First, the MaaS database secret. The repo provides a placeholder with REPLACE_ME — ArgoCD creates the Secret object, then you patch the real connection URL on-cluster. Secrets never go in Git, so this manual step is intentional." "Second, the AppSet discovery delay. After bootstrap, you'll see zero child apps for about 60 seconds while the ArgoCD repo-server initializes. Don't panic. It auto-populates." --- pause --- "The bottom line: 4 commits hardened this repo. A clean deployment today only requires awareness of those 2 platform behaviors. Let me show you the secret management pattern in detail."</div>
     </div>
   </section>
