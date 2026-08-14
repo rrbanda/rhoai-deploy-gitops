@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: vault
+  namespace: vault
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+  labels:
+    app: vault
+spec:
+  serviceName: vault
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vault
+  template:
+    metadata:
+      labels:
+        app: vault
+    spec:
+      serviceAccountName: vault
+      terminationGracePeriodSeconds: 10
+      containers:
+        - name: vault
+          image: docker.io/hashicorp/vault:1.17
+          command:
+            - vault
+            - server
+            - -config=/vault/config/vault.hcl
+          ports:
+            - containerPort: 8200
+              name: http
+            - containerPort: 8201
+              name: cluster
+          env:
+            - name: VAULT_ADDR
+              value: "http://127.0.0.1:8200"
+            - name: VAULT_API_ADDR
+              value: "http://vault.vault.svc:8200"
+            - name: SKIP_SETCAP
+              value: "1"
+            - name: HOME
+              value: "/tmp"
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - |
+                    sleep 3
+                    if [ -f /vault/unseal/unseal-key ]; then
+                      UNSEAL_KEY=$(cat /vault/unseal/unseal-key)
+                      vault operator unseal "$UNSEAL_KEY" > /dev/null 2>&1 || true
+                    fi
+          volumeMounts:
+            - name: vault-data
+              mountPath: /vault/data
+            - name: vault-config
+              mountPath: /vault/config
+            - name: vault-unseal
+              mountPath: /vault/unseal
+              readOnly: true
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  vault status -format=json 2>/dev/null | grep -q '"sealed": false' || exit 1
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /v1/sys/health?standbyok=true&sealedcode=200&uninitcode=200
+              port: 8200
+            initialDelaySeconds: 10
+            periodSeconds: 30
+      volumes:
+        - name: vault-config
+          configMap:
+            name: vault-config
+        - name: vault-unseal
+          secret:
+            secretName: vault-unseal-key
+            optional: true
+  volumeClaimTemplates:
+    - metadata:
+        name: vault-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

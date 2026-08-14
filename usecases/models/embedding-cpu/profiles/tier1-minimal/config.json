@@ -1,0 +1,9 @@
+{
+  "enabled": "true",
+  "name": "embedding-cpu",
+  "category": "models",
+  "path": "usecases/models/embedding-cpu/profiles/tier1-minimal",
+  "namespace": "models-embedding",
+  "description": "all-MiniLM-L6-v2 — CPU-only text embedding model via TEI",
+  "gpu_required": "none (CPU-only, ~512MB RAM)"
+}

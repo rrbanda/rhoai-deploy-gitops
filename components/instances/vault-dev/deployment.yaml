@@ -32,16 +32,16 @@ spec:
             - containerPort: 8200
           env:
             - name: VAULT_DEV_ROOT_TOKEN_ID
-              value: "CHANGE_ME"
+              valueFrom:
+                secretKeyRef:
+                  name: vault-dev-token
+                  key: token
             - name: VAULT_ADDR
               value: "http://0.0.0.0:8200"
             - name: SKIP_SETCAP
               value: "1"
             - name: HOME
               value: "/tmp"
-          securityContext:
-            capabilities:
-              add: ["IPC_LOCK"]
           readinessProbe:
             httpGet:
               path: /v1/sys/health

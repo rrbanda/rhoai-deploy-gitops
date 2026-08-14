@@ -27,11 +27,8 @@ spec:
           # remove or comment out this exclude rule.
           - path: components/instances/oidc-integration
             exclude: true
-          # vault-dev is for development only — excluded by default
+          # vault-dev is for development only — excluded in favor of vault-server
           - path: components/instances/vault-dev
-            exclude: true
-          # external-secrets-config depends on vault-dev — excluded when vault-dev is excluded
-          - path: components/instances/external-secrets-config
             exclude: true
           # EvalHub CRD not available in RHOAI 3.5 EA2
           - path: components/instances/evalhub

@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vault-config
+  namespace: vault
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+data:
+  vault.hcl: |
+    disable_mlock = true
+    ui            = true
+
+    listener "tcp" {
+      address       = "0.0.0.0:8200"
+      tls_disable   = 1
+    }
+
+    storage "file" {
+      path = "/vault/data"
+    }
+
+    api_addr     = "http://vault.vault.svc:8200"
+    cluster_addr = "http://vault.vault.svc:8201"

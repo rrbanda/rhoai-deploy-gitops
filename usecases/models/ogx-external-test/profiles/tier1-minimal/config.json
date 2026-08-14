@@ -1,0 +1,9 @@
+{
+  "enabled": "false",
+  "name": "ogx-external-test",
+  "category": "models",
+  "path": "usecases/models/ogx-external-test/profiles/tier1-minimal",
+  "namespace": "ogx-external-test",
+  "description": "OGX (LlamaStack) server with remote::openai provider — connects to any external OpenAI-compatible model endpoint (no GPU required)",
+  "gpu_required": "none (external provider)"
+}

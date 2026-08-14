@@ -1,0 +1,12 @@
+apiVersion: maas.opendatahub.io/v1alpha1
+kind: MaaSModelRef
+metadata:
+  name: gemini-2-0-flash
+  labels:
+    app.kubernetes.io/name: gemini-external
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  modelRef:
+    kind: ExternalModel
+    name: gemini-2-0-flash

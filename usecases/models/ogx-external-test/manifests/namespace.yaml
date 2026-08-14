@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ogx-external-test
+  labels:
+    kubernetes.io/metadata.name: ogx-external-test
+    opendatahub.io/dashboard: "true"
+    opendatahub.io/generated-namespace: "true"

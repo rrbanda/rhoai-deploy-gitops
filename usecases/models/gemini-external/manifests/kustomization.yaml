@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: models-as-a-service
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: gemini-external
+
+resources:
+  - namespace.yaml
+  - external-model.yaml
+  - maas-model-ref.yaml
+  - maas-subscription.yaml
+  - maas-auth-policy.yaml

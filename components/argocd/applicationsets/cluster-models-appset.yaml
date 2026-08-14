@@ -34,7 +34,7 @@ spec:
       source:
         repoURL: REPO_URL_PLACEHOLDER
         targetRevision: TARGET_REVISION_PLACEHOLDER
-        path: '{{ .path }}'
+        path: '{{ .path.path }}'
       destination:
         server: https://kubernetes.default.svc
         namespace: '{{ .namespace }}'

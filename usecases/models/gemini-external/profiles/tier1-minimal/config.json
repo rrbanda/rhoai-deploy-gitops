@@ -1,0 +1,9 @@
+{
+  "enabled": "true",
+  "name": "gemini-external",
+  "category": "models",
+  "path": "usecases/models/gemini-external/profiles/tier1-minimal",
+  "namespace": "models-as-a-service",
+  "description": "Google Gemini 2.0 Flash — external model via MAAS + Vault ESO integration",
+  "gpu_required": "none (external provider)"
+}
