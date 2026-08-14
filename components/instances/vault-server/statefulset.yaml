@@ -10,6 +10,15 @@ metadata:
 spec:
   serviceName: vault
   replicas: 1
+  podManagementPolicy: OrderedReady
+  revisionHistoryLimit: 10
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
   selector:
     matchLabels:
       app: vault
@@ -19,10 +28,17 @@ spec:
         app: vault
     spec:
       serviceAccountName: vault
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
       terminationGracePeriodSeconds: 10
       containers:
         - name: vault
           image: docker.io/hashicorp/vault:1.17
+          imagePullPolicy: IfNotPresent
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
           command:
             - vault
             - server
@@ -30,8 +46,10 @@ spec:
           ports:
             - containerPort: 8200
               name: http
+              protocol: TCP
             - containerPort: 8201
               name: cluster
+              protocol: TCP
           env:
             - name: VAULT_ADDR
               value: "http://127.0.0.1:8200"
@@ -90,6 +108,7 @@ spec:
       spec:
         accessModes:
           - ReadWriteOnce
+        volumeMode: Filesystem
         resources:
           requests:
             storage: 1Gi

@@ -68,8 +68,7 @@ spec:
         - group: kueue.x-k8s.io
           kind: ClusterQueue
           jsonPointers:
-            - /spec/queueingStrategy
-            - /spec/fairSharing
+            - /status
         - group: ""
           kind: Secret
           jsonPointers:
@@ -78,20 +77,12 @@ spec:
         - group: apps
           kind: StatefulSet
           jsonPointers:
-            - /spec/persistentVolumeClaimRetentionPolicy
-            - /spec/podManagementPolicy
-            - /spec/revisionHistoryLimit
-            - /spec/template/spec/containers/0/terminationMessagePath
-            - /spec/template/spec/containers/0/terminationMessagePolicy
-            - /spec/template/spec/dnsPolicy
-            - /spec/template/spec/schedulerName
-            - /spec/template/spec/terminationGracePeriodSeconds
+            - /status
             - /spec/volumeClaimTemplates/0/status
         - group: external-secrets.io
           kind: ExternalSecret
           jsonPointers:
             - /status
-            - /spec/target
       syncPolicy:
         automated:
           selfHeal: true

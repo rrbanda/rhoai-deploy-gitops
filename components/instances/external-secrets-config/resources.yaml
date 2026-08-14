@@ -53,7 +53,10 @@ spec:
   target:
     name: gemini-api-key
     creationPolicy: Owner
+    deletionPolicy: Retain
     template:
+      engineVersion: v2
+      mergePolicy: Replace
       metadata:
         labels:
           inference.llm-d.ai/ipp-managed: "true"

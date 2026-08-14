@@ -3,10 +3,17 @@ kind: ClusterQueue
 metadata:
   name: training-cluster-queue
 spec:
+  queueingStrategy: BestEffortFIFO
+  stopPolicy: None
   namespaceSelector: {}
+  flavorFungibility:
+    whenCanBorrow: MayStopSearch
+    whenCanPreempt: TryNextFlavor
   preemption:
     reclaimWithinCohort: Any
     withinClusterQueue: LowerPriority
+    borrowWithinCohort:
+      policy: Never
   resourceGroups:
     - coveredResources: ["cpu", "memory", "nvidia.com/gpu"]
       flavors:

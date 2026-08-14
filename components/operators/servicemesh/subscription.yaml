@@ -10,4 +10,12 @@ spec:
   name: servicemeshoperator3
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  installPlanApproval: Automatic
+  installPlanApproval: Manual
+  config:
+    annotations:
+      openshift.io/required-scc: restricted-v2
+      target.workload.openshift.io/management: '{"effect": "PreferredDuringScheduling"}'
+    resources:
+      requests:
+        cpu: 10m
+        memory: 64Mi

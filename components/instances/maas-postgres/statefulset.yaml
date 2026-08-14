@@ -11,6 +11,15 @@ metadata:
 spec:
   serviceName: postgresql
   replicas: 1
+  podManagementPolicy: OrderedReady
+  revisionHistoryLimit: 10
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
   selector:
     matchLabels:
       app: postgresql
@@ -19,12 +28,21 @@ spec:
       labels:
         app: postgresql
     spec:
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
       containers:
         - name: postgresql
           image: registry.redhat.io/rhel9/postgresql-15:1
+          imagePullPolicy: IfNotPresent
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
           ports:
             - containerPort: 5432
               name: postgres
+              protocol: TCP
           envFrom:
             - secretRef:
                 name: maas-db-config
@@ -67,6 +85,7 @@ spec:
         name: data
       spec:
         accessModes: ["ReadWriteOnce"]
+        volumeMode: Filesystem
         resources:
           requests:
             storage: 5Gi
