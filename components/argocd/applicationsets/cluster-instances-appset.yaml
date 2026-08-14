@@ -75,6 +75,23 @@ spec:
           jsonPointers:
             - /data
             - /stringData
+        - group: apps
+          kind: StatefulSet
+          jsonPointers:
+            - /spec/persistentVolumeClaimRetentionPolicy
+            - /spec/podManagementPolicy
+            - /spec/revisionHistoryLimit
+            - /spec/template/spec/containers/0/terminationMessagePath
+            - /spec/template/spec/containers/0/terminationMessagePolicy
+            - /spec/template/spec/dnsPolicy
+            - /spec/template/spec/schedulerName
+            - /spec/template/spec/terminationGracePeriodSeconds
+            - /spec/volumeClaimTemplates/0/status
+        - group: external-secrets.io
+          kind: ExternalSecret
+          jsonPointers:
+            - /status
+            - /spec/target
       syncPolicy:
         automated:
           selfHeal: true
