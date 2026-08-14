@@ -88,12 +88,19 @@ spec:
                   vault status -format=json 2>/dev/null | grep -q '"sealed": false' || exit 1
             initialDelaySeconds: 10
             periodSeconds: 10
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 3
           livenessProbe:
             httpGet:
               path: /v1/sys/health?standbyok=true&sealedcode=200&uninitcode=200
               port: 8200
+              scheme: HTTP
             initialDelaySeconds: 10
             periodSeconds: 30
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 3
       volumes:
         - name: vault-config
           configMap:

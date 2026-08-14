@@ -76,13 +76,17 @@ spec:
             - /stringData
         - group: apps
           kind: StatefulSet
-          jsonPointers:
-            - /status
-            - /spec/volumeClaimTemplates/0/status
+          jqPathExpressions:
+            - .spec.volumeClaimTemplates[].status
+            - .spec.volumeClaimTemplates[].apiVersion
+            - .spec.volumeClaimTemplates[].kind
+            - .spec.volumeClaimTemplates[].metadata.creationTimestamp
+            - .spec.template.metadata.creationTimestamp
         - group: external-secrets.io
           kind: ExternalSecret
           jsonPointers:
             - /status
+            - /metadata/annotations
       syncPolicy:
         automated:
           selfHeal: true

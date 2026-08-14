@@ -65,3 +65,7 @@ spec:
       remoteRef:
         key: maas/gemini
         property: api-key
+        conversionStrategy: Default
+        decodingStrategy: None
+        metadataPolicy: None
+        nullBytePolicy: Ignore
