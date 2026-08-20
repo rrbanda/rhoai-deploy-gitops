@@ -339,14 +339,23 @@ oc get pods -n rhcl-operator | grep kuadrant-operator-controller
 # Should now show Running (1/1) without restarts
 
 # 7. Once operator is stable, restart the gateway to re-fetch WASM
-GATEWAY_POD=$(oc get pods -n gateway-system -l istio.io/gateway-name=mcp-gateway -o name | head -1)
+# Try multiple common labels (varies by install method)
+GATEWAY_POD=$(oc get pods -n gateway-system -l istio.io/gateway-name=mcp-gateway -o name 2>/dev/null | head -1)
+if [ -z "$GATEWAY_POD" ]; then
+  GATEWAY_POD=$(oc get pods -n gateway-system -l app=mcp-gateway-istio -o name 2>/dev/null | head -1)
+fi
+if [ -z "$GATEWAY_POD" ]; then
+  GATEWAY_POD=$(oc get pods -n gateway-system --no-headers | head -1 | awk '{print "pod/"$1}')
+fi
+echo "Restarting: ${GATEWAY_POD}"
 oc delete ${GATEWAY_POD} -n gateway-system
-sleep 10
-oc get pods -n gateway-system -l istio.io/gateway-name=mcp-gateway
+sleep 15
+oc get pods -n gateway-system
 # Should be Running with no WASM errors
 
 # 8. Verify WASM loaded successfully (no critical errors)
-oc logs -n gateway-system $(oc get pods -n gateway-system -l istio.io/gateway-name=mcp-gateway -o name | head -1) -c istio-proxy --tail=20 | grep -i wasm
+GW_POD=$(oc get pods -n gateway-system --no-headers | grep -i running | head -1 | awk '{print $1}')
+oc logs -n gateway-system ${GW_POD} -c istio-proxy --tail=20 2>&1 | grep -i wasm
 # Should show: wasm log ... OR no critical errors
 ```
 
