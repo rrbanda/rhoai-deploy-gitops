@@ -26,4 +26,4 @@ resources:
   - wave-5-instances/monitoring.yaml
   - wave-5-instances/cluster-autoscaler.yaml
   # Models ApplicationSet (wave 10, self-service)
-  - ../models-v2/_applicationset.yaml
+  - models-applicationset.yaml
