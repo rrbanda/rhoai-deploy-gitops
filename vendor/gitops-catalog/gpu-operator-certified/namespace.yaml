@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nvidia-gpu-operator
+  annotations:
+    openshift.io/display-name: "NVIDIA GPU Operator"
+  labels:
+    openshift.io/cluster-monitoring: 'true'
