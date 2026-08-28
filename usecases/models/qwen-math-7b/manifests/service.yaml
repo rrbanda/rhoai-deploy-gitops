@@ -6,7 +6,6 @@ metadata:
     app.kubernetes.io/name: qwen-math-7b
     app.kubernetes.io/component: route-service
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
 spec:
   type: ClusterIP
   selector:

@@ -8,4 +8,3 @@ metadata:
     app.kubernetes.io/name: qwen-math-7b
     app.kubernetes.io/part-of: qwen-math-7b
   annotations:
-    argocd.argoproj.io/sync-wave: "-1"
