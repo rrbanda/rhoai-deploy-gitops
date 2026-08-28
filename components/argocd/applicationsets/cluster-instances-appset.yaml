@@ -50,6 +50,9 @@ spec:
           # External secrets depends on Vault — exclude until Vault is ready
           - path: components/instances/external-secrets-config
             exclude: true
+          # MCP servers — requires mcp-lifecycle CRD, excluded for demo
+          - path: components/instances/mcp-servers
+            exclude: true
   template:
     metadata:
       name: 'instance-{{ .path.basename }}'
