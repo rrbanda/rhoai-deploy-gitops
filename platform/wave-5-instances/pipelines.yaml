@@ -4,11 +4,11 @@ metadata:
   name: foundation-pipelines
   namespace: openshift-gitops
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "5"
   labels:
     app.kubernetes.io/part-of: rhoai-gitops
-    rhoai.redhat.com/wave: "0"
-    rhoai.redhat.com/category: foundation
+    rhoai.redhat.com/wave: "5"
+    rhoai.redhat.com/category: instance
 spec:
   project: platform
   source:

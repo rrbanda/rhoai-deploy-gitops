@@ -5,7 +5,6 @@ resources:
   # Wave 0: Foundation (cert-manager, NFD, Pipelines, JobSet, KEDA)
   - wave-0-foundation/cert-manager.yaml
   - wave-0-foundation/nfd.yaml
-  - wave-0-foundation/pipelines.yaml
   - wave-0-foundation/jobset.yaml
   - wave-0-foundation/keda.yaml
   # Wave 1: Infrastructure (LWS, Kueue, GPU, ServiceMesh)
@@ -27,3 +26,4 @@ resources:
   - wave-5-instances/cluster-autoscaler.yaml
   # Models ApplicationSet (wave 10, self-service)
   - models-applicationset.yaml
+  - wave-5-instances/pipelines.yaml
