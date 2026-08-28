@@ -10,7 +10,7 @@ spec:
   name: servicemeshoperator3
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  installPlanApproval: Manual
+  installPlanApproval: Automatic
   config:
     annotations:
       openshift.io/required-scc: restricted-v2

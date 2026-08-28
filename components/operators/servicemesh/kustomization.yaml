@@ -3,3 +3,13 @@ kind: Kustomization
 
 resources:
   - subscription.yaml
+
+patches:
+  - target:
+      kind: Subscription
+      name: servicemeshoperator3
+    path: patch-channel.yaml
+  - target:
+      kind: Subscription
+      name: servicemeshoperator3
+    path: patch-source.yaml

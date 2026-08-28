@@ -16,8 +16,8 @@ spec:
           # DSC is managed by a dedicated Application (rhoai-dsc-app.yaml)
           - path: components/instances/rhoai-instance
             exclude: true
-          # GPU operator instance uses gitops-catalog external base
-          - path: components/instances/gpu-instance
+          # GPU ClusterPolicy managed separately (GPU operator outside AppSet)
+          - path: components/instances/gpu-cluster-policy
             exclude: true
           # GPU MachineSets are cluster-specific — see gpu-workers/README.md
           - path: components/instances/gpu-workers
@@ -36,9 +36,14 @@ spec:
           # MaaS gateway requires external DNS delegation for TLS cert validation
           - path: components/instances/maas-gateway
             exclude: true
-          # Optional: uncomment to exclude components not needed in your env
-          # - path: components/instances/observability
-          #   exclude: true
+          # Registry mirror IDMS — only for disconnected environments.
+          # Remove this exclude after configuring imagedigestmirrorset.yaml
+          # with your internal registry URL.
+          - path: components/instances/registry-mirror
+            exclude: true
+          # Hermes chatbot — separate project, not part of RHOAI platform
+          - path: components/instances/hermes-argocd
+            exclude: true
   template:
     metadata:
       name: 'instance-{{ .path.basename }}'

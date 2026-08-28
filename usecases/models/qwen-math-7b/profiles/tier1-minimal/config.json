@@ -1,9 +1,9 @@
 {
-  "enabled": "false",
+  "enabled": "true",
   "name": "qwen-math-7b",
   "category": "models",
   "path": "usecases/models/qwen-math-7b/profiles/tier1-minimal",
-  "namespace": "models-as-a-service",
+  "namespace": "qwen-math-7b",
   "description": "Qwen Math 7B — specialized mathematical reasoning",
   "gpu_required": "1x NVIDIA L4/A10G (24GB VRAM)"
 }

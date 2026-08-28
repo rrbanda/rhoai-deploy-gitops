@@ -3,3 +3,18 @@ kind: Kustomization
 
 resources:
   - subscription.yaml
+
+patches:
+  - target:
+      kind: Subscription
+      name: openshift-external-secrets-operator
+    path: patch-channel.yaml
+  - target:
+      kind: Subscription
+      name: openshift-external-secrets-operator
+    path: patch-source.yaml
+  # Uncomment to override OperatorGroup name (for brownfield adoption):
+  # - target:
+  #     kind: OperatorGroup
+  #     name: external-secrets-operator
+  #   path: patch-operatorgroup-name.yaml

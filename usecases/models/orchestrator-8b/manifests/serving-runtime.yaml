@@ -17,7 +17,7 @@ spec:
   multiModel: false
   containers:
     - name: kserve-container
-      image: registry.redhat.io/rhaiis/vllm-cuda-rhel9:3.3.0
+      image: registry.redhat.io/rhaiis/vllm-cuda-rhel9:3.5.0
       command:
         - python
         - -m

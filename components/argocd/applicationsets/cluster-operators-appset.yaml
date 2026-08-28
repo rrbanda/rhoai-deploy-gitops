@@ -13,8 +13,7 @@ spec:
         revision: TARGET_REVISION_PLACEHOLDER
         directories:
           - path: components/operators/*
-          # GPU operator uses gitops-catalog (external kustomize base)
-          - path: components/operators/gpu-operator
+          - path: components/operators/gpu
             exclude: true
   template:
     metadata:

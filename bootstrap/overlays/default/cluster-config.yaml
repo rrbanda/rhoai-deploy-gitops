@@ -15,5 +15,5 @@ data:
 
   repoURL: "https://github.com/rrbanda/rhoai-deploy-gitops.git"
   targetRevision: "main"
-  rhoaiChannel: "beta"
+  rhoaiChannel: "stable-3.5"
   rhoaiOverlay: "full"

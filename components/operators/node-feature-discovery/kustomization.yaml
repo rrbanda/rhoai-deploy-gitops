@@ -2,19 +2,19 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - ../../../vendor/gitops-catalog/openshift-cert-manager-operator
+  - ../../../vendor/gitops-catalog/nfd
 
 patches:
   - target:
       kind: Subscription
-      name: openshift-cert-manager-operator
+      name: nfd
     path: patch-channel.yaml
   - target:
       kind: Subscription
-      name: openshift-cert-manager-operator
+      name: nfd
     path: patch-source.yaml
   # Uncomment to override OperatorGroup name (for brownfield adoption):
   # - target:
   #     kind: OperatorGroup
-  #     name: openshift-cert-manager-operator
+  #     name: nfd-group
   #   path: patch-operatorgroup-name.yaml
