@@ -22,7 +22,7 @@ spec:
       selfHeal: true
       prune: false
     syncOptions:
-      - Replace=true
+      
       - SkipDryRunOnMissingResource=true
       - RespectIgnoreDifferences=true
     retry:
