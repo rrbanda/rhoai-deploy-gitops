@@ -1,0 +1,19 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: qwen-math-7b
+  labels:
+    app.kubernetes.io/name: qwen-math-7b
+    app.kubernetes.io/component: route
+  annotations:
+spec:
+  to:
+    kind: Service
+    name: qwen-math-7b-route-svc
+    weight: 100
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None

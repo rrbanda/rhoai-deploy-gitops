@@ -1,0 +1,8 @@
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: openshift-custom-metrics-autoscaler
+  namespace: openshift-custom-metrics-autoscaler
+spec:
+  targetNamespaces:
+    - openshift-custom-metrics-autoscaler
