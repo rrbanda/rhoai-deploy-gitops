@@ -44,6 +44,12 @@ spec:
           # Hermes chatbot — separate project, not part of RHOAI platform
           - path: components/instances/hermes-argocd
             exclude: true
+          # Vault requires manual init — exclude until initialized
+          - path: components/instances/vault-server
+            exclude: true
+          # External secrets depends on Vault — exclude until Vault is ready
+          - path: components/instances/external-secrets-config
+            exclude: true
   template:
     metadata:
       name: 'instance-{{ .path.basename }}'
@@ -74,6 +80,11 @@ spec:
           kind: ClusterQueue
           jsonPointers:
             - /status
+        - group: mcp.x-k8s.io
+          kind: MCPServer
+          jsonPointers:
+            - /status
+            - /metadata/finalizers
         - group: ""
           kind: Secret
           jsonPointers:
