@@ -22,7 +22,6 @@ spec:
       selfHeal: true
       prune: false
     syncOptions:
-      - ServerSideApply=true
       - SkipDryRunOnMissingResource=true
     retry:
       limit: 5
