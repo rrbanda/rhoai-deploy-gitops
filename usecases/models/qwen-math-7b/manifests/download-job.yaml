@@ -16,6 +16,12 @@ spec:
         app.kubernetes.io/component: model-download
     spec:
       restartPolicy: OnFailure
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+      nodeSelector:
+        nvidia.com/gpu.product: NVIDIA-A10G
       containers:
         - name: download
           image: registry.access.redhat.com/ubi9/python-311:1
