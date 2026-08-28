@@ -26,4 +26,3 @@ resources:
   - wave-5-instances/cluster-autoscaler.yaml
   # Models ApplicationSet (wave 10, self-service)
   - models-applicationset.yaml
-  - wave-5-instances/pipelines.yaml
