@@ -3,6 +3,4 @@ kind: OperatorGroup
 metadata:
   name: openshift-kueue-operator
   namespace: openshift-kueue-operator
-spec:
-  targetNamespaces:
-    - openshift-kueue-operator
+spec: {}

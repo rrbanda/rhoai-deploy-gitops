@@ -18,6 +18,7 @@ resources:
   - wave-3-rhoai/openshift-ai.yaml
   # Wave 4: RHOAI Configuration (DSC)
   - wave-4-configuration/datasciencecluster.yaml
+  - wave-4-configuration/jobset-instance.yaml
   # Wave 5: Platform Instances
   - wave-5-instances/kueue-config.yaml
   - wave-5-instances/hardware-profiles.yaml
