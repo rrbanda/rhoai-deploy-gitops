@@ -6,3 +6,4 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - gateway-memory-rbac.yaml
