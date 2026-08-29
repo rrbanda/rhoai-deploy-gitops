@@ -63,7 +63,8 @@ components:
         managementState: Managed
   kueue:
     dsc:
-      managementState: Managed
+      managementState: Unmanaged
+      autoCreateQueues: true
       defaultClusterQueueName: default
       defaultLocalQueueName: default
   ray:
@@ -78,12 +79,19 @@ components:
   workbenches:
     dsc:
       managementState: Managed
+      workbenchNamespace: rhods-notebooks
   modelregistry:
     dsc:
       managementState: Managed
+      registriesNamespace: rhoai-model-registries
   trustyai:
     dsc:
       managementState: Managed
+      mcpGuardrailsMode: false
+      eval:
+        lmeval:
+          permitCodeExecution: deny
+          permitOnline: deny
   mlflowoperator:
     dsc:
       managementState: Managed
