@@ -37,9 +37,6 @@ spec:
                     namespaces:
                       from: All
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
     retry:
       limit: 10
       backoff:
