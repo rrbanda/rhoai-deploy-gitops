@@ -8,8 +8,3 @@ spec:
   tenancy: multi
   database:
     type: sqlite
-  providers:
-    - lm-eval-harness
-    - ragas
-    - garak
-    - guidellm
