@@ -14,6 +14,9 @@ kubeconfig
 kubeconfig.*
 auth/
 .kube/
+# Plaintext secret templates (sealed versions are safe to commit)
+helm-deploy/workloads/*/templates/
+*.yaml.template
 
 # ─────────────────────────────────────────────────────────────────────────────
 # IDE & Editor

@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - user-workload-monitoring.yaml
+  - maas-postgres.yaml
+  - sealed-maas-postgres-credentials.yaml
+  - sealed-maas-db-config.yaml
+  - milvus.yaml
+  - sealed-llm-api-secret.yaml
+  - ogx-config.yaml
+  - ogxserver.yaml
+  - dspa.yaml
