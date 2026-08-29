@@ -55,6 +55,8 @@ spec:
               managementState: Managed
               modelsAsAService:
                 managementState: Managed
+              batchGateway:
+                managementState: Managed
             modelsAsAService:
               gateway:
                 create: true
@@ -75,9 +77,11 @@ spec:
           aipipelines:
             dsc:
               managementState: Managed
+              argoWorkflowsControllers:
+                managementState: Managed
           kueue:
             dsc:
-              managementState: Unmanaged
+              managementState: Managed
           ray:
             dsc:
               managementState: Managed
@@ -105,10 +109,21 @@ spec:
           ogx:
             dsc:
               managementState: Managed
+          sparkoperator:
+            dsc:
+              managementState: Managed
+          mcplifecycleoperator:
+            dsc:
+              managementState: Managed
         services:
           monitoring:
             dsci:
               managementState: Managed
+
+        dependencies:
+          rhcl:
+            config:
+              tlsEnabled: true
   syncPolicy:
     automated:
       prune: true

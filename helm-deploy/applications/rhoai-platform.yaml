@@ -81,7 +81,7 @@ spec:
                 managementState: Managed
           kueue:
             dsc:
-              managementState: Unmanaged
+              managementState: Managed
           ray:
             dsc:
               managementState: Managed
