@@ -5,6 +5,7 @@ useDefault = true
 paths = [
   '''helm-deploy/chart/templates/.*''',
   '''\.pre-commit-config\.yaml''',
+  '''sealed-.*\.yaml''',
 ]
 
 [[rules]]
