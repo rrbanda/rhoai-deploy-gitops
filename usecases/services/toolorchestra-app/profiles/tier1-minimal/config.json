@@ -1,8 +1,0 @@
-{
-  "enabled": "false",
-  "name": "toolorchestra-app",
-  "category": "services",
-  "path": "usecases/services/toolorchestra-app/profiles/tier1-minimal",
-  "namespace": "toolorchestra",
-  "description": "ToolOrchestra — multi-agent orchestration platform with training pipelines"
-}

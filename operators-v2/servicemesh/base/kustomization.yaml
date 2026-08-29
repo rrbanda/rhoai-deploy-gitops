@@ -1,5 +1,0 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-# OpenShift Service Mesh uses the global openshift-operators namespace.
-# No Namespace or OperatorGroup needed (global OG already exists).
-resources: []

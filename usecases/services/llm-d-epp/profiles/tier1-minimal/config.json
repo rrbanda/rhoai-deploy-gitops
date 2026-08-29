@@ -1,8 +1,0 @@
-{
-  "enabled": "false",
-  "name": "llm-d-epp",
-  "category": "services",
-  "path": "usecases/services/llm-d-epp/profiles/tier1-minimal",
-  "namespace": "llm-d-epp",
-  "description": "llm-d Endpoint Picker Pod — intelligent request routing with prefix cache and load scoring"
-}
