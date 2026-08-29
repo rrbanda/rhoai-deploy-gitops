@@ -81,8 +81,12 @@ spec:
             - run
             - standalone
           env:
+            - name: DEPLOY_MODE
+              value: standalone
             - name: ETCD_ENDPOINTS
               value: etcd-service.autorag.svc:2379
+            - name: COMMON_STORAGETYPE
+              value: local
           ports:
             - containerPort: 19530
             - containerPort: 9091
