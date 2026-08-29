@@ -64,6 +64,8 @@ components:
   kueue:
     dsc:
       managementState: Managed
+      defaultClusterQueueName: default
+      defaultLocalQueueName: default
   ray:
     dsc:
       managementState: Managed
