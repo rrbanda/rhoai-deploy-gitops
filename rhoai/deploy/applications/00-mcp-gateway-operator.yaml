@@ -1,27 +1,26 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: rhoai-cluster-config
+  name: rhoai-mcp-gateway-operator
   namespace: openshift-gitops
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   project: default
   source:
     repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
     targetRevision: helm-deploy-v3.5
-    path: rhoai/workloads/cluster-config
+    path: rhoai/deploy/00-operators/mcp-gateway
   destination:
     server: https://kubernetes.default.svc
-    namespace: redhat-ods-applications
+    namespace: openshift-operators
   syncPolicy:
     retry:
-      limit: 10
+      limit: 5
       backoff:
         duration: 30s
         factor: 2
-        maxDuration: 10m
+        maxDuration: 5m
     syncOptions:
-      - CreateNamespace=true
+      - CreateNamespace=false
       - ServerSideApply=true
-      - SkipDryRunOnMissingResource=true

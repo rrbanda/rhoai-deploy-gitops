@@ -25,7 +25,7 @@ spec:
       source:
         repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
         targetRevision: helm-deploy-v3.5
-        path: rhoai/prerequisites/servicemesh/base
+        path: rhoai/deploy/00-operators/servicemesh
       destination:
         server: https://kubernetes.default.svc
         namespace: openshift-operators
