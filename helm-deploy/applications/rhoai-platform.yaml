@@ -114,6 +114,9 @@ spec:
           llamastackoperator:
             dsc:
               managementState: Managed
+          mcplifecycleoperator:
+            dsc:
+              managementState: Managed
         services:
           monitoring:
             dsci:
