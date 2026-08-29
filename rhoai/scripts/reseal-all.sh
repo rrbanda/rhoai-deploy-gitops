@@ -17,8 +17,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
-AUTORAG_DIR="${REPO_ROOT}/rhoai/workloads/autorag"
-CLUSTER_DIR="${REPO_ROOT}/rhoai/workloads/cluster-config"
+AUTORAG_DIR="${REPO_ROOT}/rhoai/deploy/03-workloads/autorag"
+CLUSTER_DIR="${REPO_ROOT}/rhoai/deploy/02-config"
 
 CONTROLLER_NS="${SEALED_SECRETS_NS:-sealed-secrets}"
 CERT_FILE="$(mktemp)"
@@ -137,7 +137,7 @@ if [[ -f "${CLUSTER_DIR}/templates/maas-oidc-config.yaml.template" ]]; then
 fi
 
 echo "Next steps:"
-echo "  1. git add rhoai/workloads/*/sealed-*.yaml"
+echo "  1. git add rhoai/deploy/*/sealed-*.yaml rhoai/deploy/**/sealed-*.yaml"
 echo "  2. git commit -m 'Re-seal secrets for new cluster'"
 echo "  3. git push"
 echo ""

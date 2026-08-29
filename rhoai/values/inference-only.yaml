@@ -1,14 +1,14 @@
-# RHOAI 3.4 -- Inference-only (RHAII profile).
-# Deploys: KServe + cert-manager, RHCL/Kuadrant, LeaderWorkerSet.
+# RHOAI 3.5 -- Inference-only (RHAII profile)
 skipCrdCheck: true
 profile: rhaii
-
-operator:
-  type: rhoai
-
 components:
   kserve:
     gateway:
+      create: true
+      name: openshift-ai-inference
+      namespace: openshift-ingress
+      labels:
+        istio.io/rev: openshift-gateway
       spec:
         gatewayClassName: openshift-ai-inference
         listeners:

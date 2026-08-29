@@ -1,17 +1,18 @@
-# RHOAI 3.4 -- GitOps Deployment with Helm Chart
+# RHOAI 3.5 -- GitOps Deployment with Helm Chart
 
-Deploy Red Hat OpenShift AI **3.4** on OpenShift using the official Helm chart,
+Deploy Red Hat OpenShift AI **3.5** on OpenShift using the official Helm chart,
 managed entirely through OpenShift GitOps (ArgoCD). The chart is committed to
 this branch -- ArgoCD reads it directly from Git. No OCI registry auth needed
 at deploy time.
 
 | | Details |
 |---|---|
-| **RHOAI version** | 3.4 |
-| **Chart source** | `oci://registry.redhat.io/rhai/rhai-on-openshift-chart:v3.4` |
-| **OCP requirement** | 4.17+ |
-| **Branch** | `helm-deploy-v3.4` |
-| **For RHOAI 3.5** | Switch to branch `helm-deploy-v3.5` |
+| **RHOAI version** | 3.5 (chart v3.5.0, appVersion v3.5.0) |
+| **Chart source** | `oci://registry.redhat.io/rhai/rhai-on-openshift-chart:v3.5` |
+| **Chart digest** | `sha256:a449277180247b42488721025c37f8db76bc6e26a5dedfc3103fa7e5231b58eb` |
+| **OCP requirement** | 4.19+ |
+| **Branch** | `helm-deploy-v3.5` |
+| **For RHOAI 3.4** | Switch to branch `helm-deploy-v3.4` |
 
 ---
 
@@ -316,7 +317,7 @@ This repo is designed to be forked and reused. Follow these steps:
 ```bash
 git clone https://github.com/YOUR_ORG/YOUR_REPO.git
 cd YOUR_REPO
-git checkout helm-deploy-v3.4
+git checkout helm-deploy-v3.5
 
 # Replace the repo URL in all ArgoCD Application manifests
 export REPO_URL=https://github.com/YOUR_ORG/YOUR_REPO.git
@@ -370,7 +371,7 @@ oc apply -f helm-deploy/app-of-apps.yaml
 ```bash
 # Edit imageset-config-template.yaml:
 #   REPLACE_OCP_VERSION -> v4.19
-#   REPLACE_RHOAI_CHANNEL -> stable-3.4
+#   REPLACE_RHOAI_CHANNEL -> stable-3.5
 #   REPLACE_KUEUE_CHANNEL -> stable-v1.4
 
 oc-mirror --config helm-deploy/imageset-config-template.yaml \
@@ -425,7 +426,7 @@ Commit, push, apply app-of-apps.
 Change `targetRevision` in your Application (or app-of-apps):
 
 ```yaml
-targetRevision: helm-deploy-v3.5  # upgrade from: helm-deploy-v3.4
+targetRevision: helm-deploy-v3.5  # was: helm-deploy-v3.4
 ```
 
 ### Updating the chart
@@ -433,7 +434,7 @@ targetRevision: helm-deploy-v3.5  # upgrade from: helm-deploy-v3.4
 ```bash
 helm registry login registry.redhat.io
 helm pull oci://registry.redhat.io/rhai/rhai-on-openshift-chart \
-  --version v3.5 --untar --untardir /tmp/upgrade
+  --version v3.6 --untar --untardir /tmp/upgrade
 rm -rf helm-deploy/chart
 mv /tmp/upgrade/rhai-on-openshift-chart helm-deploy/chart
 # Review values.yaml for new components, commit, push
@@ -605,7 +606,7 @@ helm-deploy/
 │   ├── 01-cluster-config.yaml             # Wave 1: Dashboard features, MaaS, MCP
 │   ├── 02-autorag-workload.yaml            # Wave 2: AutoRAG stack
 │   └── rhoai-platform.yaml                 # Wave 1: RHOAI Helm chart
-├── chart/                                   # Official RHOAI 3.4 Helm chart (unmodified)
+├── chart/                                   # Official RHOAI 3.5 Helm chart (unmodified)
 ├── bootstrap/                               # One-time setup
 │   ├── kustomization.yaml
 │   ├── gitops-operator-subscription.yaml   # OpenShift GitOps operator
@@ -667,7 +668,7 @@ Extracted from the official Red Hat OCI registry:
 
 ```bash
 helm registry login registry.redhat.io
-helm pull oci://registry.redhat.io/rhai/rhai-on-openshift-chart --version v3.4 --untar
+helm pull oci://registry.redhat.io/rhai/rhai-on-openshift-chart --version v3.5 --untar
 ```
 
 - **Upstream**: [opendatahub-io/odh-gitops](https://github.com/opendatahub-io/odh-gitops)

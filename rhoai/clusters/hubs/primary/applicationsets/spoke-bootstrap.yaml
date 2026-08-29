@@ -24,7 +24,7 @@ spec:
       source:
         repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
         targetRevision: helm-deploy-v3.4
-        path: rhoai/bootstrap
+        path: rhoai/setup/bootstrap
       destination:
         server: https://kubernetes.default.svc
         namespace: openshift-gitops
