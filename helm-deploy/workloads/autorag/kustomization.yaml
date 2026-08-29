@@ -9,6 +9,7 @@ resources:
   - sealed-maas-db-config.yaml
   - mcp-gateway.yaml
   - mcp-studio-config.yaml
+  - dashboard-features.yaml
   - milvus.yaml
   - sealed-llm-api-secret.yaml
   - ogx-config.yaml
