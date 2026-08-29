@@ -8,3 +8,6 @@ spec:
   tenancy: multi
   database:
     type: sqlite
+  mcp:
+    enabled: true
+    transport: http
