@@ -1,27 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: autorag-workload
+  name: rhoai-deploy
   namespace: openshift-gitops
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
 spec:
   project: default
   source:
     repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
     targetRevision: helm-deploy-v3.5
-    path: helm-deploy/workloads/autorag
+    path: rhoai/applications
+    directory:
+      recurse: false
   destination:
     server: https://kubernetes.default.svc
-    namespace: autorag
+    namespace: openshift-gitops
   syncPolicy:
-    retry:
-      limit: 10
-      backoff:
-        duration: 30s
-        factor: 2
-        maxDuration: 10m
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true
-      - SkipDryRunOnMissingResource=true
