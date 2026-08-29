@@ -25,7 +25,7 @@ spec:
       source:
         repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
         targetRevision: helm-deploy-v3.4
-        path: rhoai/deploy/03-workloads/autorag
+        path: rhoai/base/03-workloads/autorag
       destination:
         server: https://kubernetes.default.svc
         namespace: autorag
