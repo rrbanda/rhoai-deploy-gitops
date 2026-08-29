@@ -1,0 +1,19 @@
+apiVersion: opendatahub.io/v1alpha1
+kind: OdhDashboardConfig
+metadata:
+  name: odh-dashboard-config
+  namespace: redhat-ods-applications
+spec:
+  dashboardConfig:
+    genAiStudio: true
+    mcpCatalog: true
+    autorag: true
+    promptManagement: true
+    aiAssetCustomEndpoints: true
+    vLLMDeploymentOnMaaS: true
+    disableModelCatalog: false
+    disableModelRegistry: false
+    disableTracking: false
+  genAiStudioConfig:
+    aiAssetCustomEndpoints:
+      externalProviders: true
