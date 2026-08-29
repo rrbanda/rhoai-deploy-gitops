@@ -41,6 +41,21 @@ oc wait --for=condition=Available deployment/openshift-gitops-server \
   -n openshift-gitops --timeout=300s
 ```
 
+### 1b. Wire RHACM to GitOps (if RHACM is installed)
+
+If the cluster has Red Hat Advanced Cluster Management, connect it to ArgoCD:
+
+```bash
+oc apply -k helm-deploy/rhacm/
+```
+
+This creates:
+- `ManagedClusterSetBinding` -- binds the default cluster set to the `openshift-gitops` namespace
+- `Placement` -- selects `local-cluster` (the hub)
+- `GitOpsCluster` -- registers the cluster in ArgoCD via RHACM
+
+Skip this step if RHACM is not installed -- ArgoCD works standalone.
+
 ### 2. Deploy RHOAI 3.5
 
 **Option A -- App-of-Apps (recommended):**
@@ -135,6 +150,7 @@ restarts the Kuadrant controller after the DSC reaches Ready.
 helm-deploy/
 ├── chart/                                  # Official RHOAI 3.5 Helm chart (unmodified)
 ├── bootstrap/                              # GitOps + Sealed Secrets + ArgoCD instance
+├── rhacm/                                  # RHACM integration (ManagedClusterSetBinding, Placement, GitOpsCluster)
 ├── prerequisites/
 │   ├── servicemesh/
 │   │   ├── base/                           # SM3 Subscription (connected)
