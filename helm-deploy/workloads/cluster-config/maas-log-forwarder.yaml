@@ -10,8 +10,8 @@ spec:
     - name: maas-gateway-logs
       type: application
       application:
-        namespaces:
-          - models-as-a-service
+        includes:
+          - namespace: models-as-a-service
         selector:
           matchLabels:
             app.kubernetes.io/part-of: ai-gateway
@@ -31,5 +31,3 @@ spec:
         - maas-gateway-logs
       outputRefs:
         - loki-maas
-      labels:
-        log_type: maas-showback
