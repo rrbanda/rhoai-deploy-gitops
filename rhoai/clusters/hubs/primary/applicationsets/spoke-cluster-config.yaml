@@ -21,7 +21,7 @@ spec:
       labels:
         apps.open-cluster-management.io/pull-to-ocm-managed-cluster: "true"
     spec:
-      project: default
+      project: rhoai-config
       source:
         repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
         targetRevision: helm-deploy-v3.5
