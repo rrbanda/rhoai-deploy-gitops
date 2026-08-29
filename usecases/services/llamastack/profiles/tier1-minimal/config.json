@@ -1,8 +1,0 @@
-{
-  "enabled": "false",
-  "name": "llamastack",
-  "category": "services",
-  "path": "usecases/services/llamastack/profiles/tier1-minimal",
-  "namespace": "llamastack",
-  "description": "LlamaStack distribution — Meta reference inference stack with guardrails"
-}
