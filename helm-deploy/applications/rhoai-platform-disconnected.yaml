@@ -109,6 +109,8 @@ spec:
           monitoring:
             dsci:
               managementState: Managed
+        olm:
+          source: REPLACE_WITH_MIRRORED_CATALOG_NAME
   syncPolicy:
     automated:
       prune: true

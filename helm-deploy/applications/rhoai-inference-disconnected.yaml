@@ -36,6 +36,8 @@ spec:
                   allowedRoutes:
                     namespaces:
                       from: All
+        olm:
+          source: REPLACE_WITH_MIRRORED_CATALOG_NAME
   syncPolicy:
     automated:
       prune: true

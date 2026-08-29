@@ -1,173 +1,179 @@
 # RHOAI 3.5 -- Helm Chart GitOps Deployment
 
-Automated deployment of Red Hat OpenShift AI (RHOAI) 3.5 using Helm charts
-managed through OpenShift GitOps (ArgoCD).
+Deploy Red Hat OpenShift AI **3.5** using the official Helm chart managed by
+OpenShift GitOps (ArgoCD). The chart is committed to this branch -- ArgoCD
+reads it directly from Git with no OCI registry auth needed at deploy time.
 
-## Version Info
+| | Details |
+|---|---|
+| **RHOAI version** | 3.5 (chart v3.5.0, appVersion v3.5.0) |
+| **Chart source** | `oci://registry.redhat.io/rhai/rhai-on-openshift-chart:v3.5` |
+| **Chart digest** | `sha256:a449277180247b42488721025c37f8db76bc6e26a5dedfc3103fa7e5231b58eb` |
+| **OCP requirement** | 4.19+ |
+| **Branch** | `helm-deploy-v3.5` |
+| **For RHOAI 3.4** | Switch to branch `helm-deploy-v3.4` |
 
-| Field | Value |
-|-------|-------|
-| Chart Version | v3.5.0 |
-| Chart Digest | sha256:a449277180247b42488721025c37f8db76bc6e26a5dedfc3103fa7e5231b58eb |
-| OCP Compatibility | 4.19+ |
-| Branch | `helm-deploy-v3.5` |
-| Previous Version | For RHOAI 3.4: switch to `helm-deploy-v3.4` |
+## Deployment Architecture
 
-## Quick Start
+```
+oc apply -f app-of-apps.yaml
+    |
+    +-- Wave 0: Service Mesh 3.x operator (prerequisite for OGX)
+    |       Subscription in openshift-operators
+    |
+    +-- Wave 1: RHOAI platform (Helm chart)
+    |       All operators + DSC + DSCI + Gateways
+    |
+    +-- PostSync: Kuadrant controller restart
+            Fixes known AuthPolicy enforcement timing issue
+```
 
-### 1. Bootstrap GitOps + Sealed Secrets
+## Quick Start (Connected)
+
+### 1. Bootstrap (one-time)
 
 ```bash
 oc apply -k helm-deploy/bootstrap/
-```
 
-This installs:
-- OpenShift GitOps operator (ArgoCD)
-- Sealed Secrets operator
-- ArgoCD cluster-admin RBAC
+until oc apply -f helm-deploy/bootstrap/argocd-instance.yaml; do sleep 10; done
 
-Wait for the GitOps operator to become ready:
-```bash
 oc wait --for=condition=Available deployment/openshift-gitops-server \
   -n openshift-gitops --timeout=300s
 ```
 
-### 2. Deploy the ArgoCD Instance
+### 2. Deploy RHOAI 3.5
+
+**Option A -- App-of-Apps (recommended):**
+
+Deploys Service Mesh 3.x first (wave 0), then the RHOAI platform (wave 1):
 
 ```bash
-oc apply -f helm-deploy/bootstrap/argocd-instance.yaml
+oc apply -f helm-deploy/applications/app-of-apps.yaml
 ```
 
-### 3. Deploy RHOAI
+**Option B -- Direct (if Service Mesh 3.x is already installed):**
 
-**Full platform** (all components):
 ```bash
+# Full platform
 oc apply -f helm-deploy/applications/rhoai-platform.yaml
-```
-
-**Inference-only** (RHAII profile -- KServe only):
-```bash
+# OR inference only
 oc apply -f helm-deploy/applications/rhoai-inference.yaml
 ```
 
-### 4. Monitor Progress
+### 3. Monitor
 
 ```bash
-# Watch ArgoCD sync status
-oc get application rhoai-platform -n openshift-gitops -w
-
-# Check DataScienceCluster status
-oc get datasciencecluster -A
-
-# Check operator subscriptions
-oc get subscriptions -A
+oc get application -n openshift-gitops -w
+oc get csv -A | grep -E "(rhods|servicemesh|cert-manager|rhcl|kueue)"
+oc get datasciencecluster default-dsc -o jsonpath='{.status.phase}'
 ```
 
-## Upgrade from 3.4
+## Disconnected Deployment
 
-1. Update `targetRevision` in your Application manifest:
-   ```yaml
-   source:
-     targetRevision: helm-deploy-v3.5
-   ```
-2. ArgoCD will automatically sync the new chart version.
-3. Monitor the rollout:
-   ```bash
-   oc get application -n openshift-gitops -w
-   ```
+### 1. Mirror images (from a connected machine)
 
-## Disconnected / Air-Gapped Clusters
+Use the provided ImageSetConfiguration to mirror all operators:
 
-For clusters without access to `redhat-operators`, override the OLM catalog source:
+```bash
+# Edit imageset-config-template.yaml:
+#   Replace REPLACE_OCP_VERSION with v4.19
+#   Replace REPLACE_RHOAI_CHANNEL with stable-3.5
+#   Replace REPLACE_KUEUE_CHANNEL with stable-v1.4
+
+oc-mirror --config helm-deploy/imageset-config-template.yaml \
+  docker://<mirror-registry> --v2
+```
+
+### 2. Apply generated mirror config
+
+```bash
+oc apply -f working-dir/cluster-resources/  # IDMS, CatalogSource
+```
+
+Note the generated CatalogSource name (e.g., `cs-redhat-operator-index-v4-19`).
+
+### 3. Update disconnected overlay
+
+Edit `helm-deploy/prerequisites/servicemesh/overlays/disconnected/kustomization.yaml`:
 
 ```yaml
-# In your values override:
-olm:
-  source: my-disconnected-catalog
-  sourceNamespace: openshift-marketplace
+value: cs-redhat-operator-index-v4-19  # your catalog name
 ```
 
-Apply as a values file or inline in the ArgoCD Application:
+### 4. Deploy with disconnected Applications
+
 ```bash
-helm template rhoai helm-deploy/chart/ \
-  -f helm-deploy/values/full-platform.yaml \
-  --set olm.source=my-disconnected-catalog \
-  --skip-schema-validation
+# Use the disconnected SM3 application
+oc apply -f helm-deploy/applications/00-servicemesh-disconnected.yaml
+
+# Use the disconnected platform application
+oc apply -f helm-deploy/applications/rhoai-platform-disconnected.yaml
 ```
+
+The disconnected Application variants set `olm.source` to your mirrored catalog
+so all Helm-chart-managed operator Subscriptions use the correct source.
+
+## Service Mesh 3.x Dependency
+
+Service Mesh 3.x (Sail Operator) is required for:
+- **OGX/Llama Stack** workloads (RAG, agentic AI)
+- **KServe** gateway infrastructure (Istio control plane for Gateway API)
+
+The SM3 operator must be installed **before** the RHOAI operator. The App-of-Apps
+pattern handles this automatically via sync waves.
+
+### Known issue: Kuadrant AuthPolicy not enforced
+
+The RHCL (Kuadrant) operator starts before its dependencies (Istio, Limitador)
+are fully available. It caches "MissingDependency" and never enforces AuthPolicy.
+The PostSync hook Job (`prerequisites/kuadrant-restart/job.yaml`) automatically
+restarts the Kuadrant controller after the DSC reaches Ready.
 
 ## Files
 
 ```
 helm-deploy/
-├── README.md                          # This file
-├── bootstrap/
-│   ├── kustomization.yaml             # Kustomize entry point
-│   ├── gitops-operator-subscription.yaml
-│   ├── sealed-secrets-subscription.yaml
-│   ├── argocd-rbac.yaml
-│   └── argocd-instance.yaml
+├── chart/                                  # Official RHOAI 3.5 Helm chart (unmodified)
+├── bootstrap/                              # GitOps + Sealed Secrets + ArgoCD instance
+├── prerequisites/
+│   ├── servicemesh/
+│   │   ├── base/                           # SM3 Subscription (connected)
+│   │   └── overlays/disconnected/          # SM3 with mirrored catalog
+│   └── kuadrant-restart/                   # PostSync Job for Kuadrant fix
 ├── applications/
-│   ├── rhoai-platform.yaml            # Full platform ArgoCD Application
-│   └── rhoai-inference.yaml           # Inference-only ArgoCD Application
-├── chart/                             # RHOAI Helm chart (v3.5.0)
-│   ├── Chart.yaml
-│   ├── values.yaml
-│   ├── values.schema.json
-│   ├── profiles/
-│   └── templates/
-├── values/
-│   ├── full-platform.yaml             # All components Managed
-│   └── inference-only.yaml            # RHAII profile (KServe only)
-└── sealed-secrets/
-    ├── README.md
-    └── registry-secret.yaml.template
+│   ├── app-of-apps.yaml                    # Entry point (deploys all child apps)
+│   ├── 00-servicemesh.yaml                 # Wave 0: SM3 (connected)
+│   ├── 00-servicemesh-disconnected.yaml    # Wave 0: SM3 (disconnected)
+│   ├── rhoai-platform.yaml                 # Wave 1: Full platform (connected)
+│   ├── rhoai-platform-disconnected.yaml    # Wave 1: Full platform (disconnected)
+│   ├── rhoai-inference.yaml                # Wave 1: Inference only (connected)
+│   └── rhoai-inference-disconnected.yaml   # Wave 1: Inference only (disconnected)
+├── values/                                 # Standalone values files
+├── sealed-secrets/                         # Optional secret management
+└── imageset-config-template.yaml           # Mirror config for disconnected
+```
+
+## Upgrading from 3.4 to 3.5
+
+Change `targetRevision` in your Application (or app-of-apps):
+
+```yaml
+targetRevision: helm-deploy-v3.5
 ```
 
 ## Troubleshooting
 
-### ArgoCD sync fails with "CRD not found"
+**SM3 operator not installing**: Check `oc get sub servicemeshoperator3 -n openshift-operators -o yaml`.
 
-The chart uses `skipCrdCheck: true` and the sync option
-`SkipDryRunOnMissingResource=true` to handle CRD ordering. If you still see
-issues, ensure the RHOAI operator subscription has been processed first:
+**CRs not created**: Expected on first sync. ArgoCD retries (limit=10, 30s backoff).
 
+**AuthPolicy not enforced**: The PostSync hook should handle this. If not, manually:
 ```bash
-oc get csv -n redhat-ods-operator
+oc delete pod -n kuadrant-system -l control-plane=controller-manager
 ```
 
-### Operator stuck in "UpgradePending"
-
-Check install plan approval:
+**Force re-sync**:
 ```bash
-oc get installplan -n redhat-ods-operator
-```
-
-If using `Manual` approval, approve the plan:
-```bash
-oc patch installplan <plan-name> -n redhat-ods-operator \
-  --type merge -p '{"spec":{"approved":true}}'
-```
-
-### DataScienceCluster not progressing
-
-Verify all dependency operators are healthy:
-```bash
-oc get csv -A | grep -E "(cert-manager|rhcl|kueue|lws|jobset)"
-```
-
-### Gateway not created
-
-Ensure the `allowedRoutes.namespaces.from` is set (the chart requires this):
-```bash
-oc get gateway -n openshift-ingress
-oc describe gatewayclass openshift-ai-inference
-```
-
-### Sync retry exhausted
-
-The Application has retry backoff (30s base, factor 2, max 10m, 10 attempts).
-If all retries are exhausted, check ArgoCD UI for the specific error and
-manually trigger a sync after resolving the issue:
-```bash
-argocd app sync rhoai-platform
+oc annotate application rhoai-platform -n openshift-gitops \
+  argocd.argoproj.io/refresh=hard --overwrite
 ```
