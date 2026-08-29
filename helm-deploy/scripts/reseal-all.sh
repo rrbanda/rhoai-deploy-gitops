@@ -111,6 +111,31 @@ echo "=========================================="
 echo "  All 4 secrets sealed successfully!"
 echo "=========================================="
 echo ""
+
+if [[ -f "${CLUSTER_DIR}/templates/maas-oidc-config.yaml.template" ]]; then
+  echo "=========================================="
+  echo "  Optional: MaaS OIDC (requires external IdP)"
+  echo "=========================================="
+  echo ""
+  read -rp "  Configure MaaS OIDC? (y/N): " CONFIGURE_OIDC
+  if [[ "${CONFIGURE_OIDC}" =~ ^[Yy]$ ]]; then
+    seal_secret \
+      "${CLUSTER_DIR}/templates/maas-oidc-config.yaml.template" \
+      "${CLUSTER_DIR}/sealed-maas-oidc-config.yaml"
+    echo "  NOTE: The sealed OIDC config contains the GatewayConfig patch."
+    echo "  After applying, the MaaS gateway will require OIDC tokens."
+    echo ""
+    echo "  You may also want to create MaaSSubscription and MaaSAuthPolicy"
+    echo "  resources. See templates in:"
+    echo "    ${CLUSTER_DIR}/templates/maas-subscription.yaml.template"
+    echo "    ${CLUSTER_DIR}/templates/maas-auth-policy.yaml.template"
+    echo ""
+  else
+    echo "  Skipped OIDC configuration."
+    echo ""
+  fi
+fi
+
 echo "Next steps:"
 echo "  1. git add helm-deploy/workloads/*/sealed-*.yaml"
 echo "  2. git commit -m 'Re-seal secrets for new cluster'"
