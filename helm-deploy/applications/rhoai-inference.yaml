@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rhoai-inference
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
+    targetRevision: helm-deploy-v3.4
+    path: helm-deploy/chart
+    helm:
+      releaseName: rhoai
+      skipSchemaValidation: true
+      valuesObject:
+        skipCrdCheck: true
+        profile: rhaii
+
+        operator:
+          type: rhoai
+
+        components:
+          kserve:
+            gateway:
+              spec:
+                gatewayClassName: openshift-ai-inference
+                listeners:
+                  - name: https
+                    port: 443
+                    protocol: HTTPS
+                    allowedRoutes:
+                      namespaces:
+                        from: All
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: rhoai-gitops
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 10
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 10m
+    syncOptions:
+      - CreateNamespace=true
+      - SkipDryRunOnMissingResource=true
+      - ServerSideApply=true
