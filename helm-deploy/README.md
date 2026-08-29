@@ -63,16 +63,20 @@ Skip this step if RHACM is not installed -- ArgoCD works standalone.
 Deploys Service Mesh 3.x first (wave 0), then the RHOAI platform (wave 1):
 
 ```bash
-oc apply -f helm-deploy/applications/app-of-apps.yaml
+oc apply -f helm-deploy/app-of-apps.yaml
 ```
 
 **Option B -- Direct (if Service Mesh 3.x is already installed):**
 
 ```bash
-# Full platform
 oc apply -f helm-deploy/applications/rhoai-platform.yaml
-# OR inference only
-oc apply -f helm-deploy/applications/rhoai-inference.yaml
+```
+
+**To switch to inference-only profile:**
+
+```bash
+cp helm-deploy/profiles/rhoai-inference.yaml helm-deploy/applications/rhoai-platform.yaml
+git add -A && git commit -m "Switch to inference-only profile" && git push
 ```
 
 ### 3. Monitor
@@ -121,8 +125,12 @@ value: cs-redhat-operator-index-v4-19  # your catalog name
 # Use the disconnected SM3 application
 oc apply -f helm-deploy/applications/00-servicemesh-disconnected.yaml
 
-# Use the disconnected platform application
-oc apply -f helm-deploy/applications/rhoai-platform-disconnected.yaml
+# Swap in disconnected variants:
+cp helm-deploy/profiles/00-servicemesh-disconnected.yaml helm-deploy/applications/00-servicemesh.yaml
+cp helm-deploy/profiles/rhoai-platform-disconnected.yaml helm-deploy/applications/rhoai-platform.yaml
+# Edit both: replace REPLACE_WITH_MIRRORED_CATALOG_NAME
+git add -A && git commit -m "Switch to disconnected" && git push
+oc apply -f helm-deploy/app-of-apps.yaml
 ```
 
 The disconnected Application variants set `olm.source` to your mirrored catalog
