@@ -7,6 +7,8 @@ metadata:
     argocd.argoproj.io/sync-wave: '1'
 spec:
   project: default
+  destination:
+    server: https://kubernetes.default.svc
   source:
     repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
     targetRevision: helm-deploy-v3.4
@@ -17,11 +19,14 @@ spec:
       valuesObject:
         skipCrdCheck: true
         profile: rhaii
-        operator:
-          type: rhoai
         components:
           kserve:
             gateway:
+              create: true
+              name: openshift-ai-inference
+              namespace: openshift-ingress
+              labels:
+                istio.io/rev: openshift-gateway
               spec:
                 gatewayClassName: openshift-ai-inference
                 listeners:
@@ -33,13 +38,7 @@ spec:
                       from: All
         olm:
           source: REPLACE_WITH_MIRRORED_CATALOG_NAME
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: rhoai-gitops
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
     retry:
       limit: 10
       backoff:
