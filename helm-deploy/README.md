@@ -63,16 +63,22 @@ Skip this step if RHACM is not installed -- ArgoCD works standalone.
 Deploys Service Mesh 3.x first (wave 0), then the RHOAI platform (wave 1):
 
 ```bash
-oc apply -f helm-deploy/applications/app-of-apps.yaml
+oc apply -f helm-deploy/app-of-apps.yaml
 ```
 
 **Option B -- Direct (if Service Mesh 3.x is already installed):**
 
 ```bash
-# Full platform
 oc apply -f helm-deploy/applications/rhoai-platform.yaml
-# OR inference only
-oc apply -f helm-deploy/applications/rhoai-inference.yaml
+```
+
+**To switch to inference-only profile:**
+
+```bash
+# Replace the platform app with inference in the applications/ directory:
+cp helm-deploy/profiles/rhoai-inference.yaml helm-deploy/applications/rhoai-platform.yaml
+git add -A && git commit -m "Switch to inference-only profile" && git push
+# ArgoCD syncs the change automatically
 ```
 
 ### 3. Monitor
@@ -118,11 +124,13 @@ value: cs-redhat-operator-index-v4-19  # your catalog name
 ### 4. Deploy with disconnected Applications
 
 ```bash
-# Use the disconnected SM3 application
-oc apply -f helm-deploy/applications/00-servicemesh-disconnected.yaml
-
-# Use the disconnected platform application
-oc apply -f helm-deploy/applications/rhoai-platform-disconnected.yaml
+# Swap in the disconnected variants:
+cp helm-deploy/profiles/00-servicemesh-disconnected.yaml helm-deploy/applications/00-servicemesh.yaml
+cp helm-deploy/profiles/rhoai-platform-disconnected.yaml helm-deploy/applications/rhoai-platform.yaml
+# Edit both files: replace REPLACE_WITH_MIRRORED_CATALOG_NAME with your catalog name
+git add -A && git commit -m "Switch to disconnected profile" && git push
+# Then apply app-of-apps:
+oc apply -f helm-deploy/app-of-apps.yaml
 ```
 
 The disconnected Application variants set `olm.source` to your mirrored catalog
@@ -156,14 +164,16 @@ helm-deploy/
 │   │   ├── base/                           # SM3 Subscription (connected)
 │   │   └── overlays/disconnected/          # SM3 with mirrored catalog
 │   └── kuadrant-restart/                   # PostSync Job for Kuadrant fix
-├── applications/
-│   ├── app-of-apps.yaml                    # Entry point (deploys all child apps)
-│   ├── 00-servicemesh.yaml                 # Wave 0: SM3 (connected)
-│   ├── 00-servicemesh-disconnected.yaml    # Wave 0: SM3 (disconnected)
-│   ├── rhoai-platform.yaml                 # Wave 1: Full platform (connected)
-│   ├── rhoai-platform-disconnected.yaml    # Wave 1: Full platform (disconnected)
-│   ├── rhoai-inference.yaml                # Wave 1: Inference only (connected)
-│   └── rhoai-inference-disconnected.yaml   # Wave 1: Inference only (disconnected)
+├── app-of-apps.yaml                        # Entry point (apply this to deploy)
+├── applications/                            # Auto-discovered by app-of-apps
+│   ├── 00-servicemesh.yaml                 # Wave 0: SM3
+│   └── rhoai-platform.yaml                 # Wave 1: Full platform (default)
+├── profiles/                                # Alternatives (swap into applications/)
+│   ├── rhoai-platform.yaml                 # Full platform
+│   ├── rhoai-inference.yaml                # Inference only
+│   ├── rhoai-platform-disconnected.yaml    # Full platform (disconnected)
+│   ├── rhoai-inference-disconnected.yaml   # Inference only (disconnected)
+│   └── 00-servicemesh-disconnected.yaml    # SM3 (disconnected)
 ├── values/                                 # Standalone values files
 ├── sealed-secrets/                         # Optional secret management
 └── imageset-config-template.yaml           # Mirror config for disconnected
