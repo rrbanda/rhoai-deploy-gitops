@@ -96,3 +96,46 @@ entire Helm chart.
 management per hub. Each hub has its own Placements (targeting different
 ManagedClusters) and its own Policies. A DR hub can manage a separate fleet
 or take over the primary's spokes by adjusting labels.
+
+## Why the default AppProject is locked down
+
+The ArgoCD docs recommend: "lock down the default AppProject so no one can use
+it by mistake." Our `default` project only allows Applications in the
+`openshift-gitops` namespace targeting the same repo. This prevents accidental
+deployments to unrestricted destinations. Only the app-of-apps parent uses
+`default`; all child apps use purpose-specific projects.
+
+## Why resource exclusions include Leases, Events, EndpointSlices
+
+ArgoCD v3.0 ships default exclusions for high-churn objects. We exclude
+`coordination.k8s.io/Lease`, `events.k8s.io/Event`, core `Event`,
+`discovery.k8s.io/EndpointSlice`, and `metrics.k8s.io/*` to reduce API server
+load and unnecessary ArgoCD reconciliation cycles.
+
+## Why custom health checks for every RHOAI CRD
+
+Without Lua health checks, ArgoCD shows blank health for custom resources. We
+provide health checks for: DSC, DSCI, InferenceService, Subscription,
+OGXServer, EvalHub, MLflow, NemoGuardrails, and DSPA. This gives accurate
+Healthy/Progressing/Degraded status in the ArgoCD UI.
+
+## Why ignoreDifferences for operator-managed annotations
+
+The RHOAI operator adds `platform.opendatahub.io/instance.*` annotations to
+resources it manages. These cause false OutOfSync in ArgoCD because they're
+not in Git. We ignore them at the system level to prevent unnecessary diffs.
+
+## Why notifications scaffolding
+
+The `NotificationsConfiguration` CR provides webhook-based alerting for sync
+failures and health degradation. It ships disabled (the admin provides a
+webhook URL). This follows the OpenShift GitOps 1.20+ `NotificationsConfiguration`
+API rather than directly editing `argocd-notifications-cm`.
+
+## Why progressive rollout for spoke ApplicationSets
+
+At fleet scale (20+ clusters), a bad config change could affect all spokes
+simultaneously. The `RollingSync` strategy updates canary spokes (labeled
+`rhoai.io/canary: "true"`) first, then rolls out to the fleet only if canaries
+are healthy. This is Technology Preview in GitOps 1.21 but is the documented
+pattern for fleet safety.

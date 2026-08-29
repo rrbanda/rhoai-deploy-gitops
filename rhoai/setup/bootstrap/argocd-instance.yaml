@@ -95,6 +95,110 @@ spec:
           hs.message = "Waiting for status"
         end
         return hs
+    - group: ogx.io
+      kind: OGXServer
+      check: |
+        hs = {}
+        if obj.status ~= nil and obj.status.conditions ~= nil then
+          for _, c in ipairs(obj.status.conditions) do
+            if c.type == "Ready" then
+              if c.status == "True" then
+                hs.status = "Healthy"
+                hs.message = c.message or "OGXServer is ready"
+              elseif c.status == "False" then
+                hs.status = "Degraded"
+                hs.message = c.message or "OGXServer not ready"
+              else
+                hs.status = "Progressing"
+                hs.message = "Waiting for OGXServer"
+              end
+              return hs
+            end
+          end
+        end
+        hs.status = "Progressing"
+        hs.message = "Waiting for OGXServer status"
+        return hs
+    - group: trustyai.opendatahub.io
+      kind: EvalHub
+      check: |
+        hs = {}
+        if obj.status ~= nil then
+          if obj.status.phase == "Ready" then
+            hs.status = "Healthy"
+            hs.message = "EvalHub is ready"
+          elseif obj.status.phase == "Error" or obj.status.phase == "Failed" then
+            hs.status = "Degraded"
+            hs.message = obj.status.conditions and obj.status.conditions[1] and obj.status.conditions[1].message or "Error"
+          else
+            hs.status = "Progressing"
+            hs.message = obj.status.phase or "Waiting for EvalHub"
+          end
+        else
+          hs.status = "Progressing"
+          hs.message = "Waiting for status"
+        end
+        return hs
+    - group: mlflow.opendatahub.io
+      kind: MLflow
+      check: |
+        hs = {}
+        if obj.status ~= nil and obj.status.conditions ~= nil then
+          for _, c in ipairs(obj.status.conditions) do
+            if c.type == "Available" then
+              if c.status == "True" then
+                hs.status = "Healthy"
+                hs.message = c.message or "MLflow is available"
+              elseif c.status == "False" then
+                hs.status = "Degraded"
+                hs.message = c.message or "MLflow not available"
+              else
+                hs.status = "Progressing"
+                hs.message = "Waiting for MLflow"
+              end
+              return hs
+            end
+          end
+        end
+        hs.status = "Progressing"
+        hs.message = "Waiting for MLflow status"
+        return hs
+    - group: trustyai.opendatahub.io
+      kind: NemoGuardrails
+      check: |
+        hs = {}
+        if obj.status ~= nil and obj.status.ca ~= nil then
+          hs.status = "Healthy"
+          hs.message = "NemoGuardrails CA configured"
+        else
+          hs.status = "Progressing"
+          hs.message = "Waiting for NemoGuardrails"
+        end
+        return hs
+    - group: datasciencepipelinesapplications.opendatahub.io
+      kind: DataSciencePipelinesApplication
+      check: |
+        hs = {}
+        if obj.status ~= nil and obj.status.conditions ~= nil then
+          for _, c in ipairs(obj.status.conditions) do
+            if c.type == "Ready" then
+              if c.status == "True" then
+                hs.status = "Healthy"
+                hs.message = "DSPA is ready"
+              elseif c.status == "False" then
+                hs.status = "Degraded"
+                hs.message = c.message or "DSPA not ready"
+              else
+                hs.status = "Progressing"
+                hs.message = "Waiting for DSPA"
+              end
+              return hs
+            end
+          end
+        end
+        hs.status = "Progressing"
+        hs.message = "Waiting for DSPA status"
+        return hs
   resourceExclusions: |
     - apiGroups:
         - tekton.dev
@@ -103,6 +207,57 @@ spec:
         - PipelineRun
       clusters:
         - "*"
+    - apiGroups:
+        - coordination.k8s.io
+      kinds:
+        - Lease
+      clusters:
+        - "*"
+    - apiGroups:
+        - events.k8s.io
+      kinds:
+        - Event
+      clusters:
+        - "*"
+    - apiGroups:
+        - ""
+      kinds:
+        - Event
+      clusters:
+        - "*"
+    - apiGroups:
+        - discovery.k8s.io
+      kinds:
+        - EndpointSlice
+      clusters:
+        - "*"
+    - apiGroups:
+        - metrics.k8s.io
+      kinds:
+        - "*"
+      clusters:
+        - "*"
+  resourceIgnoreDifferences:
+    resourceIdentifiers:
+      - group: ""
+        kind: ConfigMap
+        customization:
+          jsonPointers:
+            - /metadata/annotations/platform.opendatahub.io~1instance.generation
+            - /metadata/annotations/platform.opendatahub.io~1instance.name
+            - /metadata/annotations/platform.opendatahub.io~1instance.uid
+      - group: opendatahub.io
+        kind: OdhDashboardConfig
+        customization:
+          jsonPointers:
+            - /metadata/annotations/platform.opendatahub.io~1instance.generation
+            - /metadata/annotations/platform.opendatahub.io~1instance.uid
+            - /metadata/annotations/platform.opendatahub.io~1type
+      - group: bitnami.com
+        kind: SealedSecret
+        customization:
+          jsonPointers:
+            - /status
   controller:
     resources:
       limits:

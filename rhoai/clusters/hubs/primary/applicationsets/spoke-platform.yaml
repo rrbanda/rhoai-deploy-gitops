@@ -4,6 +4,20 @@ metadata:
   name: spoke-platform
   namespace: openshift-gitops
 spec:
+  strategy:
+    type: RollingSync
+    rollingSync:
+      steps:
+        - matchExpressions:
+            - key: rhoai.io/canary
+              operator: In
+              values:
+                - "true"
+        - matchExpressions:
+            - key: rhoai.io/platform
+              operator: In
+              values:
+                - "true"
   generators:
     - clusterDecisionResource:
         configMapRef: acm-placement
