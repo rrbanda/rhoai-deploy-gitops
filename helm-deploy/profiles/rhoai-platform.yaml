@@ -111,7 +111,7 @@ spec:
               managementState: Managed
           llamastackoperator:
             dsc:
-              managementState: Removed
+              managementState: Managed
         services:
           monitoring:
             dsci:
