@@ -3,15 +3,9 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
-  - user-workload-monitoring.yaml
-  - maas-postgres.yaml
-  - sealed-maas-postgres-credentials.yaml
-  - sealed-maas-db-config.yaml
-  - mcp-gateway.yaml
-  - mcp-studio-config.yaml
-  - dashboard-features.yaml
   - milvus.yaml
   - sealed-llm-api-secret.yaml
+  - sealed-s3-connection-secret.yaml
   - ogx-config.yaml
   - ogxserver.yaml
   - dspa.yaml

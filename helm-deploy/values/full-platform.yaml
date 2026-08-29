@@ -1,14 +1,9 @@
-# RHOAI 3.4 -- Full platform, all components enabled.
+# RHOAI 3.5 -- Full platform
 skipCrdCheck: true
-
-operator:
-  type: rhoai
-
 components:
   dashboard:
     dsc:
       managementState: Managed
-
   kserve:
     dependencies:
       certManager: true
@@ -20,12 +15,14 @@ components:
       managementState: Managed
       nim:
         managementState: Managed
-      modelsAsService:
-        managementState: Managed
       wva:
         managementState: Managed
-      rawDeploymentServiceConfig: Headless
     gateway:
+      create: true
+      name: openshift-ai-inference
+      namespace: openshift-ingress
+      labels:
+        istio.io/rev: openshift-gateway
       spec:
         gatewayClassName: openshift-ai-inference
         listeners:
@@ -35,12 +32,14 @@ components:
             allowedRoutes:
               namespaces:
                 from: All
-    modelsAsService:
-      gatewayClass:
-        create: true
-        name: maas-gateway-class
-        spec:
-          controllerName: "openshift.io/gateway-controller/v1"
+  aigateway:
+    dsc:
+      managementState: Managed
+      modelsAsAService:
+        managementState: Managed
+      batchGateway:
+        managementState: Managed
+    modelsAsAService:
       gateway:
         create: true
         name: maas-default-gateway
@@ -57,59 +56,43 @@ components:
               allowedRoutes:
                 namespaces:
                   from: All
-
   aipipelines:
     dsc:
       managementState: Managed
       argoWorkflowsControllers:
         managementState: Managed
-
   kueue:
-    dependencies:
-      certManager: true
-      kueue: true
     dsc:
-      managementState: Unmanaged
-      defaultLocalQueueName: default
-      defaultClusterQueueName: default
-
+      managementState: Managed
   ray:
     dsc:
       managementState: Managed
-
   trainer:
     dsc:
       managementState: Managed
-
   trainingoperator:
     dsc:
       managementState: Managed
-
   workbenches:
     dsc:
       managementState: Managed
-
   modelregistry:
     dsc:
       managementState: Managed
-
   trustyai:
     dsc:
       managementState: Managed
-      eval:
-        lmeval:
-          permitCodeExecution: deny
-          permitOnline: deny
-
   mlflowoperator:
     dsc:
       managementState: Managed
-
   feastoperator:
     dsc:
       managementState: Managed
+  ogx:
+    dsc:
+      managementState: Managed
 
-  llamastackoperator:
+  sparkoperator:
     dsc:
       managementState: Managed
 
@@ -123,17 +106,6 @@ services:
       managementState: Managed
 
 dependencies:
-  kueue:
+  rhcl:
     config:
-      spec:
-        managementState: Managed
-        config:
-          integrations:
-            frameworks:
-              - Deployment
-              - Pod
-              - PyTorchJob
-              - RayCluster
-              - RayJob
-              - StatefulSet
-              - TrainJob
+      tlsEnabled: true

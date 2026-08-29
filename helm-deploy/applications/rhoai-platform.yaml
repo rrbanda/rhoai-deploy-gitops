@@ -7,6 +7,8 @@ metadata:
     argocd.argoproj.io/sync-wave: '1'
 spec:
   project: default
+  destination:
+    server: https://kubernetes.default.svc
   source:
     repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
     targetRevision: helm-deploy-v3.4
@@ -16,8 +18,6 @@ spec:
       skipSchemaValidation: true
       valuesObject:
         skipCrdCheck: true
-        operator:
-          type: rhoai
         components:
           dashboard:
             dsc:
@@ -33,12 +33,14 @@ spec:
               managementState: Managed
               nim:
                 managementState: Managed
-              modelsAsService:
-                managementState: Managed
               wva:
                 managementState: Managed
-              rawDeploymentServiceConfig: Headless
             gateway:
+              create: true
+              name: openshift-ai-inference
+              namespace: openshift-ingress
+              labels:
+                istio.io/rev: openshift-gateway
               spec:
                 gatewayClassName: openshift-ai-inference
                 listeners:
@@ -48,12 +50,14 @@ spec:
                   allowedRoutes:
                     namespaces:
                       from: All
-            modelsAsService:
-              gatewayClass:
-                create: true
-                name: maas-gateway-class
-                spec:
-                  controllerName: openshift.io/gateway-controller/v1
+          aigateway:
+            dsc:
+              managementState: Managed
+              modelsAsAService:
+                managementState: Managed
+              batchGateway:
+                managementState: Managed
+            modelsAsAService:
               gateway:
                 create: true
                 name: maas-default-gateway
@@ -76,13 +80,8 @@ spec:
               argoWorkflowsControllers:
                 managementState: Managed
           kueue:
-            dependencies:
-              certManager: true
-              kueue: true
             dsc:
-              managementState: Unmanaged
-              defaultLocalQueueName: default
-              defaultClusterQueueName: default
+              managementState: Managed
           ray:
             dsc:
               managementState: Managed
@@ -101,17 +100,16 @@ spec:
           trustyai:
             dsc:
               managementState: Managed
-              eval:
-                lmeval:
-                  permitCodeExecution: deny
-                  permitOnline: deny
           mlflowoperator:
             dsc:
               managementState: Managed
           feastoperator:
             dsc:
               managementState: Managed
-          llamastackoperator:
+          ogx:
+            dsc:
+              managementState: Managed
+          sparkoperator:
             dsc:
               managementState: Managed
           mcplifecycleoperator:
@@ -121,27 +119,11 @@ spec:
           monitoring:
             dsci:
               managementState: Managed
+
         dependencies:
           rhcl:
             config:
               tlsEnabled: true
-          kueue:
-            config:
-              spec:
-                managementState: Managed
-                config:
-                  integrations:
-                    frameworks:
-                    - Deployment
-                    - Pod
-                    - PyTorchJob
-                    - RayCluster
-                    - RayJob
-                    - StatefulSet
-                    - TrainJob
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: rhoai-gitops
   syncPolicy:
     automated:
       prune: true
