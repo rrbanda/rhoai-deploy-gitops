@@ -1,0 +1,28 @@
+apiVersion: datasciencepipelinesapplications.opendatahub.io/v1alpha1
+kind: DataSciencePipelinesApplication
+metadata:
+  name: dspa
+  namespace: autorag
+spec:
+  dspVersion: v2
+  apiServer:
+    managedPipelines: {}
+    pipelineStore: kubernetes
+  objectStorage:
+    disableHealthCheck: false
+    enableExternalRoute: false
+    externalStorage:
+      basePath: ""
+      bucket: REPLACE_WITH_BUCKET_NAME
+      host: REPLACE_WITH_S3_HOST
+      port: ""
+      region: us-east-1
+      s3CredentialsSecret:
+        accessKey: AWS_ACCESS_KEY_ID
+        secretKey: AWS_SECRET_ACCESS_KEY
+        secretName: autorag-s3-connection
+      scheme: https
+  database:
+    mariaDB:
+      deploy: true
+      pipelineDBName: mlpipeline
