@@ -7,6 +7,8 @@ resources:
   - maas-postgres.yaml
   - sealed-maas-postgres-credentials.yaml
   - sealed-maas-db-config.yaml
+  - mcp-gateway.yaml
+  - mcp-studio-config.yaml
   - milvus.yaml
   - sealed-llm-api-secret.yaml
   - ogx-config.yaml
