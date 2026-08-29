@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
+  - user-workload-monitoring.yaml
   - milvus.yaml
   - sealed-llm-api-secret.yaml
   - ogx-config.yaml

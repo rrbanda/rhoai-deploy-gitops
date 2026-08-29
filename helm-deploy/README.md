@@ -52,8 +52,14 @@ oc apply -f helm-deploy/app-of-apps.yaml
 The official Helm chart (`chart/`) handles all operator lifecycle:
 
 - 11 OLM Subscriptions: rhods-operator, cert-manager, RHCL/Kuadrant, Kueue, JobSet, LeaderWorkerSet, CMA, NFD, GPU Operator, Cluster Observability, OpenTelemetry, Tempo
-- DataScienceCluster (DSC) with all 15 components
+- DataScienceCluster (DSC) with all 15 components + sub-components:
+  - KServe (with NIM, WVA, raw deployment)
+  - AI Gateway (MaaS + BatchGateway)
+  - AIPipelines (with Argo Workflows Controllers)
+  - SparkOperator
+  - All others: Dashboard, Kueue, Ray, Trainer, TrainingOperator, Workbenches, ModelRegistry, TrustyAI, MLflow, FeastOperator, OGX
 - DSCInitialization (DSCI) with monitoring config
+- Authorino TLS enabled via `dependencies.rhcl.config.tlsEnabled: true`
 - GatewayClass + Gateway for KServe and MaaS inference
 - Dependency CRs: Kuadrant, Kueue, LeaderWorkerSetOperator, JobSetOperator
 - Tri-state dependency resolution (`auto`/`true`/`false`)
@@ -68,6 +74,7 @@ chart installed -- not operators or subscriptions:
 - Milvus standalone + etcd (vector database for RAG)
 - DataSciencePipelinesApplication with built-in MinIO and AutoRAG enabled
 - SealedSecrets for LLM API key (encrypted, safe in Git)
+- User Workload Monitoring ConfigMap (required for MaaS metrics)
 
 ---
 
