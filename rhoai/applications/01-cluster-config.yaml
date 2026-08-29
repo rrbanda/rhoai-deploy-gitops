@@ -1,19 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: autorag-workload
+  name: rhoai-cluster-config
   namespace: openshift-gitops
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   source:
     repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
     targetRevision: helm-deploy-v3.4
-    path: helm-deploy/workloads/autorag
+    path: rhoai/workloads/cluster-config
   destination:
     server: https://kubernetes.default.svc
-    namespace: autorag
+    namespace: redhat-ods-applications
   syncPolicy:
     retry:
       limit: 10

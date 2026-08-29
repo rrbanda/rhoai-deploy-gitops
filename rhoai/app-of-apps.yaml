@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
     targetRevision: helm-deploy-v3.4
-    path: helm-deploy/applications
+    path: rhoai/applications
     directory:
       recurse: false
   destination:

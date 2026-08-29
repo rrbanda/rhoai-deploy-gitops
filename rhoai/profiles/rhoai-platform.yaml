@@ -12,7 +12,7 @@ spec:
   source:
     repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
     targetRevision: helm-deploy-v3.4
-    path: helm-deploy/chart
+    path: rhoai/chart
     helm:
       releaseName: rhoai
       skipSchemaValidation: true
@@ -134,8 +134,6 @@ spec:
           rhcl:
             config:
               tlsEnabled: true
-        olm:
-          source: REPLACE_WITH_MIRRORED_CATALOG_NAME
   syncPolicy:
     retry:
       limit: 10
