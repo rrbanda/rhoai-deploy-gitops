@@ -10,7 +10,7 @@ spec:
   source:
     repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
     targetRevision: helm-deploy-v3.5
-    path: rhoai/deploy/00-operators/mcp-gateway
+    path: rhoai/base/00-operators/mcp-gateway
   destination:
     server: https://kubernetes.default.svc
     namespace: openshift-operators

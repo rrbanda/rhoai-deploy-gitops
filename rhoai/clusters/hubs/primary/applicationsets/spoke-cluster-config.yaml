@@ -25,7 +25,7 @@ spec:
       source:
         repoURL: https://github.com/rrbanda/rhoai-deploy-gitops.git
         targetRevision: helm-deploy-v3.5
-        path: rhoai/deploy/02-config
+        path: rhoai/base/02-config
       destination:
         server: https://kubernetes.default.svc
         namespace: redhat-ods-applications
