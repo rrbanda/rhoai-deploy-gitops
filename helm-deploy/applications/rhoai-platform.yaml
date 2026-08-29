@@ -104,7 +104,7 @@ spec:
               managementState: Managed
           ogx:
             dsc:
-              managementState: Removed
+              managementState: Managed
         services:
           monitoring:
             dsci:
