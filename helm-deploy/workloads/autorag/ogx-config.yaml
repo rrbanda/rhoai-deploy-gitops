@@ -3,6 +3,9 @@ kind: ConfigMap
 metadata:
   name: autorag-ogx-config
   namespace: autorag
+  labels:
+    app: ogx
+    ogx.io/watch: "true"
 data:
   config.yaml: |
     version: 2
