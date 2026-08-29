@@ -1,6 +1,25 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
+  name: default
+  namespace: openshift-gitops
+spec:
+  description: Restricted default -- only app-of-apps parent
+  sourceRepos:
+    - https://github.com/rrbanda/rhoai-deploy-gitops.git
+  destinations:
+    - namespace: openshift-gitops
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: argoproj.io
+      kind: Application
+  namespaceResourceWhitelist:
+    - group: argoproj.io
+      kind: Application
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
   name: rhoai-platform
   namespace: openshift-gitops
 spec:
