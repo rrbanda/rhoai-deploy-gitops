@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openshift-mcp-server-config
+  namespace: ocp-mcp-server
+data:
+  config.toml: |
+    [server]
+    port = 8080
+    host = "0.0.0.0"
+
+    [tools]
+    read_only = true

@@ -1,0 +1,27 @@
+# AuthPolicy for MCP Gateway using kubernetesTokenReview.
+# Uses K8s TokenReview API (avoids OIDC discovery TLS issues on ROSA/managed clusters).
+# Unauthenticated requests get 401; valid SA tokens pass through.
+apiVersion: kuadrant.io/v1
+kind: AuthPolicy
+metadata:
+  name: mcp-auth-policy
+  namespace: mcp-system
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: mcp-gateway
+    sectionName: mcp
+  defaults:
+    rules:
+      authentication:
+        "kubernetes-token":
+          kubernetesTokenReview:
+            audiences:
+              - "https://kubernetes.default.svc"
+      response:
+        unauthenticated:
+          code: 401
+          body:
+            value: |
+              {"error":"Unauthorized","message":"Authentication required. Provide a valid bearer token."}

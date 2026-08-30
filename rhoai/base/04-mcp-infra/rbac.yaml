@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mcp-viewer
+  namespace: ocp-mcp-server
+---
+# Grant the MCP server read-only cluster access for OpenShift inspection tools
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: mcp-viewer-cluster-reader
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-reader
+subjects:
+  - kind: ServiceAccount
+    name: mcp-viewer
+    namespace: ocp-mcp-server
+---
+# Service account for broker credential injection
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mcp-gateway-broker
+  namespace: ocp-mcp-server
+---
+# Token secret for the broker service account
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mcp-gateway-broker-token
+  namespace: ocp-mcp-server
+  annotations:
+    kubernetes.io/service-account.name: mcp-gateway-broker
+type: kubernetes.io/service-account-token
+---
+# Allow MCP Gateway controller to read the broker token secret
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: mcp-gateway-secret-reader
+  namespace: ocp-mcp-server
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: mcp-gateway-secret-reader
+  namespace: ocp-mcp-server
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: mcp-gateway-secret-reader
+subjects:
+  - kind: ServiceAccount
+    name: mcp-controller
+    namespace: openshift-operators

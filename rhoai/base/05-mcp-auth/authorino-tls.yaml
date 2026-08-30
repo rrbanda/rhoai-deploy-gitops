@@ -1,0 +1,27 @@
+# Authorino TLS configuration for RHCL/Kuadrant
+# The Authorino service must use an OpenShift service-serving certificate
+# (NOT cert-manager) so that the authn-ssl EnvoyFilter can verify it
+# against the cluster's service CA.
+#
+# Pre-requisite: run once per cluster (idempotent):
+#   oc annotate svc/authorino-authorino-authorization \
+#     service.beta.openshift.io/serving-cert-secret-name=authorino-server-cert \
+#     -n kuadrant-system --overwrite
+#
+# The Authorino CR must have TLS enabled with the service-ca cert.
+apiVersion: operator.authorino.kuadrant.io/v1beta1
+kind: Authorino
+metadata:
+  name: authorino
+  namespace: kuadrant-system
+spec:
+  replicas: 1
+  clusterWide: true
+  listener:
+    tls:
+      enabled: true
+      certSecretRef:
+        name: authorino-server-cert
+  oidcServer:
+    tls:
+      enabled: false

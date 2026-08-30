@@ -66,6 +66,10 @@ spec:
       server: https://kubernetes.default.svc
     - namespace: mcp-system
       server: https://kubernetes.default.svc
+    - namespace: ocp-mcp-server
+      server: https://kubernetes.default.svc
+    - namespace: kuadrant-system
+      server: https://kubernetes.default.svc
     - namespace: models-as-a-service
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
@@ -79,6 +83,8 @@ spec:
       kind: MLflow
     - group: ''
       kind: Namespace
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
   namespaceResourceWhitelist:
     - group: '*'
       kind: '*'

@@ -1,0 +1,19 @@
+apiVersion: mcp.kuadrant.io/v1alpha1
+kind: MCPServerRegistration
+metadata:
+  name: openshift-mcp-server-reg
+  namespace: ocp-mcp-server
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: openshift-mcp-server-route
+    namespace: ocp-mcp-server
+  prefix: openshift_
+  category:
+    - kubernetes
+  hint: "OpenShift cluster inspection tools for AI agents"
+  credentialRef:
+    name: mcp-broker-credential
+    key: token
+  tokenURLElicitation: {}
