@@ -25,7 +25,6 @@ spec:
     - name: mcp
       port: 8001
       protocol: HTTP
-      hostname: REPLACE_WITH_MCP_GATEWAY_HOSTNAME
       allowedRoutes:
         namespaces:
           from: All

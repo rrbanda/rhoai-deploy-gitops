@@ -1,14 +1,38 @@
-# Authorino TLS configuration for RHCL/Kuadrant
-# The Authorino service must use an OpenShift service-serving certificate
-# (NOT cert-manager) so that the authn-ssl EnvoyFilter can verify it
-# against the cluster's service CA.
+# Authorino TLS configuration for RHCL/Kuadrant.
 #
-# Pre-requisite: run once per cluster (idempotent):
-#   oc annotate svc/authorino-authorino-authorization \
-#     service.beta.openshift.io/serving-cert-secret-name=authorino-server-cert \
-#     -n kuadrant-system --overwrite
+# Two resources work together:
+# 1. Service annotation: triggers OpenShift service-ca to generate a cert
+#    signed by the cluster's service CA (NOT cert-manager self-signed).
+# 2. Authorino CR: enables TLS listener using that cert.
 #
-# The Authorino CR must have TLS enabled with the service-ca cert.
+# The authn-ssl EnvoyFilter (auto-created by ODH Model Controller when
+# the Gateway has security.opendatahub.io/authorino-tls-bootstrap=true)
+# trusts the service CA at /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt.
+#
+# IMPORTANT: If cert-manager previously created an authorino-server-cert
+# Secret, delete the cert-manager Certificate first:
+#   oc delete certificate authorino-server-cert -n kuadrant-system
+#   oc delete secret authorino-server-cert -n kuadrant-system
+# The service-ca operator will recreate the Secret with a proper cert.
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authorino-authorino-authorization
+  namespace: kuadrant-system
+  annotations:
+    service.beta.openshift.io/serving-cert-secret-name: authorino-server-cert
+spec:
+  ports:
+    - name: grpc
+      port: 50051
+      protocol: TCP
+      targetPort: 50051
+    - name: http
+      port: 5001
+      protocol: TCP
+      targetPort: 5001
+---
 apiVersion: operator.authorino.kuadrant.io/v1beta1
 kind: Authorino
 metadata:
